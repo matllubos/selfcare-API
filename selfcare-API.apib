@@ -1,0 +1,2094 @@
+FORMAT: 1A
+HOST: https://api.homecredit.cz/customer/v1
+
+# Home Credit Customer API
+This is documentation of the Customer v1 API for Home Credit International.
+
+**Base prefix: /customer/v1**.
+
+
+There are some rules that are valid throughout whole API.
+
+
+## Naming conventions
+- we use camelCase for all object and property names
+- we use plural in resource names
+
+## Paging
+- some resources (stated in documentation) that return collection of objects support pagination.
+- on request:
+  - query parameter `limit` specifies maximum number of objects in returned collection
+  - query parameter `after` specifies last object retrieved in previous request. Its value is usually `id` of last object retrieved in previous call, but this will be stated in documentation. Parameter `after` is used when traversing collection forwards.
+  - query parameter `before` specifies first object retrieved in previous request (analogy to `after` parameter), and is used when traversing collection backwards.
+  - if `before` and `after` are omitted, beginning of collection is returned, using specified sort order
+  - items in collection are always sorted accoridng to attribute which could be passed in after/before parameters. Even if you specify different sorting order, this attribute will be last sorting criterion; if you do not specify sorting order, result collection will be sorted according to this attribute.
+- on response:
+  - `pagingInfo` object is returned as part of response body with following attributes:
+    - _nextPage_ - request to retrieve next page. Either nextPage or previousPage is returned, depending whether you specify `after` or `before` parameter. If you specify neither `before` nor `after` parameter, these attributes will be omitted from response.
+    - _prevPage_ - request to retrieve previous page (see `nextPage` attribute description above).
+    - _itemsPerPage_ - number of items per page
+
+
+Example request:
+```
+curl -X GET https://api.homecredit.eu/customer/v1/my/contracts?sort=category&limit=10&after=15
+```
+
+Example response pagingInfo:
+
+```javascript
+"pagingInfo": {
+    "nextPage": "/my/contracts?sort=category&limit=10&after=25"
+    "itemsPerPage": 10,
+}
+```
+
+## Sorting
+- some resources (stated in documentation) suppors result sorting. You can specify sorting attributes and order using `sort` request parameter. For ascending order, specify just attribute name; for descending order, add unary - in front of attribute name. You can specify multiple attributes for sorting, separated by comma.
+- each resource that supports sorting specifies list of attributes that can be used for sorting.
+
+Examples:
+- `/public/fxrates?sort=currencyCode` - get list of FX rates sorted by attribute currencyCode
+- `/public/branches?sort=-name` - get list of branches, sorted by attribute name in descending order
+- `/banking/accounts?sort=accountType,-accountCurrency,accountName` - get list of accounts, sorted by type (ascending), then by currency descending and then by account name (ascending)
+
+
+## Filtering
+Some resources (stated in documentation) supports results filtering. Such resources have list of filters specified together with possible operations and possible values.
+
+You can specify filtering by passing `filter` attribute. General pattern to specify filter is:
+
+`<filterName>|<operator>|<values>`
+
+- `filterName` - filter name from documentation
+- `operator` - operator, specified in resource documentation
+- `values` - one or more values for filter. Multiple values are separated by comma
+
+Multiple filters can be specified on each request, separated by semi-colon. They are joined by "AND", so each result item must satisfy all conditions.
+
+### Filtering examples
+
+- get a list of partners with category in (1, 5, 10)
+```
+GET /general/partners?filter=category|in|1,5,10
+```
+
+- get a list of contracts with contractDate in (2016-02-10, 2016-04-28>
+```
+GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-04-28
+```
+
+### List of operators
+| operator | meaning |
+| ---      | ---     |
+| lt       | less than |
+| lteq       | less than or equals |
+| eq       | equals    |
+| gteq       | greater than or equals    |
+| gt       | greater than |
+| in       | value in list |
+
+## API calls limits
+When limit is reached, you receive HTTP error 429. To inform you about limits we use following headers:
+- `X-Rate-Limit-Limit` - The number of allowed requests in the current period
+- `X-Rate-Limit-Remaining` - The number of remaining requests in the current period
+- `X-Rate-Limit-Reset` - The number of seconds left in the current period
+
+## Bandwith usage reducing
+
+### Fields attribute
+- for all GET resources, you can use optional `fields` query parameter to limit objects' attributes returned in response
+- `fields` parameter contains comma-separated list of attributes, that will be present in response; if omitted, all objects' attributes will be returned
+- you can specify only top-level attributes in `fields` parameter. This means that when response is an object, you can only specify top-level attributes. When response is an array of objects, only top-level attributes of those objects can be specified.
+- if you specify non-existent attribute or atttribute that is not in first level, you will receive HTTP status `400 Bad Request`
+- `fields` parameter has no effect on resources that returns plain value or array of plain values.
+
+Examples:
+  - `/public/branches?fields=id,name,location` - only get list of branches with id, name and location attributes
+
+### GZIP compression
+- we support GZIP compression of responses. Client must specify header `Accept-Encoding: gzip` in request in order to use the compression.
+
+## Versioning
+We use API version in URL (e.g. `https://api.homecredit.vn/customer/v1/my/profile`). Minor changes (see below) that don't break backwards compatibility do NOT increase API version, e.g. they may happen without prior notice and your application should be ready to handle them.
+
+Minor changes include:
+- adding new resource
+- adding new optional header/URL parameter or optional body attribute to request
+- adding new attribute to response body
+- adding new error codes and messages, provided that error structure is the same
+
+## Language
+We use English.
+
+## Response encoding
+Unless stated otherwise, all responses are sent as `Content-Type: application/json; charset=utf-8`
+
+## HTTP status codes
+We use following status codes throughout the API, except for OAuth flow when response codes are prescribed in RFC
+- 200 `OK` - request was successful
+- 201 `Created` - request was successfull and resource was created
+- 204 `No content` - we accepted your request but there is nothing to return (e.g. response is empty)
+- 400 `Bad Request` - request is missing required parameters
+- 401 `Unauthorized` - your API key is wrong or user not authorized (not logged in)
+- 403 `Forbidden` - access denied (e.g. user / application is not allowed to use the resource)
+- 404 `Not Found` - resource could not be found
+- 405 `Method Not Allowed` - specified method is not allowed for resource
+- 422 `Unprocessable Entity` - validation errors. Errors are specified in response body (see below)
+- 429 `Too Many Requests` - you exceeded the rate limit (see X-Rate-Limit headers)
+- 500 `Internal Server Error` - something went wrong on our side
+- 503 `Service Unavailable` - there is planned service outage (TODO: should specify response headers with more details on service outage)
+
+## Error handling
+Besides HTTP status codes, which are the main indication if something goes wrong, we also use `errors` object to report more details about errors.
+
+Errors object example:
+```javascript
+{
+    ...
+
+    errors: [
+        {
+            "code": "ERR_100",
+            "message": "Invalid contract number",
+            "severity": "ERROR",
+            "attribute": "partyAccount.accountNumber",          // optional
+            "ticketId": "UAT1:AMS:20160516-091658.450:45e4" // optional
+        },
+        {
+            "code": 352,
+            "message": "Insufficiend funds for payment order realization",
+            "severity": "WARN"
+        },
+        {
+            "code": 523,
+            "message": "This order will trigger currency exchange operation",
+            "severity": "INFO"
+        }
+    ]
+}
+```
+
+Error object attributes
+| attribute name | description |
+| --- | --- |
+| code | unique error code |
+| message | human readable error description (non-localized) |
+| severity | error severity (see below) |
+| attribute | json path of request attribute that caused the error (optional) |
+| ticketId | internal ticket ID, used for error backtracking |
+
+There are 3 levels of error severity:
+
+- ERROR - critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code (`422 Unprocessable Entity`)
+- WARN - non-critical error, execution can continue but further user interaction is advisable (for request to proceed, you MUST specify this error code in `override` request attribute). This MIGHT be indicated also by appropriate HTTP status code.
+- INFO - information only, execution can continue without user interaction.
+
+## Formats
+- **date** and **time** uses [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formatting, e.g.:
+  - date is represented as `YYYY-mm-dd`. Timezone is added when necessary.
+  - time is represented as `Thh:mm:ss`. Timezone is added when necessary.
+  - day of week is represented as number 1..7, with 1 being Monday
+  - week no. 1 is the week with the year's first Thursday in it
+- **phone numbers** uses international format starting with '+' and including country code
+- **numbers format** number format is defined by [JSON standard](http://www.json.org), e.g. decimals are separated by `.`
+- **money format** uses [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) formatting (in minor units, e.g.: 12590 represents 125,90 CZK)
+
+## Documentation principles
+- attributes in request/response object are optional, unless stated otherwise (`required` flag under attribute name)
+- required attribute in optional object means, that if optional object is specified, it must contain required attribute.
+- all values in request/response attributes are just examples, except for enum values - these are the only possible values for given attribute.
+
+## Partial update
+We support partial update using PATCH method. Use JSON Merge Patch according to [RFC-7386](https://tools.ietf.org/html/rfc7386).
+
+## Group Security
+
+## Securing APIs - OAuth2
+To access user sensitive data through API, user must grant your application a permission to do so. Open API uses [OAuth2](https://tools.ietf.org/html/rfc6749) mechanism to grant permissions to access user data. This section describes mechanism and resources to get valid access token and use it to access protected resources.
+
+- if you fail to specify OAuth2 token, you will receive `401 Unauthorized` error and following response body:
+
+```
+{
+   "error_description": "The access token is missing",
+   "error": "invalid_request"
+}
+```
+
+- if you provide invalid OAuth2 token, you will receive `403 Forbidden` error and following response body:
+
+```
+{
+    "error_description":"The access token is invalid or has expired",
+    "error":"invalid_token"
+}
+```
+
+
+
+Customer API supports following OAuth2 flows:
+
+- [authorization code grant](https://tools.ietf.org/html/rfc6749#section-4.1) 
+- [implicit grant](https://tools.ietf.org/html/rfc6749#section-4.2)
+
+For accessing Customer API, you need to specify scope `customer`.
+
+OAuth2 flows are described in sections below.
+
+### Authorization code grant flow
+This should be used for applications that have a place to securely store application credentials (`client_id` and `client_secret`) - that includes applications with server-side component, which in turn communicates with API.
+
+#### Developers perspective
+
+1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` and `client secret`.
+
+2. When you wish to access protected resource  for the first time, redirect user to `login page` with parameters:
+    + `client_id` - client ID parameter you received from previous step
+    + `response_type` - value `code` to indicate authorization code flow
+    + `state` - random value that will be returned to you
+    + `scope` - specify value needed for accessed API services, e.g. `customer`
+    + `redirect_uri` - optional. If your application has registered multiple redirect uris, you can choose by specifying one of them.
+
+    *Example login request:*
+
+    ```
+    https://idm.homecredit.net/login?client_id=MYID&response_type=code&state=ehshvnajgtf34&scope=customer
+    ```
+
+    > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
+
+3. User have to log-in using his credentials and approve your application's access
+
+4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `code`. This redirect should be handled by your application, in order to exchange code for valid access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
+
+    *Example redirect URI:*
+
+    ```
+    https://myapp.example.com/handle_authentication?code=123arjdmvcskfm&state=ehshvnajgtf34
+    ```
+
+5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
+    
+5. Access API [token resource](#security-exchange-code-for-token-post) and exchange `code` for access token. You will also receive refresh token; you can use it to get new access token when access token validity expires.
+
+6. You receive `access token` that has limited lifespan (usually to 20 min or so), along with `refresh token`. Refresh token can later be used to exchange for new access token, when old one expires.
+
+7. Use retireved `access token` to access protected resources by specifying it in header `Authorization`, together with its type, e.g.:
+
+    ```
+    curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
+    ```
+
+> IMPORTANT NOTE: You must keep your client secret safe. It serves as your application password. 
+
+#### User perspective
+
+1. User runs your application for the first time
+
+2. Your application redirects user to OpenAPI login page
+
+3. User provides its credentials (user + password, possibly combined with another factor like SMS code etc)
+
+4. User sees a page, that displays details about your application and rights it requested.
+
+5. User authorizes your application's access and he can start using your application.
+
+
+
+### Implicit grant flow
+This should be used for applications that runs solely on client (e.g. single page JavaScript applications). Refresh token is NOT supported in this flow.
+
+
+#### Developers perspective
+
+1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` value.
+
+2. When you wish to access protected resource for the first time, redirect user to `login page` with parameters:
+    + `client_id` - client ID parameter you received from previous step
+    + `response_type` - value `token` to indicate implicit grant flow
+    + `state` - random value that will be returned to you
+    + `scope` - specify value needed for accessed API services, e.g. `customer`
+    + `redirect_uri` - optional. If your application has registered multiple redirect uris, you can choose by specifying one of them.
+
+    *Example login request:*
+
+    ```
+    https://idm.homecredit.net/login?client_id=MYID&response_type=token&state=ehshvnajgtf34&scope=customer
+    ```
+
+    > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
+
+3. User have to log-in using his credentials 
+
+4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `token` in URI fragment. This redirect should be handled by your application, in order to extract access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
+
+    *Example redirect URI:*
+
+    ```
+    https://myapp.example.com/handle_authentication#access_token=0abc239da00a4f89a66c95a2cf76cea1&expires_in=7200&state=xyz&token_type=bearer
+    ```
+
+5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
+    
+6. You receive `access token` of type `Bearer` that has limited lifespan (usually to 20 min or so); refresh token is NOT supported.
+
+7. Use retireved `access token` to access protected resources by specifying it in header `Authorization`, together with its type, e.g.:
+
+    ```
+    curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
+    ```
+
+> Note: above is the happy-day scenario. Error responses are described in [OAuth2 RFC](https://tools.ietf.org/html/rfc6749#section-4.2).
+
+#### User perspective
+
+1. User runs your application for the first time
+
+2. Your application redirects user to OpenAPI login page
+
+3. User provides its credentials (user + password, possibly combined with another factor like SMS code etc)
+
+4. User is redirected back to your application.
+
+
+
+
+### OAuth2 resources
+| resource | enviroment | address |
+| --- | --- | --- |
+| login page | testing environment | https://TBD |
+| login page | production | https://TBD |
+| token resource | testing environment | /customer/hc-oauth2/token |
+| token resource | production | /customer/hc-oauth2/token |
+
+
+## Exchange code for token [POST /customer/hc-oauth2/token]
+Exchange authorization code for access token
+
++ Request Get token from authorization code  (application/json;charset=UTF-8)
+
+    + Attributes (TokenCodeRequest)
+
+
++ Response 200 (application/json;charset=UTF-8)
+
+    + Attributes (TokenResponse)
+
+# My Data
+Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
+
+# Group My profile
+Resources for accessing and modifying user personal data.
+
+## Customer information [/my/profile]
+Customer profile information
+
+### Get client information [GET]
+Get information about logged-in user.
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (Client, required)
+
++ Response 400 (application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+
+### Update client information [PATCH]
+Update client information. JSON Merge patch syntax according to [RFC 7396](https://tools.ietf.org/html/rfc7396) should be used, which means that partial update is supported. Only some of the attributes can be changed (see list below). Some changes also needs to be authorized - OTP is sent to user via SMS and after getting the code from client, consumer should send the same request with authorization code in header `X-Authorization-Code`.
+
+#### Supported changes
+
+attribute name | must be authorized
+--- | ---
+TBD            | yes
+
++ Request (application/merge-patch+json;charset=UTF-8)
+Change user e-mail
+
+    + Body
+            {
+                "email": "john.doe@email.com"
+            }
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (Client, required)
+        + email: `john.doe@email.com` (string, required)
+
+## Customer credential change [/my/profile/change]
+Customer credential change
+
+### Provide credential change url [POST]
+Provide url to change login or password
+
++ Request (application/merge-patch+json;charset=UTF-8)
+Change user login
+    + Attributes (CredentialChangeRequest)
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (CredentialChangeResponse)
+
++ Response 400 (application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+    
+## Customer logout [/my/profile/logout]  
+Customer logout
+  
+### Invalidate existing token [POST]           
+Invalidate existing token, which in effect log outs the user.
+**This resource should not be exposed to untrusted consumer and its consumption needs to be secured by OAuth2 tokens.** 
+
++ Request Logout (application/json;charset=UTF-8)
+    + Attributes (Logout)
+
++ Response 204 (application/json;charset=UTF-8)
+Logout successful
+    + Body
+
++ Response 422
+Credentials incorrect
+    + Attributes (Errors)
+# Group My contracts
+Set of resources to access and modify client's contracts.
+
+## Customer contracts [/my/contracts]
+Customer contracts.
+
+### List of contracts [GET]
+Get a list of customer contracts.
+
+feature | supported by resource
+--- | ---
+[paging](#header-paging) | no
+[sorting](#header-sorting) | no
+[filtering](#header-filtering) | no
+
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Contract], fixed-type, required)
+
+### Create new contract [POST]
+Create new contract.
+
+TODO: Bude se vubec implementovat??
+
+scenar:
+ATL sesklada request na createApplication podle dat prihlaseneho klienta a posle to na LoanIT.
+Sesklada callback URL na samo sebe.
+Vstup take IDcko uzivatele v SLIP
+
++ Request  (application/json;charset=UTF-8)
+
+    + Body
+
++ Response 200 (application/json;charset=UTF-8)
+Application was successfully created.
+
+    + Attributes (ApplicationResponse)
+
++ Response 400 (application/json;charset=UTF-8)
+Error processing request - bad syntax.
+
+    + Attributes (Errors)
+
+
+## Customer contract detail [/my/contracts/{contractNumber}]
+Specific customer contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Contract detail [GET]
+Get details about one customer contract.
+
++ Request Get contract details
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+   + Attributes (Contract)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+
+
+## Contract financing [/my/contracts/{contractNumber}/financings]
+ !!! Final Warning (30.10.): Will be deleted in next iteration Contract financing
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Change contract financing [POST]
+ !!! Final Warning (30.10.): Will be deleted in next iteration
+ Change financing to revolving loan. Only available for application types: `DEFERRED_PAYMENT`, `TRY_AND_PAY`.
+
+This will create a financing application to re-finance deferred payment applications.
+
+TODO:
+Jen pro odklady. Propadne na KNJ, ktere zavola createApplication na LoanIT s parametry
+- order - co orderItem, to jeden odklad
+- ostatni parametry dle JVB (callbackURLs!)
+- partner: KNJ
+
++ Request Change financing of certain applications (application/json;charset=UTF-8)
+
+    + Attributes (ChangeFinancingRequest)
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (ApplicationResponse)
+
+
+## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
+Transactions of given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + include: `HOLD` (string, optional) - which trasactions to include. Possible values: `HOLD` (only authorization holds, e.g. non-processed transactions), `PROCESSED` (only processed transactions), `BOTH` (include both processed transactions and authorization holds)
+
+### Transactions on contract [GET]
+Get a list of transactions on contract
+
+feature | supported by resource
+--- | ---
+[paging](#header-paging) | yes
+[sorting](#header-sorting) | no
+[filtering](#header-filtering) | yes
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+*Example request:*
+
+`GET /my/contracts/{contractNumber}/transactions?limit=10`
+
+*Example response pagingInfo:*
+
+```
+"pagingInfo": {     
+    "nextPage": "transactions?limit=10&after=1222",     
+    "itemsPerPage": 10
+}
+```
+
+#### Sorting
+Transactions are sorted by default according to bookingDate.
+TBD.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+bookingDate      | lt,lteq,gt,gteq,eq | `transactions?filter=bookingDate|gt|2015-01-10;bookingDate|lteq|2015-01-20`  transactions with 2015-01-10 <= bookingDate < 2015-01-20
+value.amount     | lteq,gteq,eq       | `transactions?filter=value.amount|gteq|100;value.amount|lteq|1000`  transactions with 100 <= value.amount <= 1000, in account's currency
+transactionType  | eq, in             | `transactions?filter=transactionType|in|INSTALLMENT,CARD` transactions of type `INSTALLMENT` and `CARD`
+
+
++ Request Existing contract
+    + Parameters
+        + contractNumber: `54307275`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Transaction], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+
+## Specific transaction [/my/contracts/{contractNumber}/transactions/{transactionId}]
+Actions on specified transaction
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + transactionId: `a7718` (string, required) - ID of transaction
+
+### Transaction detail [GET]
+Get a detail of one transaction
+
++ Request Existing transaction
+    + Parameters
+        + contractNumber: `54307275`
+        + transactionId: `a123`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (Transaction)
+
+## Applications [/my/contracts/{contractNumber}/applications]
+Applications of given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Applications on contract [GET]
+Get a list of applications on given contract.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+TBD.
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+TBD.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+state            |eq,in               | `applications?filter=state|in|READY` applications that are ready to be financed
+stateReason      |eq,in               | `applications?filter=stateReason|in|READY_TO_SHIP` applications that are READY_TO_SHIP
+type             |eq,in               | `applications?filter=type|in|INSTALLMENT` applications financed by installment program
+
++ Request Existing contract
+    + Parameters
+        + contractNumber: `54307275`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Application], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
+<!-- may be only warning for particular application and correct response for the others
++ Request Bad data for application type resolution
+    + Parameters
+        + contractNumber: `54307275`
+
++ Response 422 (application/json;charset=UTF-8)
+    Some attributes cannot be assigned.
+        + Attributes (Errors)-->
+
+## Specific application [/my/contracts/{contractNumber}/applications/{applicationId}]
+Specific application.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + applicationId: `a7718` (string, required) - ID of application
+
+### Application detail [GET]
+Get details of one application.
+
++ Request  (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 200 (application/json;charset=UTF-8)
+    Existing application
+    + Attributes (Application)
+
++ Request Non-existing contract (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 404 (application/json;charset=UTF-8)
+    Contract not found.
+    + Attributes (Errors)
+
++ Request Non-existing application (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `6605812455` (string, required) - ID of contract
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+
++ Response 404 (application/json;charset=UTF-8)
+    Application not found.
+    + Attributes (Errors)
+
++ Request Bad data for application type resolution
+    + Parameters
+        + contractNumber: `54307275`
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 422 (application/json;charset=UTF-8)
+    Some attributes cannot be assigned.
+        + Attributes (Errors)
+
+### Cancel application [DELETE]
+Cancel application processing.
+
++ Request  (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 204 (application/json;charset=UTF-8)
+    Application processing was cancelled.
+    + Body
+
++ Request Invalid application state (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 422 (application/json;charset=UTF-8)
+    Application cannot be cancelled.
+    + Attributes (Errors)
+
++ Request Non-existing contract (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 404 (application/json;charset=UTF-8)
+    Contract or application not found.
+    + Attributes (Errors)
+
+
+## Installments [/my/contracts/{contractNumber}/installments{?selection}]
+Installments of given contract (installment schedule for CEL contract)
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + selection: `current` (enum, optional) - request one specific installment
+        + `first` - first installment
+        + `previous` - installment preceding current installment (ie. installment with due date in previous month)
+        + `current` - current installment (ie. installment with due date in current month)
+
+### Installments of contract [GET]
+Get list of available REL contract's installments or the whole installment schedule for CEL contract.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | no
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `installmentNumber` will be used as the value for `before` or `after` parameter.
+
++ Request Get list of installments
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Installment], fixed-type, required)
+        + pagingInfo (PagingInfo, fixed-type, optional)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+
+
+## Current calculated installment [/my/contracts/{contractNumber}/installments/current]
+Current calculated installment of given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Current installment for contract [GET]
+Get current installment of given contract
+
++ Request Get current installment
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (Installment)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+
+
+## Installment Programs [/my/contracts/{contractNumber}/installmentPrograms]
+Installment programs of given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Installment Programs of contract [GET]
+Get all installment programs of given REL contract
+
+
+feature | supported by resource
+--- | ---
+[paging](#header-paging) | yes
+[sorting](#header-sorting) | no
+[filtering](#header-filtering) | no
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `createdDate` will be used as the value for `before` or `after` parameter.
+
+
++ Request Get list of installment programs
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[InstallmentProgram], fixed-type, required)
+        + pagingInfo (PagingInfo, fixed-type, optional)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+
+
+## Installment Program details [/my/contracts/{contractNumber}/installmentPrograms/{installmentProgramId}]
+Specific installment program of given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + installmentProgramId: `14456` (string, required) - ID of installment program
+
+### Installment Program detail [GET]
+Get details of specific installment program
+
++ Request Existing contract
+    + Parameters
+        + contractNumber: `22134`
+        + installmentProgramId: `14456` (string, required) - ID of installment program
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (InstallmentProgram)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+        + installmentProgramId: `14456` (string, required) - ID of installment program
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+
+
+## Installment Program installmets [/my/contracts/{contractNumber}/installmentPrograms/{installmentProgramId}/installments]
+Installment schedule of specific installment program of given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + installmentProgramId: `14456` (string, required) - ID of installment program
+
+### Installment Program installments [GET]
+Get installment schedule of specific installment program
+
++ Request Existing contract
+    + Parameters
+        + contractNumber: `22134`
+        + installmentProgramId: `14456` (string, required) - ID of installment program
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Installment], fixed-type, required)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+
+
+## Cards for contract [/my/contracts/{contractNumber}/cards]
+Cards issued on given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Cards for contract [GET]
+Get a list of cards issued on given contract
+
+feature | supported by resource
+--- | ---
+[paging](#header-paging) | no
+[sorting](#header-sorting) | no
+[filtering](#header-filtering) | no
+
++ Request  (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Card], fixed-type, required)
+
+
+## Documents for contract [/my/contracts/{contractNumber}/documents]
+Documents issued on given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Documents for contract [GET]
+Get a list of documents issued on given contract.
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | no
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEMENT` only documents of type "MÏsÌËnÌ v˝pis"
+
++ Request  (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Document], fixed-type, required)
+
+
+## Contract services [/my/contracts/{contractNumber}/services]
+Services provided on given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Services of given contract [GET]
+Get a list of services provided on given contract.
+
+feature | supported by resource
+--- | ---
+[paging](#header-paging) | no
+[sorting](#header-sorting) | no
+[filtering](#header-filtering) | no
+
++ Request  (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Service], fixed-type, required)
+
+
+## Insurances of contract [/my/contracts/{contractNumber}/insurances]
+Insurances provided on given contract.
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Insurances of given contract [GET]
+Get a list of insurances provided on given contract.
+
+feature | supported by resource
+--- | ---
+[paging](#header-paging) | no
+[sorting](#header-sorting) | no
+[filtering](#header-filtering) | no
+
++ Request  (application/json;charset=UTF-8)
+    + Parameters
+        + contractNumber: `01-3700227718`
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Insurance], fixed-type, required)
+
+
+## Money transfer [/my/contracts/{contractNumber}/moneyTransfer]
+Money transfer.
+
+It is possible to call this resource in 2 ways: A) Unauthorized mode (when you request OTP generation), B) Authorized mode (when you reuest OTP verification).
+
+| Unauthorized mode                                       | Authorized mode                                 |
+| ---                                                     | ---                                             |
+| Header doesn't contain any special attribute            | Header contains X-OTP-Id, X-OTP-Key, X-OTP-Code |
+| Returns 403 - Forbidden when OTP successfully generated | Returns 200 - OK when successfully verified     |
+
+Possible error codes explanation:
+| Error status code | Code         | Explanation                                                                                                     |
+| --- | ---                        | ---                                                                                                             |
+| 422 | EXPLOITED_MAX_SMS_SENT     | Number of available SMS for time unit exceeded                                                                  |
+| 422 | REPEATED_REQUEST_TOO_EARLY | Repeated request violated security time span                                                                    |
+| 422 | NOT_ALLOWED                | Not allowed (other reason) - optionaly extended for authorization attribute `blockedUntil`                      |
+| 422 | CUID_NOT_FOUND             | Unknown customer                                                                                                |
+| 422 | NO_VERIF_MOBILE            | Customer has not verified mobile                                                                                |
+| 422 | NOT_AUTHORIZED             | Incorrect OTP code                                                                                              |
+| 422 | NOT_AUTHORIZED_BLOCKED     | Limit of attempts for OTP verification exceeded - optionaly extended for authorization attribute `blockedUntil` |
+| 422 | SMS_CODE_EXPIRED           | Validity of OTP code expired                                                                                    |
+| 422 | INVALID_ACCOUNT_NUMBER     | Invalid account number                                                                                          |
+| 500 | FAILURE                    | Internal failure                                                                                                |
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### Money transfer [POST]
+Create money transfer within given contract
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718`
+    + Attributes (MoneyTransfer)
+
++ Response 200 (application/json;charset=UTF-8)
+   + Attributes (MoneyTransferResponse)
+
++ Request Non-existing contract
+    + Parameters
+        + contractNumber: `this_is_no_contract`
+
++ Response 404 (application/json;charset=UTF-8)
+    + Attributes (Errors)
+      + authorization (Authorization, optional)
+
+
+## Create application [/my/applications]
+If the request was recognized as duplication, HTTP status code 200 and the *application* object created during the first related successful request is received.
+
+In other cases, you receive one of the following errors:
+| Status code | Code | Message |
+| --- | --- | --- |
+| 400 | INVALID_REQUEST | *Various messages possible* |
+| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+
+
+### Create application [POST]
+Create new *application* of particular type
+
++ Request (application/json; charset=utf-8)
+    + Attributes (ApplicationRequest)
+
+
++ Response 200(application/json; charset=utf-8)
+
+        Application was created
+
+    + Attributes (ApplicationResponse)
+
+
++ Response 400(application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+# Group My Payments
+
+## Payments [/my/payments]
+Payments operations.
+
+### List of payments [GET]
+Get a list of all prepared payment orders.
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[DomesticPaymentOrderStatus], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+
+
+### Request new payment [POST]
+Prepare payment order data for specified repayments. TODO: add payment method.
+
++ Request  (application/json;charset=UTF-8)
+    + Attributes (PaymentRequest)
+
++ Response 200(application/json; charset=utf-8)
+
+        Payment order method TRANSFER/SAZKA was prepared and can be paid.
+
+    + Attributes (DomesticPaymentOrder)
+
+
++ Response 200(application/json; charset=utf-8)
+
+        Payment order method CARD/PLATBA24/MOJE_PLATBA/EKONTO was prepared and can be paid.
+
+    + Attributes (OnlinePaymentOrder)
+
+
++ Response 400(application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+
+
+## Payment options [/my/payments/options{?amount}]
+Get all possible repayment options
+
++ Parameters
+  + amount: 11000 (number, optional) - Amount to pay specified by client, in minor units and default currency (e.g. 11000 means 110 CZK). If set, repayment options will be modified accordingly. NOT SUPPORTED YET.
+
+### Repayment options [GET]
+Get prioritized list of possible installments that are available for repayment. If no amount is specified, upper bound of repayment is calculated according to business rules (e.g. including all possible installments).
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[PaymentItem], fixed-type, required)
+
++ Response 400 (application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+
+
+## Revolving payment availability [/my/payments/revolvingPaymentAvailability]
+Client may pay his deffered payments by revolving loan, either by installment program or by drawing from balance. This resource provide information about possibility to use this payment method.
+
+Possible error codes:
+| Status code | Code | Message |
+| --- | ---                   | ---                         |
+| 400 | INVALID_REQUEST       | *Various messages possible* |
+| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+
+### Revolving payment availability [POST]
+Check the availability to pay given Applications by revolving loan.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (RevolvingPaymentAvailabilityRequest)
+
+
++ Response 200(application/json; charset=utf-8)
+
+        Payment possibility checked successfully
+
+    + Attributes (RevolvingPaymentAvailability)
+
+
++ Response 400(application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+# Group My Offers
+
+## Installment programs calculations [/my/calculations]
+When a customer wants to use a loan as a payment method and he wants to see an offer of available installment programs, `/my/calculations` resource with properly filled request that contains at least following data is used:
+- Payment value
+
+If the request was successfully processed, HTTP status code 200 and array of objects of available installment programs with at least following information in the response is received:
+- Installment program (array)
+  - Installment program product code
+  - Installment program type
+  - Installment amount
+  - Number of installments
+
+In other cases, following errors are received:
+| Status code | Code | Message |
+| --- | --- | --- |
+| 400 | INVALID_REQUEST | *Various messages possible* |
+| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+
+
+### Calculate installment programs [POST]
+Calculate installment programs offer according to specified input
+
++ Request (application/json; charset=utf-8)
+    + Attributes (InstallmentProgramsCalculationsRequest)
+
+
++ Response 200(application/json; charset=utf-8)
+
+        Installment programs collection
+
+    + Attributes (InstallmentProgramsCalculations, required)
+
++ Response 400(application/json; charset=utf-8)
+        Error in processing request
+
+    + Attributes (Errors)
+
+
+## Installment program detail calculation [/my/calculationDetails]
+When a customer wants to know details of one of previously offered installment programs, `/my/calculation` resource with properly filled request that contains at least following data is used:
+- Product code of given installment program
+- Payment value
+
+If the request was successfully processed, HTTP status code 200 and object of information about specified installment program with at least following information in the response is received:
+- Installment program type
+- Installment amount
+- Number of installments
+- Installment program details
+
+In other cases, one of the following errors is received:
+| Status code | Code | Message |
+| --- | --- | --- |
+| 400 | INVALID_REQUEST | *Various messages possible* |
+| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+
+
+### Calculate installment program detail [POST]
+Calculate installment program detailed information.
+
+It returns the installment program that most closely matches specified input.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (InstallmentProgramCalculationRequest)
+
+
++ Response 200(application/json; charset=utf-8)
+
+        Detailed information about installment program
+
+    + Attributes (InstallmentProgramCalculation)
+
+
++ Response 422(application/json; charset=utf-8)
+
+        No installment program was found
+
+    + Attributes (Errors)
+# Group My Documents
+
+## Documents for client [/my/documents]
+All documents for client and for all his contracts.
+
+### List of documents [GET]
+Get a list of documents.
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | no
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_AGREEMENT` only documents of type "Smlouva o pouûÌv·nÌ online aplikacÌ"
+
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (object)
+        + data (array[Document], fixed-type, required)
+
+# Data Structures
+
+## Error (object)
++ code: `ERR_1000_SOME_ERROR_CODE` (string, required) - unique internal error code
++ message: `Some error/validation message description` (string, required) - human readable error description (non-localized)
++ severity (enum, required)
+    + ERROR - critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code
+    + WARN - non-critical error, execution can continue but further user interaction is advisable. This MIGHT be indicated also by appropriate HTTP status code
+    + INFO - information only, execution can continue without user interaction
++ attribute: `personalBirthNumber` (string, optional) - json path of request attribute that caused the error (if applicable)    
++ ticketId: `UAT1:AMS:20160516-091658.450:45e4` (string, optional) - internal ticket ID, used for error backtracking
+
+## Errors (object)
++ errors (array[Error], fixed-type, required)
+
+## OTPErrors (Errors)
++ blockedUntil: `2017-01-18T10:34:44+01:00` (string, optional) - requested operation is blocked until specified time
+
+## PagingInfo (object)
++ itemsPerPage: 10 (number, required) - number of items per page
++ nextPage: `transactions?sort=category&limit=10&after=25` (string, optional) - request to retrieve next page, if it exists and can be unambiguously specified
++ prevPage: `transactions?sort=category&limit=10&before=25` (string, optional) - request to retrieve previous page, if it exists and can be unambiguously specified
+
+
+## Amount (object)
++ `amount`: 12590 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `currency`: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## VatAmount (Amount)
+Financial amount with VAT rate.
+
+### Properties
++ `vatRate`: 15 (number, required) - VAT rate as natural number (15 represents 15% rate)
+
+
+## TokenCodeRequest (object)
++ `grant_type`: `authorization_code` (enum, required) - grant flow type, only `authorization_code` and `refresh_token` is supported
+    + `authorization_code` - use to exchange code for access token
+    + `refresh_token` - can be used to get new access token instead of forcing user to login again
++ `client_id`: `my_app_id` (string, required) - client_id parameter of your application, received at application registration    
++ `client_secret`: `my_app_secret` (string, required) - client_secret parameter of your application, received at application registration    
++ One Of
+    + `code`: `12254a1124` (string, required) - authorization code, received from authorization server
+    + `refresh_token`: `12254a1124` (string, required) - refresh token, received from authorization server
+
+## TokenResponse (object)
++ `refresh_token`: `7dbadd74c434439db4fc9b2bbf8cabb3` (string, optional) - refresh token, if supported
++ `token_type`: `bearer` (string, required) - token type. Always "bearer".
++ `access_token`: `ccafe62cbce645ce95b2acce839f4acc` (string, required) - access token, to be included in API request
++ `expires_in`: 7200 (number, required) - access token validity, in seconds
+## PhoneNumber (object)
++ phoneType: `PRIMARY` (enum, required) - type of phone
+    + `PRIMARY` - primary (verified) mobile number (can be `CONTACT` at the same time)
+    + `CONTACT` - contact  mobile number
+    + `MOBILE` - not primary nor contact mobile number
+    + `PHONE` - not primary nor contact phone number
++ countryCode: `+420` (string, optional) - country code, including leading `+`
++ number: `123456789` (string, required) - phone number
+
+## Email (object)
++ type: `PRIMARY_EMAIL` (enum, required) - type of email
+    + `PRIMARY_EMAIL`
+    + `CONTACT_EMAIL`
++ address: `john.doe@gmail.com` (string, required) - e-mail address
+
+## Address (object)
++ streetAddress: `Na Pankraci` (string, required) - street
++ streetNumber: `5` (string, required) - street number
++ city: `Prague` (string, required) - city
++ zip: `14000` (string, required) - postal code
++ addressType: `CONTACT` (enum, required) - type of address
+    + CONTACT - contact address
+    + BILLING - billing address
+    + PERMANENT - permanent (residential) address, according to identity document
+    + DELIVERY - delivery address
++ country: `CZ` (string, required) - ISO code of country
+
+## IdentityDocument (object)
++ number: `123456748` (string, required) - identity document number
++ issueDate: `2014-02-10` (string, optional) - identity document issue date
++ validity: `2024-02-10` (string, optional) - identity document valid to date
++ type: `ID_CARD` (enum, required) - identity document type
+    + `ID_CARD`
+    + `DRIVERS_LICENSE`
+    + `PASSPORT`
+    + `BIRTH_CERTIFICATE`
++ country: `Czech Republic` (string, optional) - country that issued the document    
+
+## Client (object)
++ name (object, required)
+  + titleBefore: Ing. (string, optional) - academical degree before name
+  + titleAfter: PhD. (string, optional) - academical degree behind name
+  + firstName: John (string, required) - user first (given) name
+  + middleNames: Peter, Frank (array[string], optional) - middle names
+  + lastName: Doe (string, required) - user family name
++ fullName: `Ing. John Petetr Frank Doe, PhD.` (string, optional) - client full name
++ salutation: Mr. (string, optional) - salutation, e.g. Mr. or Mrs.
++ gender: `MALE` (enum, required)
+    + `MALE`
+    + `FEMALE`
++ birthDate: `1978-02-15` (string, required) - date of birth
++ addresses (array[Address], fixed-type, optional) - client addresses
++ phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
++ emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
++ username: `memyself@mine.com` (string, required) - client's self care zone username
++ identityDocuments: (array[IdentityDocument], fixed-type, optional) - client identity documents
+
+
+## Contract (object)
++ contractNumber: `12345678` (string, required) - ID of a contract
++ applicationCreatedAt: `2016-01-01` (string, required) - date when application was created
++ name: `Tesco karta` (string, required) - human-readable contract (product) name
++ productVisualUrl (string, optional) - URL of product visual for this contract
++ contractType: `CEL` (enum, required) - contract type
+   + `CEL` - Close End Loan
+   + `REL` - Revolving Loan
+   + `DEFPAY` - deferred payment
++ status: `ACTIVE` (enum, required) - status of contract
+    + `PROCESSING` - contract is approved
+    + `ACTIVE` - contract is active (DEFPAY user is not banned and active)
+    + `FINISHED` - contract has been closed (DEFPAY user is banned or inactive)
+    + `CANCELLED` - contract has been cancelled
++ currentDebt (Amount, required) - sum of overdue installments to date (DEFPAY sum of application debts in closest due date)
++ overdueInstallmentsCount: 2 (number, required) - number of overdue installments to date
++ currentInstallment (Amount, optional) - current installment amount  (DEFPAY sum of application claims in closest due date)
++ currentInstallmentDueDate: `2017-10-13` (string, optional) - current installment due date (DEFPAY closest application due date)
++ currentDPD: 8 (number, optional) - current days past due of contract (DEFPAY closest application DPD)
++ One Of
+   + CELAdditionalInfo (object, required)
+        + approveDate: `2017-01-08` (string, required) - date when contract was approved
+        + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
+        + tenor: 10 (number, optional) - number of installment of contract when signed
+        + monthlyInstallment (Amount, required) - monthly installment amount a client need to repay
+        + monthlyInterestRate: 2.96 (number,  required) - monthly interest rate in percent
+        + credit (Amount, required) - total amount a client ask for loan, including insurance amount
+        + downPayment (Amount, required) - total down payment amount of  a client
+        + signedAt: `2016-01-25` (string, required) - date when contract was signed
+        + productInformation: `Credit card loan (REL_POS-01)` (string, optional)
+        + productCode:`CCX_INI_0001` (string, required) - code of product
+   + RELAdditionalInfo (object, required)
+        + approveDate: `2017-01-08` (string, required) - date when contract was approved
+        + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
+        + currentInstallmentGP (Amount, required) - current installment for using grace period amount
+        + signedAt: `2016-01-25` (string, required) - date when contract was signed
+        + productInformation: `Credit card loan (REL_POS-01)` (string, optional)
+        + productCode:`CCX_INI_0001` (string, required) - code of product
+        + availableCreditBalance (Amount, required) - available credit balance of an account
+        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account
+        + moneyTransferInfo (MoneyTransferAvailability, required) - money transfer availability information
+        + defPayInfo (object, required) - transactions for deferred payments info
+            + blockedAmount (Amount, required) - amount of all unconfirmed transactions for deferred payments
+            + blockedCount (number, required) - count of all unconfirmed transactions for deferred payments
+        + legalTermination (object, optional)
+            + status: `TERMINATED` (enum, required) - legal termination state
+                + `TO_TERMINATE` - legal termination is being processed
+                + `TERMINATED` - legal termination done
+   + DEFPAYAdditionalInfo (object, required)
+        + availableCreditBalance (Amount, required) - available credit balance of an account
+        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account   
+        + remainingOrdersCount: 4 (number, required) - count of orders that can be realised
+
+## AccountNumber (object)
++ One Of
+    + Properties
+        + `iban`: `CZ123456789` (string, required) - account number in IBAN format
+        + `bic`: `AIRACZPP` (string, optional) - BIC for account
+    + Properties
+        + `prefix`: `000000` (string, optional) - account number prefix
+        + `accountNumber`: `1235335010` (string, required) - account number. For domestic accounts, this will be specified in national format.
+        + `bankCode`: `3030` (string, required) - for domestic accounts, bank code in national format
+
+
+## Transaction (object)
++ id: `12312345` (string, required) - internal transaction identifier
++ contractNumber: `01-123456789` (string, required) - contract to that transaction belongs (to which it is accounted)
++ value (Amount, required) - amount & currency used for bookkeeping (e.g. amount in account's currency). Can be negative e.g. if something was withdrawn from an account. Original transaction amount and currency will be specified in `additionalInfo` object if applicable
++ direction: `CREDIT` (enum, required) - direction of transaction
+    + `CREDIT` - credit transaction (+)
+    + `DEBIT` - debit transaction (-)
++ status: `PROCESSED` (enum, required) - transaction status
+    + `UNPROCESSED` - unprocessed transaction
+    + `PROCESSED` - processed transaction
++ description: `Purchase from SuperShop - 12.12.2017` (string, required) - transaction description
++ partyAccount (AccountNumber, optional) - party account number
++ partyDescription: `John Doe` (string, optional) - party description
++ transactionType (enum[string], required) - transaction type
+    + `ATM_WITHDRAWAL`
+    + `INSTALLMENT`
+    + `BONUS`
+    + `DEFERRED_PAYMENT`
+    + `CASH_TRANSFER` - cash transfer
+    + `INST_PROGRAM` - installment program
+    + `INST_PROGRAM_STORNO` - cancelled installment program
+    + `FIRST_DRAW`
+    + `DIRECT_DEBIT`
+    + `CARD`
+    + `FEE`
+    + `TAX`
+    + `INTEREST`
+    + `INSURANCE`
+    + `SAZKA`
+    + `OTHER`
+    + `BLOCKING`
++ valueDate: `2016-02-10T10:00Z` (string, required) - transaction value date, e.g. the day transaction "happened"
++ bookingDate: `2016-02-09T10:00Z` (string, optional) - transaction booking date, e.g. the day transaction was bookkeeped
++ payerMessage: `need to pay this` (string, optional) - message for payer. Empty for incoming transactions.
++ payeeMessage: `info` (string, optional) - message for payee (e.g. for client receiving transaction)
++ transactionFeeCanceled: `false` (boolean, optional) - set to true if transaction fee is canceled.
++ additionalInfoDomestic (TransactionInfoDomestic, optional) - domestic payments additional info (symbols for fomestic payments)
++ additionalInfoForeign (TransactionInfoForeign, optional) - foreign payments additional info (original value and exchange rate)
++ additionalInfoCard (TransactionInfoCard, optional) - card payemnts additional info (card number, mcc and merchant name)
++ additionalInfoApplication (TransactionInfoApplication, optional) - transaction info related to application
+
+## TransactionInfoDomestic (object)
++ `constantSymbol`: `0558` (string, optional)
++ `variableSymbol`: `9` (string, optional)
++ `specificSymbol`: `100011` (string, optional)
+
+## TransactionInfoCard (object)
++ `mcc`: `3081` (string, optional) - Merchant Category code
++ `merchantName`: `SomeCompany, Ltd.` (string, optional)
++ `cardNumber`: `34xx-xxxx-xxxx-6289` (string, required) - Masked card number used for transaction
++ `cardName`: `äikovn· karta Home Credit` (string, optional) - Card name
+
+## TransactionInfoForeign (object)
++ `originalValue` (Amount, optional) - amount & currency in which transaction was originated
++ `exchangeRate`: 12.80 (number, optional) - exchange rate valid at the time of transfer
+
+## TransactionInfoApplication (object)
++ `applicationId`: `11200a0ee1` (string, required) - identifier of application related to transaction
++ `contractNumber`: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with Transaction.contractNumber)
++ `applicationOrigin` (object, optional) - if related application was created based on other application
+    + `applicationId`: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
+    + `contractNumber`: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
+
+## File (object)
++ `filename`: `invoice.pdf` (string, optional) - File name.
++ `url`: `https://www.partner.com/file?id=12345` (string, required) - File URL.
++ `createdDate` : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
++ `contentType` : `image/jpg` (string, optional) - content type of the file
++ `size` : 48439 (number, optional) - file size in bytes
+
+## Document (object)
+Attached document (document only for client, document for specific contract, document for specific order ...)
+
+### Properties
++ `name`: `ObchodnÌ podmÌnky` (string, required) - Human-readable localized document name
++ `type`: `GEN_SMS_SIGN_AGREEMENT` (enum, required) - Type of the document
+    + `EKLIENT_AGREEMENT` - Smlouva o pouûÌv·nÌ aplikace Spr·vce financÌ
+    + `INSTALLMENTPROGRAM_AMENDMENT` - Dodatek smlouvy - Spl·tkovÈ programy
+    + `NRKI_CONSENT` - Souhlas s NRKI
+    + `SOLUS_CONSENT` - Souhlas se SOLUS
+    + `ATTACHMENT` - Vyû·dan˝ dokument
+    + `CONTRACT` - ⁄vÏrov· smlouva
+    + `CREDIT_CONDITIONS` - ⁄vÏrovÈ podmÌnky
+    + `FLIP_SUPPLEMENT` - Dodatek smlouvy - FLIP
+    + `BONUS_ACTION` - Bonusov· akce
+    + `PERSONAL_DATA_CONSENT` - Souhlas se zpracov·nÌm osobnÌch ˙daj˘
+    + `PREAGREEMENT` - P¯edsmluvnÌ formul·¯
+    + `CARD_HANDOVER` - P¯ed·vacÌ protokol ke kartÏ
+    + `SUPPLEMENT_CLIP` - Dodatek pro nav˝öenÌ ˙vÏrovÈho r·mce
+    + `REGISTRY_SHEET` - MatriËnÌ list
+    + `ATTACHMENT_NO1` - P¯Ìloha Ë.1
+    + `ACCEPT_PROT_VEH` - Protokol o p¯evzetÌ vozidla
+    + `ORIG_VINCULATION` - Origin·l VINKULACE (ind. HAV)
+    + `INSURANCE_CONTRACT_COPY` - Kopie pojistnÈ smlouvy
+    + `INFO_INSURANCE_COMPANY` - Informace pro klienta-poj. KOOPERATIVA UNIQA
+    + `ATTACHMENT_CLIENT` - Dokument k osobÏ
+    + `INSTALMENT_CALENDAR` - Spl·tkov˝ kalend·¯
+    + `MONTHLY_STATEMENT` - MÏsÌËnÌ v˝pis
+    + `GEN_SMS_SIGN_AGREEMENT` - Smlouva o pouûÌv·nÌ online aplikacÌ
+    + `ARBITRATION` - RozhodËÌ smlouva
+    + `INVOICE` - Invoice
+    + `PROFORMA_INVOICE` - Proforma invoice
+    + `CREDIT_NOTE` - Credit note
+    + `OTHER` - OstatnÌ
++ `contractNumber`: `6707000642` (string, optional) - contractNumber if document is connected to specific contract
++ `contractType`: `REL` (enum, optional) - contract type if document is connected to specific contract
+    + `CEL` - Close End Loan
+    + `REL` - Revolving Loan
+    + `DEFPAY` - deferred payment
++ `file` (File, required) - Attached file
++ `description`: `This is an invoice` (string, optional) - File description
++ `additionalData` (object, optional)
+    + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
+    + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
+    + `statementYear`: 2017 (number, optional) - Year for document type MONTHLY_STATEMENT
+
+## DeliveryCarrier (object)
+Delivery carrier
+
+### Properties
++ One Of
+    + carrierId (enum, required)
+        + CZ_POST_HAND - Czech Post, Parcel Delivery to Hand
+        + CZ_POST_OFFICE - Czech Post, Parcel Delivery to Post Office
+        + CZ_POST_OTHER - Czech Post, other service
+        + PPL
+        + DPD
+        + GEIS
+        + IN_TIME
+        + TOP_TRANS
+        + GEBRUDER_WEISS
+        + LOCAL_COURIER
+        + TNT
+        + GLS
+        + HDS_COMFORT
+        + HDS_STANDARD
+    + carrierCustom: `my custom carrier` (string, required) - For carriers not found in enumeration of customer ID, specify value as text
+
+
+## ApplicationBase (object)
+Financing application base information
+
+### Properties
++ `id`: `77d665d7-da44-402e-b7f7-6354d6076b32` (string, required) - Unique identifier in HCO
++ `state`: `PROCESSING` (enum, required) - Application state.
+    + `PROCESSING` - Application is being processed by HC
+    + `READY` - Application was approved and is ready for financing
+    + `REJECTED` - Application was rejected
+    + `CANCELLED` - Application was cancelled by client, either before approval or after delivery
++ `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
+    + `PROCESSING_ADDITIONAL_DATA` - Additional data needed (redirect to HC or send Application additional data)
+    + `PROCESSING_VERIFICATION` - Verification needed (redirect to HC or send Application verification)
+    + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
+    + `PROCESSING_NEW` - New application created
+    + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
+    + `REJECTED` - Rejected by HC
+    + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
+    + `PROCESSING_REVIEW` - Manual review by HC in progress
+    + `PROCESSING_WAIT_CLIENT` - To be completed by client
+    + `PROCESSING_ALT_OFFER` - Alternative offered to client
+    + `PROCESSING_SIGNED` - Signed by client, to verification by HC
+    + `CANCELLED_NOT_PAID` - Cancelled before delivery
+    + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
+    + `READY_SHIPPED` - Goods shipped to client
+    + `READY_DELIVERING` - Verification of goods delivery
+    + `READY_DELIVERED` - Goods delivered to client
+    + `READY_PAID` - Paid to merchant
+    + `CANCELLED_TO_RETURN` - Cancelled after delivery, goods to be returned (not implemented)
+    + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
+
+
+## Application (ApplicationBase)
+Financing application.
+
+### Properties
++ `createdDate`: `2017-06-15` (string, optional) - date the application was created
++ `order` (Order, optional) - Order data. One and only one of `order` or `liability` objects is provided
++ `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
++ `type`: `TRY_AND_PAY` (enum, optional) - Financing type
+    + `DEFERRED_PAYMENT` - Pay later ("zaplaù pozdÏji")
+    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkouöej a zaplaù")
+    + `INSTALLMENT` - Pay in monthly installments ("n·kup na spl·tky")
+    + `SUBSCRIPTION` - Recurring payment ("p¯edplatnÈ, nebo opakovan· platba")
+    + `INTERNAL` - Application created "technical way"
++ `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
++ `gatewayRedirectUrl`: `https://myloan.homecredit.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
++ `applicationOrigin` (object, optional) - if the application was created based on other application
+    + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
+    + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
++ `eshopAdditionalInfo` (object, optional) - other information for particular salesroom connected to this application
+    + `name`: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
+    + `logoUrl`: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
++ `defpayAdditionalInfo` (object, optional) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
+    + `currentDebt` (Amount, required) - Actual debt amount
+    + `dueDate`: `2016-11-15` (string, required) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
+    + `dueDateClient`: `2016-11-14` (string, optional) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
+    + `currentDpd`: 2 (number, required) - current days past due
+    + `blockedOnContractNumber`: `01-6010027378` (string, optional) - contract when application is prepared to be paid from RU balance after dueDateClient
+    + `paidFromContractNumber`: `01-6010027378` (string, optional) - contract when application was paid by revolving loan
+    + `completelyPaid`: `true` (boolean, optional) - information if this application is completely paid and there is no expected payment from client
+    + `paymentAvailability`: (PaymentAvailability, optional) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
+    + `revolvingPaymentInfo`: (object, optional) - information about revolving loan payment method (installments or balance)
+        + `availability`: (RevolvingPaymentAvailability, optional) - information about possibility to pay application by revolving loan
+        + `application`: (ApplicationBase, optional) - information about revolving payment application (Homer application)
++ `installmentAdditionalInfo` (object, optional) - additional application information for INSTALLMENT application type
+    + `financedAmount` (Amount, required) - amount really financed by HC (price minus downPayment)
+    + `applicationSignDate`: `2017-01-19` (string, optional) - Date of signature confirmation of the application by client
+    + `installmentProgram` (InstallmentProgram, optional) - installment program information
+
+
+## RevolvingPaymentAvailabilityRequest (object)
++ `applications` (array[ApplicationId], fixed-type, required) - Applications of type `DEFERRED_PAYMENT` that will be financed by revolving loan
+
+
+## RevolvingPaymentAvailability (object)
+Information about possibility to pay application by revolving loan, either by installment program or by drawing from balance
+
+### Properties
++ `availability` (enum, required)
+    + `AVAILABLE`
+    + `NOT_AVAILABLE`
++ `reasons` (array[string], optional) - List of reasons.
+    Possible values in array: `UNDESIRABLE`, `TOO_LOW_AMOUNT`, `ALREADY_PAID`, `BLOCKED`, `OVERDUE`, `IN_REVOLVING_PAYMENT_PROCESS`.
++ `suitableContracts` (array[string], fixed-type, optional) - list of suitable target revolving loan contract numbers (if available)
+
+## PaymentAvailability (object)
+Information about possibility to pay application
+
+### Properties
++ `availability` (enum, required)
+    + `AVAILABLE`
+    + `NOT_AVAILABLE`
++ `reasons` (array[string], optional) - List of reasons.
+    Possible values in array: `ALREADY_PAID`, `BLOCKED`, `IN_REVOLVING_PAYMENT_PROCESS`.
+
+## ApplicationRequest (object)
+Application request
+
+### Properties
++ `applications` (array[ApplicationId], fixed-type, required) - Applications of type `DEFERRED_PAYMENT` that will be financed by revolving loan
++ `type`: `INSTALLMENT` (enum, required) - Financing type
+    + `INSTALLMENT` - Pay in monthly installments ("rozklad odloûen˝ch n·kup˘")
+    + `BALANCE` - Pay by charging client's revolving loan (NOT SUPPORTED YET)
++ `settingsInstallment` (object, optional) - Settings for INSTALLMENT Application type.
+    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
+    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
+    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
++ `returnUrls` (ReturnUrls, required) - Collection of URLs used for redirection of a customer back to a Self care
+
+
+## ApplicationResponse (ApplicationBase)
++ `redirectUrl`: `https://myloan.homecredit.cz?applicationId=77d665d7-da44-402e-b7f7-6354d6076b32` (string, required) - URL where the client should be redirected after successfull creation of application.
+
+
+## ReturnUrls (object)
+Collection of URLs used for redirection of a customer back to a Self care
+
+### Properties
++ `approvedRedirect` (string, required) - return URL used for redirection of the customer back to self care after application approval.
++ `rejectedRedirect` (string, required) - return URL used for redirection of the customer back to self care after application rejection.
++ `discontinuationRedirect` (string, required) - return URL used for redirection of the customer back to self care in case client doesn't want to finish application process.
+
+
+## FinancedSubject (object)
+Subject of financing
+
+### Properties
++ `createdDate`: `2016-11-15` (string, optional) - date the order was created
++ `number`: `AA234` (string, required) - Order number (internal for e-shop)
++ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
++ `totalPrice` (Amount, required) - Total order amount, including VAT
++ `broker` (Broker, optional) - Additional information about broker application. Required for order types `LIABILITY` and `GOODS_BROKER`
+
+
+## Order (FinancedSubject)
+Detailed information about order (type `GOODS` and `GOODS_BROKER`)
+
+### Properties
++ `type`: `GOODS` (enum, required) - Order type
+    + `GOODS` - Purchase of (physical) goods on eshop
+    + `GOODS_BROKER` - Purchase of (physical) goods on eshop mediated by broker. "Deffered payment" or "Try and pay" are some examples of this type of order.
++ `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
++ `items` (array[Item], fixed-type, required) - Items in order
++ `documents` (array[Document], fixed-type, optional) - Attached documents (invoices etc.)
++ `state`: `PROCESSING` (enum, required) - Order state.
+    + `PROCESSING` - Order is being processed by merchant
+    + `SENT` - All order items was sent to customer
+    + `DELIVERED` - All order items was delivered to customer
+    + `RETURNED` - All order items was returned to merchant
+    + `CANCELLED` - Order was fully cancelled
++ `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
++ `deliveryDate`: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of delivery
++ `deliveryTrackingNumber`: `EX12221` (string, optional) - Delivery tracking number
++ `sentDate`: `2017-01-12T10:34:44+01:00` (string, optional) - Date and time of order shipping
+
+## Liability (FinancedSubject)
+Detailed information about order (type `LIABILITY`)
+
+### Properties
++ `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
++ `items` (array[LiabilityItem], fixed-type, required) -  Items in order
+
+
+## ItemBase (object)
++ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
++ `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
++ `image` (File, optional) - Item image
+
+
+## Item (ItemBase)
+Order item information, needed to create an application.
+
+### Properties
++ `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
++ `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
++ `type` (enum, optional) - Item type
+    + `PHYSICAL`
+    + `DISCOUNT`
+    + `SHIPPING_FEE`
+    + `SALES_TAX`
+    + `DIGITAL`
+    + `GIFT_CARD`
+    + `STORE_CREDIT`
+    + `FEE`
+    + `INSURANCE`
++ `ean`: `888462064002` (string, optional) - EAN code.
++ `variant`: `32GB SpaceGray` (string, optional) - Item variant
++ `description`: `Mobile phone with 32GB of RAM` (string, optional)
++ `producer`: `Apple` (string, optional)
++ `unitPrice` (Amount, optional) - Price per one piece. If empty, automatically considered that `unitPrice` is `totalPrice` / `quantity`.
++ `unitVat` (VatAmount, optional) - VAT amount per one piece. If empty, automatically considered that `unitVat` is `totalVat` / `quantity`.
++ `totalVat` (VatAmount, optional) - Total VAT amount for all pieces
++ `productUrl`: `https://www.example.com?itemId=10` (string, optional) - URL of the item in e-shop
++ `state`: `PROCESSING` (enum, required) - Order state.
+    + `PROCESSING` - Order item delivery is being processed by merchant
+    + `SENT` - Items was sent to customer
+    + `DELIVERED` - Order item was delivered to customer
+    + `RETURNED` - Order item was returned to merchant
+    + `CANCELLED` - Order item was cancelled
++ `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional) - Date and time when item was sent. Only when the whole order was NOT sent at once.
++ `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
++ `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
+
+
+## LiabilityItem (ItemBase)
+Order item information, needed to create an application.
+
+### Properties
++ `brokerApplicationId`: `02-11b00a1ef1` (string, required) - Broker application ID (`KNJapplicationId`)
++ `homerApplicationId`: `01-11b00a1ef2` (string, optional) - Homer application ID ("Odklad na RU" application id)
++ `creditor`: `Mall.cz` (string, optional) - Creditor of liability item
++ `dateCreated`:  `2017-01-10T10:34:44+01:00` (string, optional) - Date of creation of liability
++ `dateDue`:  `2017-02-20` (string, required) - Due date of liability
++ `itemsQuantity`: 3 (number, optional) - Quantity of items in financed liability, if applicable (f.e. quantity of items purchased by Deffered payment). If empty, considered as 0
+
+## Broker (object)
+Additional information about broker application
+
+### Properties
++ `applicationId`: `02-a1345` (string, required) - Broker application ID (`KNJapplicationId`)
++ `receivableDueDate`: `2017-01-10` (string, optional) - Expected due date. Required for order type `GOODS_BROKER`
+
+## Card (object)
++ id: 12 (number, required) - internal card ID
++ cardNumber: `516822******1234` (string, required) - masked card number
++ cardStatus: (enum, required) - card status
+    + INACTIVE - card has yet to be activated
+    + ACTIVE - card is active
+    + BLOCKED - card is blocked
+    + LOST - card is reported lost
+    + STOLEN - card is reported stolen
+    + CANCELLED - card is cancelled
++ cardType: (enum, required)
+    + CREDIT - credit card
+    + STICKER - contactless sticker
+    + VIRTUAL - virtual card
++ cardVisual (File, optional) - Card visualisation image
++ contractNumber: `123` (string, required) - contract number of contract that card belongs to
++ holderName: `John Doe` (string, optional) - card holder name
++ validFrom: `2016-02` (string, optional) - card valid from date
++ validTo: `2022-02` (string, optional) - card valid to date
+
+
+## Insurance (object)
++ id: `12345` (string, required) - insurance identificator
++ type: `LIFE_INSURANCE` (enum, required) - type of insurance service
+   + `LIFE_INSURANCE` - life insurance service
+   + `GOODS_INSURANCE` - goods insurance service
++ code: `LI_AAA` (string, required) - code of insurance service
++ name: `AAA Credit Life Insurance` (string, required) - name of insurance service
++ validFrom: `2017-01-01` (string, optional) - insurance validity from date
++ validTo: `2017-12-31` (string, optional) - insurance validity from to
++ fee (Amount, optional) - total insurance fee
++ insuredSum (Amount, optional) - total insured sum
+
+
+## Service (object)
++ id: `12345` (string, required) - service identificator
++ type: `FULL_EARLY_REPAYMENT` (enum, optional) - type of services
+   + `FULL_EARLY_REPAYMENT` - service for early repayment of CEL contract
+   + `GIFT_PAYMENT` - gift service
+   + `GRACE_PERIOD` - grace period service for CEL
+   + `GRACE_PERIOD_FOR_REL` - grace period service for REL
+   + `LOYALTY` - loyalty service for REL customer
+   + `INSTALLMENT_PLAN_FOR_REL_TRANSACTION` - initial transaction of REL contract
+   + `SMS_NOTIFICATION` - notification service
+   + `STANDARD_PAYMENT_CARD` - REL only, standard payment card type Personalized or Instant
++ code: `FER01` (string, optional) - code of service
++ name: `Early repayment 1` (string, optional) - name of service
++ validFrom: `2017-01-01` (string, optional) - validity from date
++ validTo: `2017-12-31` (string, optional) - validity from to
+
+
+## Installment (object)
+Revolving loan installment
+
+### Properties
++ installmentNumber: `108` (number, required) - the rank of installment in installment schedule (if available), unique number for specific contract
++ type: `STANDARD` (enum, required) - type of the installment
+   + `STANDARD` - regular installment
+   + `EXTRAORDINARY` - extraordinary installment
+   + `PARTIAL_CANCELLATION` - partial cancellation (special debit transaction)
+   + `OTHER` - other values
++ dueDate: `2016-11-15` (string, required) - installment date due
++ dueDateClient: `2016-11-14` (string, optional) - installment date due comunicated on the client
++ dueAmount (Amount, required) - installment amount due to be paid by dueDate
++ daysPastDue (number, optional) - days past due
++ daysPastDueClient (number, optional) - days past due comunicated on client
++ installmentDatePaid: `2016-11-15` (string, optional) - date paid for the installment (when the installment was completely paid)
++ installmentAmountPaid (Amount, optional) - amount paid for the installment amount due
++ installmentDetail (object, optional) - detail of `STANDARD` installment (connected with installment program)
+   + `name` (string, required) - item (installment program) description
+   + `idTransaction`: `1234567890` (number, required) - reference to related transaction
++ installmentItems (array[InstallmentItem], fixed-type, required) - array of particular installment items
+
+
+## InstallmentItem (object)
+Revolving loan installment item
+
+### Properties
++ installmentItemNumber: 4 (number, optional) - the rank of installment item within installment, unique number for specific installment
++ itemType: `MIN_INSTALLMENT` (enum, required) - type of the installment item
+   + `MIN_INSTALLMENT` - minimal installment (four percent of credit balance debt)
+   + `INSTALLMENT_PROGRAM` - installment program (one-click purchase etc.)
+   + `PRINCIPAL` - principal
+   + `INTEREST` - interest
++ itemDueAmount (Amount, required) - installment item amount due
++ itemDatePaid: `2016-11-15` (string, optional) - date paid for the installment item (when the installment item was completely paid)
++ itemAmountPaid (Amount, optional) - amount paid for the installment item amount due
++ itemDetail (object, optional) - detail of `INSTALLMENT_PROGRAM` item
+   + `name`: `N·kup na spl·tky` (string, required) - item (installment program) description
+   + `idTransaction`: 1234567890 (number, required) - reference to related transaction
+   + `applicationId` (ApplicationId, optional) - reference to related application (if available)
+
+
+## InstallmentProgram (object)
+Purchase transormed into installments
+
+### Properties
++ `installmentProgramId`: `14456` (string, required) - installment program identificator
++ `createdDate`: `2016-11-15` (string, required) - installment program created date
++ `programType`: `PURCHASE_INSTALLMENT` (enum, required) - installment program type
+  + `PURCHASE_INSTALLMENT`
+  + `TENTH`
+  + `AUTOMATIC`
+  + `CASH_ON_CARD`
+  + `CONSOLIDATION`
++ `name` (string, optional) - installment program description
++ `amount` (Amount, required)  installment program total amount (purchase amount)
++ `completelyPaid`: `false` (boolean, required) - installment program "completely paid" flag
++ `annuity` (Amount, required) - installment amount
++ `numberOfInstallments`: 10 (number, required) - number of installments
++ `remainingInstallments`: 4 (number, required) - number of remaining (not completely paid) installments
++ `paidInstallments`: 6 (number, required) - number of completely paid installments
++ `paidTotal` (Amount, required) - sum of completely paid installments
++ `annualInterestRate`: 12.9 (number, required) - annual interest rate
++ `annualPercentageRate`: 18.3 (number, required) - annual percentage rate of charge (RPSN in Czech)
++ `overpayment` (Amount, optional) - amount of overpayment
++ `lastInstallmentDate`: `2018-11-20` (string, optional) - date of the last installment of installment calendar (may not be available when related contract is paid off)
++ `state`: `ACTIVE` (enum, required) - installment program state
+  + `ACTIVE`
+  + `CANCELLED`
+  + `INVALID`
+
+
+## ApplicationId (object)
++ `contractNumber`: `01-123456789` (string, required) - contract number
++ `applicationId`: `112334556` (string, required) - application identifier
+
+## PaymentItem (object)
++ `contractNumber`: `01-123456789` (string, required) - applications respective contract or a contract to be repaid as a whole
++ `applicationIds` (array[string], fixed-type, optional) - list of applications to be repaid
++ `revolvingItemType`: `MIN_INSTALLMENT` (enum, optional) - revolving item type
+    + `MIN_INSTALLMENT` - minimal installment amount
+    + `GRACE_PERIOD` - amount to pay to use a grace period
+    + `WHOLE_DEBT` - amount to repay a whole debt
+
+## PaymentRequest (object)
++ `items` (array[PaymentItem], fixed-type, required) - list of payment items to be repaid
++ `value` (Amount, optional) - amount of requested payment
++ `method`: `TRANSFER` (enum, required) - payment method
+    + `TRANSFER` - money transfer
+    + `CARD` - card payment
+    + `PLATBA24` - Ceska Sporitelna online payment
+    + `MOJE_PLATBA` - Komercni Banka online payment
+    + `EKONTO` - Raiffeisen online payment
+    + `SAZKA` - payment by Sazka
++ `redirectUrls` (MerchantUrls, optional) - Collection of URLs used for redirection of a customer back to an application, based on payment result. Only usefull for method=`CARD`
+
+
+## DomesticPaymentOrder (object)
++ `value` (Amount, required) - amount & currency of payment order
++ `partyAccount` (AccountNumber, required) - party account number
++ `dueDate`: `2018-01-22` (string, optional) - payment order due date
++ `payeeMessage`: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.` (string, optional) - message for payee
++ `payerMessage`: `Mauris mollis justo neque, ac iaculis erat lacinia vel.` (string, optional) - message for payer
++ `additionalInfo` (TransactionInfoDomestic, optional) - payment order additional info (symbols)
++ `sazkaCode`: `54764` (string, optional) - SAZKA code
+
+## DomesticPaymentOrderStatus (DomesticPaymentOrder)
++ `id` (string, required) - payment order ID
++ `status` (enum[string], required) - status of the payment
+    + `PREPARED` - payment order has been prepared
+    + `PAID` - payment has been received
+    + `CANCELLED` - cancelled payment order, TBD do we need this?
+
+## OnlinePaymentOrder (object)
++ `id` (string, required) - payment order ID
++ `gatewayRedirectUrl` (string, required) - gateway redirect URL. Redirect user to this URL to complete the online payment order.
+
+
+## MerchantUrls (object)
+Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint
+
+### Properties
++ `approvedRedirect`: `https://slip.hc.cz/payment/success` (string, required) - URL of the originating application (e.g. SLIP) used for redirection of the customer back to partner website (from HCO gateway) after application approval.
++ `rejectedRedirect`: `https://slip.hc.cz/payment/failure` (string, required) - URL of the originating application used for redirection of the customer back to partner website (from HCO gateway) after application rejection.
+
+
+## ChangeFinancingRequest (object)
+!!! Final Warning (30.10.): Will be deleted in next iteration
+
+### Properties
++ applicationIds: `123`,`456` (array[string], required) - Application identifiers to be re-financed
++ `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
++ financingType: `INSTALLMENT` (enum[string], required) - Requested financing type
+    + `INSTALLMENT` - Financing as installment program
+    + `REL_BALANCE` - Not supported yet
++ `settingsInstallment` (object, optional) - Settings for INSTALLMENT financing type. Fill in if calculation preceeded financing request.
+    + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
+    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
+    + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
+    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
+    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
+
+
+## MoneyTransferAvailability (object)
++ One Of
+    + `moneyTransferParameters`
+        + `limitFrom` (Amount, required) - Minimal available money transfer amount (possible overpayment taken into account)
+        + `limitTo` (Amount, required) - Maximal available money transfer amount (zero when money transfer unavailable)
+        + `overpayment` (Amount, optional) - Overpayment amount
+    + `unavailabilityReason`
+        + `reason`: `IN_RECOVERY` (enum, optional) - reason of possible unavailability of money transfer operation
+            + `IN_RECOVERY` - Customer in collection
+            + `NOT_SUFFICIENT_BALANCE` - Customer doesn't have sufficient balance
+            + `NO_VERIFIED_MOBILE` - Customer doesn't have verified mobile (PRIMARY mobile)
+            + `OTHER` - Unspecified reason (internal failure etc.)
+
+
+## MoneyTransfer (object)
++ `moneyTransfer` (object, required)
+    + `account` (AccountNumber, required) - Customer's account number
+    + `amount` (Amount, required) - Money transfer amount
+    + `variableSymbol`: 123456789 (number, optional) - Variable symbol of payment
+    + `specificSymbol`: 123456789 (number, optional) - Specific symbol of payment
+    + `constantSymbol`: 123456789 (number, optional) - Constant symbol of payment
+
+
+## MoneyTransferResponse (object)
++ One Of
+    + `otp` (object, required)
+        + `id`: 1323589 (number, required) - Authorization ID
+        + `key`: `fc1ec9ae87da7f97fdbbe7cc45f5e9cee0372fcd37bc25c94c0ed62ce27a436b` (string, required) - Authorization key
+    + `accountMoveId`: 1122334455 (number, required) - Money transfer relevant account move ID
+
+## Authorization (object)
++ blockedUntil: `2017-01-18T10:34:44+01:00` (string, optional) - requested operation is blocked until specified time
+
+
+## InstallmentProgramsCalculationsRequest (object)
++ `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations. If not provided, default productSet will be used.
++ `price` (Amount, required) - Payment value
++ `downPayment` (Amount, optional) - Down payment amount (default is 0, amount should be rounded to hundreds)
+
+
+## InstallmentProgramCalculationRequest (object)
++ `productCode`: `a122ax` (string, required) - Product code, this indicates previous calculation result
++ `price` (Amount, required) - Payment value
++ `downPayment` (Amount, optional) - Down payment amount (default is 0, amount should be rounded to hundreds)
+
+## InstallmentProgramsCalculations (object)
++ `calculations` (array[InstallmentProgramCalculation], fixed-type, required) - Array with installment programs calculations
+
+## InstallmentProgramCalculation (object)
++ `productCode`: `a122ax` (string, required) - Installment program product code
++ `type` (enum, optional) - Program type
+    + MINIMAL - Lowest installment
+    + FAVOURITE - Recommended (favourite) installment program
+    + OTHER - Other
++ `installment` (Amount, optional) - monthly installment amount
++ `numberOfInstallments`: 10 (number, optional) - installment count
++ `detail` (InstalmentProgramOfferDetail, optional)
+    Calculation detailed information.
+    Only available for calculations received by calling `POST /calculation`
+    Not available for `POST /calculations/`
+
+## InstalmentProgramOfferDetail (object)
++ `installmentDay`: 20 (number, optional) - Installment date (day in month)
++ `installmentFirstDate`: `2017-05-20` (string, optional) - Date of the first installment
++ `installmentLastDate`: `2018-03-20` (string, optional) - Date of the last installment
++ `annualInterestRate`: 0.17 (number, optional) - Annual interest rate
++ `predictedProvisionDate`: `2017-05-20` (string, optional) - Predicted provision date
++ `paidBack` (Amount, optional) - Total amount paid by customer
++ `rpsn`: 0.23 (number, optional) - RPSN
++ `legalline`: "UvedenÈ hodnoty jsou spoËÌt·ny k datu poskytnutÌ 18.1.2017, datu 1. spl·tky 20.1.2017 a se splatnostÌ vöech dalöÌch spl·tek k 20. dni v mÏsÌci poËÌtaje 20.1.2017. Nejedn· se o nabÌdku Ëi ve¯ejnou nabÌdku. PlatÌ p¯i splnÏnÌ podmÌnek Home Credit...." (string, optional) - Text interpretation of the offer
+
+## CredentialChangeRequest (object)
++ username: `memyself@mine.com` (string, required) - client's self care zone username
++ `type` (enum, required) - Type of credential change
+    + LOGIN - Login Change
+    + PWD - Password Change
++ `returnUri`: `https://www.partner.com/file?id=12345` (string, required)
+
+## CredentialChangeResponse (object)
++ `redirectUrl`: `https://myloan.homecredit.cz?applicationId=123` (string, required) - URL where the client should be redirected after successfull creation of application.
+
+## Logout (object)
+- tokenId: `0acbc85b-f0a1-4b22-acbf-053de458655f` (string, required) - ID of token used to logout
