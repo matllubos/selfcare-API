@@ -427,6 +427,30 @@ Use this resource to set a new password.
 # Group My profile
 Resources for accessing and modifying user personal data.
 
+## Customer login [/authentication/v1/login]
+
+### Login customer [POST]
+Use this resource to obtain the access token.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (CustomerLogin)
+
+
++ Response 200(application/json; charset=utf-8)
+
+    Access token issued.
+
+    + Attributes (CustomerLoginResult)
+
+
++ Response 400(application/json; charset=utf-8)
+
+    Unable to authenticate the customer.
+
+    + Attributes (Errors)
+
+
+
 ## Customer information [/my/profile]
 Customer profile information
 
@@ -1782,3 +1806,13 @@ Collection of URLs used for redirection of a customer back to a partner website 
 
 ## Logout (object)
 - tokenId: `0acbc85b-f0a1-4b22-acbf-053de458655f` (string, required) - ID of token used to logout
+
+## CustomerLogin (object)
+### Properties
++ `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
++ `password`: `secretpassword1234` (string, required) - Customer's password
+
+## CustomerLoginResult (object)
+### Properties
++ `accessToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Access token
++ `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
