@@ -748,30 +748,6 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
 + Response 200 (application/json;charset=UTF-8)
     + Attributes (object)
         + data (array[Document], fixed-type, required)
-ices dele
-## Insurances of contract [/my/contracts/{contractNumber}/insurances]
-Insurances provided on given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Insurances of given contract [GET]
-Get a list of insurances provided on given contract.
-
-feature | supported by resource
---- | ---
-[paging](#header-paging) | no
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | no
-
-+ Request  (application/json;charset=UTF-8)
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (object)
-        + data (array[Insurance], fixed-type, required)
-
 
 ## Money transfer [/my/contracts/{contractNumber}/moneyTransfer]
 Money transfer.
