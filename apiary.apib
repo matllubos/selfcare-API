@@ -442,27 +442,6 @@ Get information about logged-in user.
 
     + Attributes (Errors)
 
-### Update client information [PATCH]
-Update client information. JSON Merge patch syntax according to [RFC 7396](https://tools.ietf.org/html/rfc7396) should be used, which means that partial update is supported. Only some of the attributes can be changed (see list below). Some changes also needs to be authorized - OTP is sent to user via SMS and after getting the code from client, consumer should send the same request with authorization code in header `X-Authorization-Code`.
-
-#### Supported changes
-
-attribute name | must be authorized
---- | ---
-TBD            | yes
-
-+ Request (application/merge-patch+json;charset=UTF-8)
-Change user e-mail
-
-    + Body
-            {
-                "email": "john.doe@email.com"
-            }
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (Client, required)
-        + email: `john.doe@email.com` (string, required)
-
 ## Customer credential change [/my/profile/change]
 Customer credential change
 
