@@ -375,7 +375,7 @@ Exchange authorization code for access token
 
     + Attributes (TokenResponse)
 
-# My Data
+# Group My Data
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
 # Group Password management
@@ -501,34 +501,7 @@ Get details about one customer contract.
 
 + Response 404 (application/json;charset=UTF-8)
     + Attributes (Errors)
-
-
-## Contract financing [/my/contracts/{contractNumber}/financings]
- !!! Final Warning (30.10.): Will be deleted in next iteration Contract financing
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Change contract financing [POST]
- !!! Final Warning (30.10.): Will be deleted in next iteration
- Change financing to revolving loan. Only available for application types: `DEFERRED_PAYMENT`, `TRY_AND_PAY`.
-
-This will create a financing application to re-finance deferred payment applications.
-
-TODO:
-Jen pro odklady. Propadne na KNJ, ktere zavola createApplication na LoanIT s parametry
-- order - co orderItem, to jeden odklad
-- ostatni parametry dle JVB (callbackURLs!)
-- partner: KNJ
-
-+ Request Change financing of certain applications (application/json;charset=UTF-8)
-
-    + Attributes (ChangeFinancingRequest)
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (ApplicationResponse)
-
-
+anc
 ## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
 Transactions of given contract.
 
