@@ -501,7 +501,7 @@ Get details about one customer contract.
 
 + Response 404 (application/json;charset=UTF-8)
     + Attributes (Errors)
-anc
+    
 ## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
 Transactions of given contract.
 
@@ -718,30 +718,6 @@ Installments of given contract (installment schedule for CEL contract)
         + `first` - first installment
         + `previous` - installment preceding current installment (ie. installment with due date in previous month)
         + `current` - current installment (ie. installment with due date in current month)
-
-## Cards for contract [/my/contracts/{contractNumber}/cards]
-Cards issued on given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Cards for contract [GET]
-Get a list of cards issued on given contract
-
-feature | supported by resource
---- | ---
-[paging](#header-paging) | no
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | no
-
-+ Request  (application/json;charset=UTF-8)
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (object)
-        + data (array[Card], fixed-type, required)
-
 
 ## Documents for contract [/my/contracts/{contractNumber}/documents]
 Documents issued on given contract.
