@@ -378,6 +378,52 @@ Exchange authorization code for access token
 # My Data
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
+# Group Password management
+Resource group for managing user's password. These resources don't require user to be logged in.
+
+## Request password reset [/password/reset]
+Use this resource to request a password reset. If the request is successful, a verification token will be generated and send to user's e-mail address as part of the password reset link.
+
+### Request password reset [POST]
++ Request (application/json)
+    + Attributes (object)
+        + email (string) - User's e-mail address.
+    + Body
+    {
+        "email": "john.doe@yahoo.com",
+    }
+
++ Response 204
+    Password reset request successful.
+    + Body
+
++ Response 422 (application/json)
+    Password reset request was not successful.
+    + Attributes (Errors)
+    
+
+## Password set [/password]
+Use this resource to set a new password.
+
+### Password set [POST]
++ Request (application/json)
+    + Attributes (object)
+        + password (string) - New password.
+        + token (string) - Verification token.
+    + Body
+    {
+        "password": "f2FqYbmQZHXuPbdq",
+        "token": "a5d46273922540caa2432359367abc5c"
+    }
+
++ Response 204
+    Password set successful.
+    + Body
+
++ Response 422(application/json)
+    Password set was not successful.
+    + Attributes (Errors)
+
 # Group My profile
 Resources for accessing and modifying user personal data.
 
@@ -472,31 +518,6 @@ feature | supported by resource
 + Response 200 (application/json;charset=UTF-8)
     + Attributes (object)
         + data (array[Contract], fixed-type, required)
-
-### Create new contract [POST]
-Create new contract.
-
-TODO: Bude se vubec implementovat??
-
-scenar:
-ATL sesklada request na createApplication podle dat prihlaseneho klienta a posle to na LoanIT.
-Sesklada callback URL na samo sebe.
-Vstup take IDcko uzivatele v SLIP
-
-+ Request  (application/json;charset=UTF-8)
-
-    + Body
-
-+ Response 200 (application/json;charset=UTF-8)
-Application was successfully created.
-
-    + Attributes (ApplicationResponse)
-
-+ Response 400 (application/json;charset=UTF-8)
-Error processing request - bad syntax.
-
-    + Attributes (Errors)
-
 
 ## Customer contract detail [/my/contracts/{contractNumber}]
 Specific customer contract.
@@ -764,150 +785,6 @@ Installments of given contract (installment schedule for CEL contract)
         + `first` - first installment
         + `previous` - installment preceding current installment (ie. installment with due date in previous month)
         + `current` - current installment (ie. installment with due date in current month)
-
-### Installments of contract [GET]
-Get list of available REL contract's installments or the whole installment schedule for CEL contract.
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | yes
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | no
-
-#### Paging
-This resource supports [paging](#header-paging). The attribute `installmentNumber` will be used as the value for `before` or `after` parameter.
-
-+ Request Get list of installments
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (object)
-        + data (array[Installment], fixed-type, required)
-        + pagingInfo (PagingInfo, fixed-type, optional)
-
-+ Request Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-+ Response 404 (application/json;charset=UTF-8)
-    + Attributes (Errors)
-
-
-## Current calculated installment [/my/contracts/{contractNumber}/installments/current]
-Current calculated installment of given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Current installment for contract [GET]
-Get current installment of given contract
-
-+ Request Get current installment
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (Installment)
-
-+ Request Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-+ Response 404 (application/json;charset=UTF-8)
-    + Attributes (Errors)
-
-
-## Installment Programs [/my/contracts/{contractNumber}/installmentPrograms]
-Installment programs of given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Installment Programs of contract [GET]
-Get all installment programs of given REL contract
-
-
-feature | supported by resource
---- | ---
-[paging](#header-paging) | yes
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | no
-
-#### Paging
-This resource supports [paging](#header-paging). The attribute `createdDate` will be used as the value for `before` or `after` parameter.
-
-
-+ Request Get list of installment programs
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (object)
-        + data (array[InstallmentProgram], fixed-type, required)
-        + pagingInfo (PagingInfo, fixed-type, optional)
-
-+ Request Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-+ Response 404 (application/json;charset=UTF-8)
-    + Attributes (Errors)
-
-
-## Installment Program details [/my/contracts/{contractNumber}/installmentPrograms/{installmentProgramId}]
-Specific installment program of given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + installmentProgramId: `14456` (string, required) - ID of installment program
-
-### Installment Program detail [GET]
-Get details of specific installment program
-
-+ Request Existing contract
-    + Parameters
-        + contractNumber: `22134`
-        + installmentProgramId: `14456` (string, required) - ID of installment program
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (InstallmentProgram)
-
-+ Request Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-        + installmentProgramId: `14456` (string, required) - ID of installment program
-
-+ Response 404 (application/json;charset=UTF-8)
-    + Attributes (Errors)
-
-
-## Installment Program installmets [/my/contracts/{contractNumber}/installmentPrograms/{installmentProgramId}/installments]
-Installment schedule of specific installment program of given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + installmentProgramId: `14456` (string, required) - ID of installment program
-
-### Installment Program installments [GET]
-Get installment schedule of specific installment program
-
-+ Request Existing contract
-    + Parameters
-        + contractNumber: `22134`
-        + installmentProgramId: `14456` (string, required) - ID of installment program
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (object)
-        + data (array[Installment], fixed-type, required)
-
-+ Request Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-+ Response 404 (application/json;charset=UTF-8)
-    + Attributes (Errors)
-
 
 ## Cards for contract [/my/contracts/{contractNumber}/cards]
 Cards issued on given contract.
