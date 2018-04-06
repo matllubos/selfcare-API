@@ -749,53 +749,6 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
-## Money transfer [/my/contracts/{contractNumber}/moneyTransfer]
-Money transfer.
-
-It is possible to call this resource in 2 ways: A) Unauthorized mode (when you request OTP generation), B) Authorized mode (when you reuest OTP verification).
-
-| Unauthorized mode                                       | Authorized mode                                 |
-| ---                                                     | ---                                             |
-| Header doesn't contain any special attribute            | Header contains X-OTP-Id, X-OTP-Key, X-OTP-Code |
-| Returns 403 - Forbidden when OTP successfully generated | Returns 200 - OK when successfully verified     |
-
-Possible error codes explanation:
-| Error status code | Code         | Explanation                                                                                                     |
-| --- | ---                        | ---                                                                                                             |
-| 422 | EXPLOITED_MAX_SMS_SENT     | Number of available SMS for time unit exceeded                                                                  |
-| 422 | REPEATED_REQUEST_TOO_EARLY | Repeated request violated security time span                                                                    |
-| 422 | NOT_ALLOWED                | Not allowed (other reason) - optionaly extended for authorization attribute `blockedUntil`                      |
-| 422 | CUID_NOT_FOUND             | Unknown customer                                                                                                |
-| 422 | NO_VERIF_MOBILE            | Customer has not verified mobile                                                                                |
-| 422 | NOT_AUTHORIZED             | Incorrect OTP code                                                                                              |
-| 422 | NOT_AUTHORIZED_BLOCKED     | Limit of attempts for OTP verification exceeded - optionaly extended for authorization attribute `blockedUntil` |
-| 422 | SMS_CODE_EXPIRED           | Validity of OTP code expired                                                                                    |
-| 422 | INVALID_ACCOUNT_NUMBER     | Invalid account number                                                                                          |
-| 500 | FAILURE                    | Internal failure                                                                                                |
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Money transfer [POST]
-Create money transfer within given contract
-
-+ Request (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `01-3700227718`
-    + Attributes (MoneyTransfer)
-
-+ Response 200 (application/json;charset=UTF-8)
-   + Attributes (MoneyTransferResponse)
-
-+ Request Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-+ Response 404 (application/json;charset=UTF-8)
-    + Attributes (Errors)
-      + authorization (Authorization, optional)
-
-
 ## Create application [/my/applications]
 If the request was recognized as duplication, HTTP status code 200 and the *application* object created during the first related successful request is received.
 
