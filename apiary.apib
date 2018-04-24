@@ -397,10 +397,16 @@ Use this resource to request a password reset. If the request is successful, a v
     Password reset request successful.
     + Body
 
++ Response 400 (application/json)
+    Invalid input data.
+    + Attributes (Errors)
+    
 + Response 422 (application/json)
     Password reset request was not successful. Following errors codes are possible:
     * CUSTOMER_DOES_NOT_EXIST
     + Attributes (Errors)
+    
+
     
 
 ## Password set [/password]
