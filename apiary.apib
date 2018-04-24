@@ -379,15 +379,15 @@ Exchange authorization code for access token
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
 # Group Password management
-Resource group for managing user's password. These resources don't require user to be logged in.
+Resource group for managing customer's password. These resources don't require customer to be logged in.
 
 ## Request password reset [/password/reset]
-Use this resource to request a password reset. If the request is successful, a verification token will be generated and send to user's e-mail address as part of the password reset link.
+Use this resource to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link.
 
 ### Request password reset [POST]
 + Request (application/json)
     + Attributes (object)
-        + email (string) - User's e-mail address.
+        + email (string) - Customer's e-mail address.
     + Body
     {
         "email": "john.doe@yahoo.com",
@@ -403,7 +403,9 @@ Use this resource to request a password reset. If the request is successful, a v
     
 
 ## Password set [/password]
-Use this resource to set a new password.
+Use this resource to set a new password for:
+* new customer (registration)
+* existing customer (forgotten password)
 
 ### Password set [POST]
 + Request (application/json)
@@ -427,7 +429,7 @@ Use this resource to set a new password.
 # Group My profile
 Resources for accessing and modifying user personal data.
 
-## Customer login [/authentication/v1/login]
+## Customer login [/my/profile/login]
 
 ### Login customer [POST]
 Use this resource to obtain the access token.
@@ -466,23 +468,44 @@ Get information about logged-in user.
 
     + Attributes (Errors)
     
+## Change password [/my/profile/password]
+Use this resource to change password of logged-in customer.
+
+### Change password [POST]
++ Request (application/json)
+    + Attributes (object)
+        + currentPassword (string) - Customer's current password.
+        + newPassword (string) - New password.
+    + Body
+    {
+        "currentPassword": "f2FqYbmQZHXuPbdq",
+        "newPassword": "xt3hP58vouL61H40"
+    }
+
++ Response 204
+    Password change successful.
+    + Body
+
++ Response 422(application/json)
+    Password change was not successful.
+    + Attributes (Errors)
+    
 ## Customer logout [/my/profile/logout]  
 Customer logout
   
 ### Invalidate existing token [POST]           
-Invalidate existing token, which in effect log outs the user.
-**This resource should not be exposed to untrusted consumer and its consumption needs to be secured by OAuth2 tokens.** 
+Invalidate existing token, which in effect log outs the customer.
 
 + Request Logout (application/json;charset=UTF-8)
-    + Attributes (Logout)
 
 + Response 204 (application/json;charset=UTF-8)
 Logout successful
     + Body
 
 + Response 422
-Credentials incorrect
+Customer is not logged in
     + Attributes (Errors)
+    
 # Group My contracts
 Set of resources to access and modify client's contracts.
 
@@ -1803,9 +1826,6 @@ Collection of URLs used for redirection of a customer back to a partner website 
 
 ## CredentialChangeResponse (object)
 + `redirectUrl`: `https://myloan.homecredit.cz?applicationId=123` (string, required) - URL where the client should be redirected after successfull creation of application.
-
-## Logout (object)
-- tokenId: `0acbc85b-f0a1-4b22-acbf-053de458655f` (string, required) - ID of token used to logout
 
 ## CustomerLogin (object)
 ### Properties
