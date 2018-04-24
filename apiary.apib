@@ -395,10 +395,11 @@ Use this resource to request a password reset. If the request is successful, a v
 
 + Response 204
     Password reset request successful.
-    + Body
+    + Bodyes
 
 + Response 422 (application/json)
-    Password reset request was not successful.
+    Password reset request was not successful. Following errors codes are possible:
+    * CUSTOMER_DOES_NOT_EXIST
     + Attributes (Errors)
     
 
