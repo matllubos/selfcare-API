@@ -378,10 +378,89 @@ Exchange authorization code for access token
 # Group My Data
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
-# Group Password management
-Resource group for managing customer's password. These resources don't require customer to be logged in.
+# Group Account management
+Resource group for managing customer's account.
 
-## Request password reset [/password/reset]
+## Customer login [/account/login]
+Use this resource to obtain the access token.
+
+### Login customer [POST]
++ Request (application/json; charset=utf-8)
+    + Attributes (CustomerLogin)
+
++ Response 200(application/json; charset=utf-8)
+    Access token issued.
+    + Attributes (CustomerLoginResult)
+
++ Response 400(application/json; charset=utf-8)
+    Unable to authenticate the customer.
+    + Attributes (Errors)
+
+## Customer logout [/account/logout]  
+Use this resource to invalidate existing token, which in effect logs out the customer.
+
+### Invalidate existing token [POST]           
++ Request (application/json;charset=UTF-8)
+
++ Response 204 (application/json;charset=UTF-8)
+    Logout successful.
+    + Body
+
++ Response 422 (application/json; charset=utf-8)
+    Customer is not logged in.
+    + Attributes (Errors)
+
+## Change password [/my/profile/password]
+Use this resource to change password of a logged-in customer.
+
+### Change password [POST]
++ Request (application/json)
+    + Attributes (object)
+        + currentPassword (string) - Customer's current password.
+        + newPassword (string) - New password.
+    + Body
+    {
+        "currentPassword": "f2FqYbmQZHXuPbdq",
+        "newPassword": "xt3hP58vouL61H40"
+    }
+
++ Response 204
+    Password change successful.
+    + Body
+
++ Response 422(application/json)
+    Password change was not successful. Following errors codes are possible:
+    * CURRENT_PASSWORD_WRONG
+    * NEW_PASSWORD_TOO_WEAK
+    + Attributes (Errors)
+
+## Password set [account/password/set]
+Use this resource to set a new password for:
+* new customer (registration)
+* existing customer (forgotten password)
+
+### Password set [POST]
++ Request (application/json)
+    + Attributes (object)
+        + password (string) - New password.
+        + token (string) - Verification token.
+    + Body
+    {
+        "password": "f2FqYbmQZHXuPbdq",
+        "token": "a5d46273922540caa2432359367abc5c"
+    }
+
++ Response 204
+    Password set successful. Following errors codes are possible:
+    * NEW_PASSWORD_TOO_WEAK
+    * VERIFICATION_TOKEN_INVALID
+    + Body
+
++ Response 422(application/json)
+    Password set was not successful.
+    + Attributes (Errors)
+    
+## Request password reset [account/password/reset]
 Use this resource to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link.
 
 ### Request password reset [POST]
@@ -405,58 +484,37 @@ Use this resource to request a password reset. If the request is successful, a v
     Password reset request was not successful. Following errors codes are possible:
     * CUSTOMER_DOES_NOT_EXIST
     + Attributes (Errors)
-    
 
-    
+## Forgotten e-mail [/account/forgottenEmail]
+Use this resource to remind the customer his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
 
-## Password set [/password]
-Use this resource to set a new password for:
-* new customer (registration)
-* existing customer (forgotten password)
-
-### Password set [POST]
+### Send e-mail address via SMS [POST]
 + Request (application/json)
     + Attributes (object)
-        + password (string) - New password.
-        + token (string) - Verification token.
+        + phone (string) - Customer's phone in international format.
     + Body
     {
-        "password": "f2FqYbmQZHXuPbdq",
-        "token": "a5d46273922540caa2432359367abc5c"
+        "phone": "+420607123456",
     }
 
 + Response 204
-    Password set successful.
+    SMS with e-mail address sent successfully.
     + Body
 
-+ Response 422(application/json)
-    Password set was not successful.
++ Response 400 (application/json)
+    Invalid input data.
     + Attributes (Errors)
+    
++ Response 422 (application/json)
+    SMS with e-mail address was not sent. Following errors codes are possible:
+    * CUSTOMER_DOES_NOT_EXIST
+    + Attributes (Errors)
+
 
 # Group My profile
 Resources for accessing and modifying user personal data.
 
-## Customer login [/my/profile/login]
 
-### Login customer [POST]
-Use this resource to obtain the access token.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (CustomerLogin)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-    Access token issued.
-
-    + Attributes (CustomerLoginResult)
-
-
-+ Response 400(application/json; charset=utf-8)
-
-    Unable to authenticate the customer.
-
-    + Attributes (Errors)
 
 
 
@@ -475,43 +533,7 @@ Get information about logged-in user.
 
     + Attributes (Errors)
     
-## Change password [/my/profile/password]
-Use this resource to change password of logged-in customer.
 
-### Change password [POST]
-+ Request (application/json)
-    + Attributes (object)
-        + currentPassword (string) - Customer's current password.
-        + newPassword (string) - New password.
-    + Body
-    {
-        "currentPassword": "f2FqYbmQZHXuPbdq",
-        "newPassword": "xt3hP58vouL61H40"
-    }
-
-+ Response 204
-    Password change successful.
-    + Body
-
-+ Response 422(application/json)
-    Password change was not successful.
-    + Attributes (Errors)
-    
-## Customer logout [/my/profile/logout]  
-Customer logout
-  
-### Invalidate existing token [POST]           
-Invalidate existing token, which in effect log outs the customer.
-
-+ Request Logout (application/json;charset=UTF-8)
-
-+ Response 204 (application/json;charset=UTF-8)
-Logout successful
-    + Body
-
-+ Response 422
-Customer is not logged in
-    + Attributes (Errors)
     
 # Group My contracts
 Set of resources to access and modify client's contracts.
