@@ -410,10 +410,11 @@ Use this resource to invalidate existing token, which in effect logs out the cus
     Customer is not logged in.
     + Attributes (Errors)
 
-## Change password [/my/profile/password]
-Use this resource to change password of a logged-in customer.
+## Password management [/my/profile/password]
+Use this resource to manage customer's password.
 
 ### Change password [POST]
+Use this endpoint to change password of a logged-in customer.
 + Request (application/json)
     + Attributes (object)
         + currentPassword (string) - Customer's current password.
@@ -435,11 +436,11 @@ Use this resource to change password of a logged-in customer.
     + Attributes (Errors)
 
 ## Password set [account/password/set]
-Use this resource to set a new password for:
-* new customer (registration)
-* existing customer (forgotten password)
 
 ### Password set [POST]
+Use this endpoint to set a new password for:
+* new customer (registration)
+* existing customer (forgotten password)
 + Request (application/json)
     + Attributes (object)
         + password (string) - New password.
@@ -461,9 +462,10 @@ Use this resource to set a new password for:
     + Attributes (Errors)
     
 ## Request password reset [account/password/reset]
-Use this resource to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link.
 
 ### Request password reset [POST]
+Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link.
+
 + Request (application/json)
     + Attributes (object)
         + email (string) - Customer's e-mail address.
