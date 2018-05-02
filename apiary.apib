@@ -452,13 +452,13 @@ Use this endpoint to set a new password for:
     }
 
 + Response 204
-    Password set successful. Following errors codes are possible:
-    * NEW_PASSWORD_TOO_WEAK
-    * VERIFICATION_TOKEN_INVALID
+    Password set successful. 
     + Body
 
 + Response 422(application/json)
-    Password set was not successful.
+    Password set was not successful. Following errors codes are possible:
+    * NEW_PASSWORD_TOO_WEAK
+    * VERIFICATION_TOKEN_INVALIDF
     + Attributes (Errors)
     
 ## Request password reset [account/password/reset]
