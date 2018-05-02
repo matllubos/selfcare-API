@@ -410,8 +410,7 @@ Use this resource to invalidate existing token, which in effect logs out the cus
     Customer is not logged in.
     + Attributes (Errors)
 
-## Change password [/my/profile/password]
-Use this resource to manage customer's password.
+## Change password [/account/password]
 
 ### Change password [POST]
 Use this endpoint to change password of a logged-in customer.
@@ -430,9 +429,7 @@ Use this endpoint to change password of a logged-in customer.
     + Body
 
 + Response 422(application/json)
-    Password change was not successful. Following errors codes are possible:
-    * CURRENT_PASSWORD_WRONG
-    * NEW_PASSWORD_TOO_WEAK
+    Password change was not successful.
     + Attributes (Errors)
 
 ## Password set [/account/password/set]
