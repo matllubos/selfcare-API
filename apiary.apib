@@ -435,7 +435,7 @@ Use this endpoint to change password of a logged-in customer.
     * NEW_PASSWORD_TOO_WEAK
     + Attributes (Errors)
 
-## Password set [account/password/set]
+## Password set [/account/password/set]
 
 ### Password set [POST]
 Use this endpoint to set a new password for:
@@ -478,10 +478,10 @@ Use this endpoint to request a password reset. If the request is successful, a v
     Password reset request successful.
     + Body
     
-+ Response 422 (application/json)
-    Password reset request was not successful. Following errors codes are possible:
-    * CUSTOMER_DOES_NOT_EXIST
++ Response 404(application/json)
+    Customer was not found.
     + Attributes (Errors)
+
 
 ## Forgotten e-mail [/account/forgottenEmail]
 Use this resource to remind the customer his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
