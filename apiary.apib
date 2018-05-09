@@ -459,7 +459,7 @@ Use this endpoint to set a new password for:
 ## Request password reset [/account/password/reset]
 
 ### Request password reset [POST]
-Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link.
+Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link. For security reasons, the response will not contain information if the e-mail was actually sent.
 
 + Request (application/json)
     + Attributes (object)
@@ -475,10 +475,6 @@ Use this endpoint to request a password reset. If the request is successful, a v
     
 + Response 422(application/json)
     Invalid input data.
-    + Attributes (Errors)
-    
-+ Response 404(application/json)
-    Customer was not found.
     + Attributes (Errors)
 
 
