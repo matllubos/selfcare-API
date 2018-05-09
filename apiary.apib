@@ -506,7 +506,7 @@ Use this resource to remind the customer his e-mail address (which is needed for
 ## Resend registration e-mail [/account/resendRegistrationEmail]
 
 ### Resend registration e-mail [POST]
-Use this resource to resend registration e-mail to the customer. E-mail can be resent only in case it was already sent.
+Use this resource to resend registration e-mail to the customer. E-mail can be resent only in case it was already sent. For security reasons, the response will not contain information if the e-mail was actually sent.
 + Request (application/json)
     + Attributes (object)
         + email (string) - Customer's e-mail address.
@@ -516,11 +516,11 @@ Use this resource to resend registration e-mail to the customer. E-mail can be r
     }
 
 + Response 204
-    Registration e-mail was resent.
+    Registration e-mail was requested to be resent.
     + Body
     
 + Response 422 (application/json)
-    Registration e-mail was not sent.
+    Invalid input data.
     + Attributes (Errors)
 
 
