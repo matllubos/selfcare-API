@@ -73,7 +73,7 @@ Multiple filters can be specified on each request, separated by semi-colon. They
 GET /general/partners?filter=category|in|1,5,10
 ```
 
-- get a list of contracts with contractDate in (2016-02-10, 2016-04-28>
+- get a list of contracts with contractDate in greater than 2016-02-10 and lower or equal to 2016-04-28
 ```
 GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-04-28
 ```
@@ -140,7 +140,7 @@ We use following status codes throughout the API, except for OAuth flow when res
 - 503 `Service Unavailable` - there is planned service outage (TODO: should specify response headers with more details on service outage)
 
 ## Error handling
-Besides HTTP status codes, which are the main indication if something goes wrong, we also use `errors` object to report more details about errors.
+Besides HTTP status codes, which are the main indication if something goes wrong, we also use `errors` object to report more details about the errors.
 
 Errors object example:
 ```javascript
@@ -170,13 +170,13 @@ Errors object example:
 ```
 
 Error object attributes
-| attribute name | description |
-| --- | --- |
-| code | unique error code |
-| message | human readable error description (non-localized) |
-| severity | error severity (see below) |
-| attribute | json path of request attribute that caused the error (optional) |
-| ticketId | internal ticket ID, used for error backtracking |
+| attribute name | description                                                     |
+| ---            | ---                                                             |
+| code           | unique error code                                               |
+| message        | human readable error description (non-localized)                |
+| severity       | error severity (see below)                                      |
+| attribute      | json path of request attribute that caused the error (optional) |
+| ticketId       | internal ticket ID, used for error backtracking                 |
 
 There are 3 levels of error severity:
 
@@ -258,7 +258,7 @@ This should be used for applications that have a place to securely store applica
 
     > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
 
-3. User have to log-in using his credentials and approve your application's access
+3. User has to log in using his credentials and approve your application's access.
 
 4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `code`. This redirect should be handled by your application, in order to exchange code for valid access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
 
@@ -270,11 +270,11 @@ This should be used for applications that have a place to securely store applica
 
 5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
     
-5. Access API [token resource](#security-exchange-code-for-token-post) and exchange `code` for access token. You will also receive refresh token; you can use it to get new access token when access token validity expires.
+6. Access [token resource](#security-exchange-code-for-token-post) API and exchange `code` for access token. You will also receive refresh token; you can use it to get new access token when access token validity expires.
 
-6. You receive `access token` that has limited lifespan (usually to 20 min or so), along with `refresh token`. Refresh token can later be used to exchange for new access token, when old one expires.
+7. You receive `access token` that has limited lifespan (usually approximately 20 minutes), along with `refresh token`. Refresh token can later be used to exchange for new access token when the&nbsp;old one expires.
 
-7. Use retireved `access token` to access protected resources by specifying it in header `Authorization`, together with its type, e.g.:
+8. Use the retrieved `access token` to access protected resources by specifying it in `Authorization` header, together with its type, e.g.:
 
     ```
     curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
@@ -288,28 +288,28 @@ This should be used for applications that have a place to securely store applica
 
 2. Your application redirects user to OpenAPI login page
 
-3. User provides its credentials (user + password, possibly combined with another factor like SMS code etc)
+3. User provides its credentials (username and password, possibly combined with other data, like SMS code etc)
 
-4. User sees a page, that displays details about your application and rights it requested.
+4. User sees a page that displays details about your application and rights it requested.
 
 5. User authorizes your application's access and he can start using your application.
 
 
 
 ### Implicit grant flow
-This should be used for applications that runs solely on client (e.g. single page JavaScript applications). Refresh token is NOT supported in this flow.
+This should be used for applications that run solely on client (e.g. single page JavaScript applications). Refresh token is NOT supported in this flow.
 
 
 #### Developers perspective
 
 1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` value.
 
-2. When you wish to access protected resource for the first time, redirect user to `login page` with parameters:
+2. When you wish to access protected resource for the first time, redirect user to `login page` with the following parameters:
     + `client_id` - client ID parameter you received from previous step
     + `response_type` - value `token` to indicate implicit grant flow
     + `state` - random value that will be returned to you
     + `scope` - specify value needed for accessed API services, e.g. `customer`
-    + `redirect_uri` - optional. If your application has registered multiple redirect uris, you can choose by specifying one of them.
+    + `redirect_uri` - optional. If your application has registered multiple redirect URIs, you can choose by specifying one of them.
 
     *Example login request:*
 
@@ -319,7 +319,7 @@ This should be used for applications that runs solely on client (e.g. single pag
 
     > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
 
-3. User have to log-in using his credentials 
+3. User has to log in using his credentials 
 
 4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `token` in URI fragment. This redirect should be handled by your application, in order to extract access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
 
@@ -331,23 +331,23 @@ This should be used for applications that runs solely on client (e.g. single pag
 
 5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
     
-6. You receive `access token` of type `Bearer` that has limited lifespan (usually to 20 min or so); refresh token is NOT supported.
+6. You receive an `access token` of type `Bearer` that has limited lifespan (usually approximately 20 minutes); refresh token is NOT supported.
 
-7. Use retireved `access token` to access protected resources by specifying it in header `Authorization`, together with its type, e.g.:
+7. Use the retrieved `access token` to access protected resources by specifying it in `Authorization` header, together with its type, e.g.:
 
     ```
     curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
     ```
 
-> Note: above is the happy-day scenario. Error responses are described in [OAuth2 RFC](https://tools.ietf.org/html/rfc6749#section-4.2).
+> Note: The procedure described above is an "everything went well" scenario. Error responses are described in [OAuth2 RFC](https://tools.ietf.org/html/rfc6749#section-4.2).
 
 #### User perspective
 
-1. User runs your application for the first time
+1. User runs your application for the first time.
 
-2. Your application redirects user to OpenAPI login page
+2. Your application redirects user to OpenAPI login page.
 
-3. User provides its credentials (user + password, possibly combined with another factor like SMS code etc)
+3. User provides his credentials (username and password, possibly combined with other data, like SMS code etc).
 
 4. User is redirected back to your application.
 
@@ -355,12 +355,12 @@ This should be used for applications that runs solely on client (e.g. single pag
 
 
 ### OAuth2 resources
-| resource | enviroment | address |
-| --- | --- | --- |
-| login page | testing environment | https://TBD |
-| login page | production | https://TBD |
+| resource       | enviroment          | address                   |
+| ---            | ---                 | ---                       |
+| login page     | testing environment | https://TBD               |
+| login page     | production          | https://TBD               |
 | token resource | testing environment | /customer/hc-oauth2/token |
-| token resource | production | /customer/hc-oauth2/token |
+| token resource | production          | /customer/hc-oauth2/token |
 
 
 ## Exchange code for token [POST /customer/hc-oauth2/token]
@@ -416,19 +416,16 @@ Use this resource to invalidate existing token, which in effect logs out the cus
 Use this endpoint to change password of a logged-in customer.
 + Request (application/json)
     + Attributes (object)
-        + currentPassword (string) - Customer's current password.
-        + newPassword (string) - New password.
-    + Body
-    {
-        "currentPassword": "f2FqYbmQZHXuPbdq",
-        "newPassword": "xt3hP58vouL61H40"
-    }
+        + currentPassword: `f2FqYbmQZHXuPbdq` (string) - Customer's current password.
+        + newPassword: `xt3hP58vouL61H40` (string) - New password.
+
 
 + Response 204
     Password change successful.
     + Body
 
-+ Response 422(application/json)
+
++ Response 422 (application/json)
     Password change was not successful.
     + Attributes (Errors)
 
@@ -440,13 +437,8 @@ Use this endpoint to set a new password for:
 * existing customer (forgotten password)
 + Request (application/json)
     + Attributes (object)
-        + password (string) - New password.
-        + token (string) - Verification token.
-    + Body
-    {
-        "password": "f2FqYbmQZHXuPbdq",
-        "token": "a5d46273922540caa2432359367abc5c"
-    }
+        + password: `f2FqYbmQZHXuPbdq` (string) - New password.
+        + token: `a5d46273922540caa2432359367abc5c` (string) - Verification token.
 
 + Response 204
     Password set successful. 
@@ -459,15 +451,16 @@ Use this endpoint to set a new password for:
 ## Request password reset [/account/password/reset]
 
 ### Request password reset [POST]
-Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link. For security reasons, the response will not contain information if the e-mail was actually sent.
+Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as a part of the password reset link. For security reasons, the response will not contain any information if the e-mail was actually sent.
 
 + Request (application/json)
     + Attributes (object)
         + email (string) - Customer's e-mail address.
     + Body
-    {
-        "email": "john.doe@yahoo.com",
-    }
+    
+            {
+                "email": "john.doe@yahoo.com",
+            }
 
 + Response 204
     Password reset request successful.
@@ -479,16 +472,13 @@ Use this endpoint to request a password reset. If the request is successful, a v
 
 
 ## Forgotten e-mail [/account/forgottenEmail]
-Use this resource to remind the customer his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
+Use this resource to remind the customer of his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
 
 ### Send e-mail address via SMS [POST]
 + Request (application/json)
     + Attributes (object)
-        + phone (string) - Customer's phone in international format.
-    + Body
-    {
-        "phone": "+420607123456",
-    }
+        + phone: `+420607123456` (string) - Customer's phone in international format.
+
 
 + Response 204
     SMS with e-mail address sent successfully.
@@ -506,14 +496,10 @@ Use this resource to remind the customer his e-mail address (which is needed for
 ## Resend registration e-mail [/account/resendRegistrationEmail]
 
 ### Resend registration e-mail [POST]
-Use this resource to resend registration e-mail to the customer. E-mail can be resent only in case it was already sent. For security reasons, the response will not contain information if the e-mail was actually sent.
+Use this resource to resend a registration e-mail to the customer. E-mail can be resent only in case it was already sent. For security reasons, the response will not contain any information if the e-mail was actually sent.
 + Request (application/json)
     + Attributes (object)
-        + email (string) - Customer's e-mail address.
-    + Body
-    {
-        "email": "john.doe@yahoo.com",
-    }
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
 
 + Response 204
     Registration e-mail was requested to be resent.
@@ -702,11 +688,12 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
 
 + Request Non-existing contract
     + Parameters
-        + contractNumber: `this_is_no_contract`
+        + contractNumber: `this_is_no_contract`  (string)
 
-+ Response Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
++ Response 404 
+    Non-existing contract
+    + Attributes
+        + contractNumber: `this_is_no_contract` (string)
 
 <!-- may be only warning for particular application and correct response for the others
 + Request Bad data for application type resolution
@@ -761,7 +748,7 @@ Get details of one application.
 
 + Response 422 (application/json;charset=UTF-8)
     Some attributes cannot be assigned.
-        + Attributes (Errors)
+    + Attributes (Errors)
 
 ### Cancel application [DELETE]
 Cancel application processing.
@@ -838,10 +825,10 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
 If the request was recognized as duplication, HTTP status code 200 and the *application* object created during the first related successful request is received.
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                     |
+| ---         | ---                   | ---                         |
+| 400         | INVALID_REQUEST       | *Various messages possible* |
+| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 
 ### Create application [POST]
@@ -880,7 +867,7 @@ Get a list of all prepared payment orders.
 ### Request new payment [POST]
 Prepare payment order data for specified repayments. TODO: add payment method.
 
-+ Request  (application/json;charset=UTF-8)
++ Request TRANSFER/SAZKA (application/json;charset=UTF-8)
     + Attributes (PaymentRequest)
 
 + Response 200(application/json; charset=utf-8)
@@ -889,7 +876,9 @@ Prepare payment order data for specified repayments. TODO: add payment method.
 
     + Attributes (DomesticPaymentOrder)
 
-
++ Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json;charset=UTF-8)
+    + Attributes (PaymentRequest)
+    
 + Response 200(application/json; charset=utf-8)
 
         Payment order method CARD/PLATBA24/MOJE_PLATBA/EKONTO was prepared and can be paid.
@@ -928,10 +917,10 @@ Get prioritized list of possible installments that are available for repayment. 
 Client may pay his deffered payments by revolving loan, either by installment program or by drawing from balance. This resource provide information about possibility to use this payment method.
 
 Possible error codes:
-| Status code | Code | Message |
-| --- | ---                   | ---                         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                     |
+| ---         | ---                   | ---                         |
+| 400         | INVALID_REQUEST       | *Various messages possible* |
+| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 ### Revolving payment availability [POST]
 Check the availability to pay given Applications by revolving loan.
@@ -966,10 +955,10 @@ If the request was successfully processed, HTTP status code 200 and array of obj
   - Number of installments
 
 In other cases, following errors are received:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                     |
+| ---         | ---                   | ---                         |
+| 400         | INVALID_REQUEST       | *Various messages possible* |
+| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 
 ### Calculate installment programs [POST]
@@ -1003,10 +992,10 @@ If the request was successfully processed, HTTP status code 200 and object of in
 - Installment program details
 
 In other cases, one of the following errors is received:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                     |
+| ---         | ---                   | ---                         |
+| 400         | INVALID_REQUEST       | *Various messages possible* |
+| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 
 ### Calculate installment program detail [POST]
@@ -1161,7 +1150,7 @@ Financial amount with VAT rate.
 + phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
 + emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
 + username: `memyself@mine.com` (string, required) - client's self care zone username
-+ identityDocuments: (array[IdentityDocument], fixed-type, optional) - client identity documents
++ identityDocuments (array[IdentityDocument], fixed-type, optional) - client identity documents
 
 
 ## Contract (object)
@@ -1428,10 +1417,10 @@ Financing application.
     + `blockedOnContractNumber`: `01-6010027378` (string, optional) - contract when application is prepared to be paid from RU balance after dueDateClient
     + `paidFromContractNumber`: `01-6010027378` (string, optional) - contract when application was paid by revolving loan
     + `completelyPaid`: `true` (boolean, optional) - information if this application is completely paid and there is no expected payment from client
-    + `paymentAvailability`: (PaymentAvailability, optional) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
-    + `revolvingPaymentInfo`: (object, optional) - information about revolving loan payment method (installments or balance)
-        + `availability`: (RevolvingPaymentAvailability, optional) - information about possibility to pay application by revolving loan
-        + `application`: (ApplicationBase, optional) - information about revolving payment application (Homer application)
+    + `paymentAvailability` (PaymentAvailability, optional) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
+    + `revolvingPaymentInfo` (object, optional) - information about revolving loan payment method (installments or balance)
+        + `availability` (RevolvingPaymentAvailability, optional) - information about possibility to pay application by revolving loan
+        + `application` (ApplicationBase, optional) - information about revolving payment application (Homer application)
 + `installmentAdditionalInfo` (object, optional) - additional application information for INSTALLMENT application type
     + `financedAmount` (Amount, required) - amount really financed by HC (price minus downPayment)
     + `applicationSignDate`: `2017-01-19` (string, optional) - Date of signature confirmation of the application by client
@@ -1593,14 +1582,14 @@ Additional information about broker application
 ## Card (object)
 + id: 12 (number, required) - internal card ID
 + cardNumber: `516822******1234` (string, required) - masked card number
-+ cardStatus: (enum, required) - card status
++ cardStatus (enum, required) - card status
     + INACTIVE - card has yet to be activated
     + ACTIVE - card is active
     + BLOCKED - card is blocked
     + LOST - card is reported lost
     + STOLEN - card is reported stolen
     + CANCELLED - card is cancelled
-+ cardType: (enum, required)
++ cardType (enum, required)
     + CREDIT - credit card
     + STICKER - contactless sticker
     + VIRTUAL - virtual card
