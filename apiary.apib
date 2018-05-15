@@ -453,23 +453,35 @@ Use this endpoint to set a new password for:
 ### Request password reset [POST]
 Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as a part of the password reset link. For security reasons, the response will not contain any information if the e-mail was actually sent.
 
-+ Request (application/json)
++ Request (application/json; charset=utf-8)
     + Attributes (object)
         + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
-
 + Response 204
     Password reset request successful.
     + Body
 
-+ Request Bad Data (application/json)    
-+ Response 422 (application/json)
++ Request Wrong Fields (application/json; charset=utf-8)
+    + Body
+    ```
+            {
+            "string": "nonsense"
+            }
+    ```Fix reset tests
++ Response 422 (application/json; charset=utf-8)
     Invalid input data.
     + Attributes (Errors)
 
-+ Request Not Found (application/json)
++ Request No Data (application/json; charset=utf-8)
+    + Body
++ Response 400 (application/json; charset=utf-8)
+    Invalid input data.
+    + Attributes (Errors)
+
++ Request Not Found (application/json; charset=utf-8)
     + Attributes (object)
         + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
-+ Response 400 (application/json)
++ Response 404 (application/json; charset=utf-8)
+    + Attributes (Errors)
 
 
 ## Forgotten e-mail [/account/forgottenEmail]
