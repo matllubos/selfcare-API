@@ -203,7 +203,7 @@ There are 3 levels of error severity:
 We support partial update using PATCH method. Use JSON Merge Patch according to [RFC-7386](https://tools.ietf.org/html/rfc7386).
 
 ## Group Security
-
+<!--
 ## Securing APIs - OAuth2
 To access user sensitive data through API, user must grant your application a permission to do so. Open API uses [OAuth2](https://tools.ietf.org/html/rfc6749) mechanism to grant permissions to access user data. This section describes mechanism and resources to get valid access token and use it to access protected resources.
 
@@ -374,7 +374,7 @@ Exchange authorization code for access token
 + Response 200 (application/json;charset=UTF-8)
 
     + Attributes (TokenResponse)
-
+-->
 # Group My Data
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
@@ -396,7 +396,7 @@ Use this endpoint to obtain the access token.
     Unable to authenticate the customer.
     + Attributes (Errors)
 
-## Customer logout [/account/logout]  
+## Customer logout - TBD [/account/logout]  
 Use this resource to invalidate existing token, which in effect logs out the customer.
 
 ### Invalidate existing token [POST]           
@@ -410,7 +410,7 @@ Use this resource to invalidate existing token, which in effect logs out the cus
     Customer is not logged in.
     + Attributes (Errors)
 
-## Change password [/account/password]
+## Change password - TBD [/account/password]
 
 ### Change password [POST]
 Use this endpoint to change password of a logged-in customer.
@@ -429,7 +429,7 @@ Use this endpoint to change password of a logged-in customer.
     Password change was not successful.
     + Attributes (Errors)
 
-## Password set [/account/password/set]
+## Password set - TBD [/account/password/set]
 
 ### Password set [POST]
 Use this endpoint to set a new password for:
@@ -455,20 +455,21 @@ Use this endpoint to request a password reset. If the request is successful, a v
 
 + Request (application/json)
     + Attributes (object)
-        + email (string) - Customer's e-mail address.
-    + Body
-    
-            {
-                "email": "john.doe@yahoo.com",
-            }
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
 
 + Response 204
     Password reset request successful.
     + Body
-    
-+ Response 422(application/json)
+
++ Request Bad Data (application/json)    
++ Response 422 (application/json)
     Invalid input data.
     + Attributes (Errors)
+
++ Request Not Found (application/json)
+    + Attributes (object)
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
++ Response 400 (application/json)
 
 
 ## Forgotten e-mail [/account/forgottenEmail]
