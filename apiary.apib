@@ -723,8 +723,7 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
 
 + Response 404 
     Non-existing contract
-    + Attributes (Errors)
-<!--        + contractNumber: `this_is_no_contract` (string) -->
+    + Attributes (Error)
 
 <!-- may be only warning for particular application and correct response for the others
 + Request Bad data for application type resolution
@@ -1404,18 +1403,20 @@ Financing application base information
     + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
     + `PROCESSING_NEW` - New application created
     + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
-    + `REJECTED` - Rejected by HC
     + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
-    + `PROCESSING_REVIEW` - Manual review by HC in progress
+    + `PROCESSING_REVIEW` - Review in progress
     + `PROCESSING_WAIT_CLIENT` - To be completed by client
     + `PROCESSING_ALT_OFFER` - Alternative offered to client
     + `PROCESSING_SIGNED` - Signed by client, to verification by HC
-    + `CANCELLED_NOT_PAID` - Cancelled before delivery
+    + `PROCESSING_VALIDATION_IN_PROGRESS` - Processing, validation in progress
     + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
     + `READY_SHIPPED` - Goods shipped to client
     + `READY_DELIVERING` - Verification of goods delivery
     + `READY_DELIVERED` - Goods delivered to client
     + `READY_PAID` - Paid to merchant
+    + `READY_TO_PAY` - Ready - to pay
+    + `REJECTED` - Rejected by HC
+    + `CANCELLED_NOT_PAID` - Cancelled before delivery
     + `CANCELLED_TO_RETURN` - Cancelled after delivery, goods to be returned (not implemented)
     + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
 
@@ -1428,13 +1429,7 @@ Financing application.
 + `order` (Order, optional) - Order data. One and only one of `order` or `liability` objects is provided
 + `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
-    + `DEFERRED_PAYMENT` - Pay later ("zaplaĚ pozdžji")
-<!--
-    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkouöej a zaplaĚ")
-    + `INSTALLMENT` - Pay in monthly installments ("nŠkup na splŠtky")
-    + `SUBSCRIPTION` - Recurring payment ("pÝedplatnť, nebo opakovanŠ platba")
-    + `INTERNAL` - Application created "technical way"
--->
+    + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
 + `gatewayRedirectUrl`: `https://myloan.homecredit.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
 + `applicationOrigin` (object, optional) - if the application was created based on other application
@@ -1443,24 +1438,18 @@ Financing application.
 + `eshopAdditionalInfo` (object, optional) - other information for particular salesroom connected to this application
     + `name`: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
     + `logoUrl`: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
-+ `defpayAdditionalInfo` (object, optional) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
++ `defpayAdditionalInfo` (object, optional, nullable) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
     + `currentDebt` (Amount, required) - Actual debt amount
     + `dueDate`: `2016-11-15` (string, required) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
-    + `dueDateClient`: `2016-11-14` (string, optional) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
+    + `dueDateClient`: `2016-11-14` (string, optional, nullable) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
     + `currentDpd`: 2 (number, required) - current days past due
-    + `blockedOnContractNumber`: `01-6010027378` (string, optional) - contract when application is prepared to be paid from RU balance after dueDateClient
-    + `paidFromContractNumber`: `01-6010027378` (string, optional) - contract when application was paid by revolving loan
-    + `completelyPaid`: `true` (boolean, optional) - information if this application is completely paid and there is no expected payment from client
-    + `paymentAvailability` (PaymentAvailability, optional) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
-    + `revolvingPaymentInfo` (object, optional) - information about revolving loan payment method (installments or balance)
-        + `availability` (RevolvingPaymentAvailability, optional) - information about possibility to pay application by revolving loan
-        + `application` (ApplicationBase, optional) - information about revolving payment application (Homer application)
-<!--
-+ `installmentAdditionalInfo` (object, optional) - additional application information for INSTALLMENT application type
-    + `financedAmount` (Amount, required) - amount really financed by HC (price minus downPayment)
-    + `applicationSignDate`: `2017-01-19` (string, optional) - Date of signature confirmation of the application by client
-    + `installmentProgram` (InstallmentProgram, optional) - installment program information
--->    
+    + `blockedOnContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application is prepared to be paid from RU balance after dueDateClient
+    + `paidFromContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application was paid by revolving loan
+    + `completelyPaid`: `true` (boolean, optional, nullable) - information if this application is completely paid and there is no expected payment from client
+    + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
+    + `revolvingPaymentInfo` (object, optional, nullable) - information about revolving loan payment method (installments or balance)
+        + `availability` (RevolvingPaymentAvailability, optional, nullable) - information about possibility to pay application by revolving loan
+        + `application` (ApplicationBase, optional, nullable) - information about revolving payment application (Homer application)
 
 
 ## RevolvingPaymentAvailabilityRequest (object)
