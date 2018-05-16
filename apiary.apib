@@ -565,11 +565,11 @@ Customer contracts.
 ### List of contracts [GET]
 Get a list of customer contracts.
 
-feature | supported by resource
---- | ---
-[paging](#header-paging) | no
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | no
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | no
 
 
 + Response 200 (application/json;charset=UTF-8)
@@ -1183,7 +1183,7 @@ Financial amount with VAT rate.
 + contractNumber: `12345678` (string, required) - ID of a contract
 + applicationCreatedAt: `2016-01-01` (string, required) - date when application was created
 + name: `Tesco karta` (string, required) - human-readable contract (product) name
-+ productVisualUrl (string, optional) - URL of product visual for this contract
+<!-- + productVisualUrl (string, optional) - URL of product visual for this contract -->
 + contractType: `CEL` (enum, required) - contract type
    + `CEL` - Close End Loan
    + `REL` - Revolving Loan
@@ -1199,7 +1199,7 @@ Financial amount with VAT rate.
 + currentInstallmentDueDate: `2017-10-13` (string, optional) - current installment due date (DEFPAY closest application due date)
 + currentDPD: 8 (number, optional) - current days past due of contract (DEFPAY closest application DPD)
 + One Of
-   + CELAdditionalInfo (object, required)
+<!--   + CELAdditionalInfo (object, required)
         + approveDate: `2017-01-08` (string, required) - date when contract was approved
         + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
         + tenor: 10 (number, optional) - number of installment of contract when signed
@@ -1227,10 +1227,11 @@ Financial amount with VAT rate.
             + status: `TERMINATED` (enum, required) - legal termination state
                 + `TO_TERMINATE` - legal termination is being processed
                 + `TERMINATED` - legal termination done
+-->
    + DEFPAYAdditionalInfo (object, required)
         + availableCreditBalance (Amount, required) - available credit balance of an account
         + creditLimit (Amount, fixed-type, required) - credit limit amount of an account   
-        + remainingOrdersCount: 4 (number, required) - count of orders that can be realised
+<!--        + remainingOrdersCount: 4 (number, required) - count of orders that can be realised -->
 
 ## AccountNumber (object)
 + One Of
