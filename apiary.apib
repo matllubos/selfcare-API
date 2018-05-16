@@ -958,7 +958,6 @@ Check the availability to pay given Applications by revolving loan.
 + Request (application/json; charset=utf-8)
     + Attributes (RevolvingPaymentAvailabilityRequest)
 
-
 + Response 200(application/json; charset=utf-8)
 
         Payment possibility checked successfully
@@ -966,7 +965,10 @@ Check the availability to pay given Applications by revolving loan.
     + Attributes (RevolvingPaymentAvailability)
 
 
-+ Response 400(application/json; charset=utf-8)
++ Request Wrong data (application/json; charset=utf-8)
+    + Attributes (RevolvingPaymentAvailabilityRequest)
+
++ Response 422 (application/json; charset=utf-8)
 
         There was an error processing request
 
