@@ -723,8 +723,8 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
 
 + Response 404 
     Non-existing contract
-    + Attributes
-        + contractNumber: `this_is_no_contract` (string)
+    + Attributes (Errors)
+<!--        + contractNumber: `this_is_no_contract` (string) -->
 
 <!-- may be only warning for particular application and correct response for the others
 + Request Bad data for application type resolution
@@ -1427,12 +1427,14 @@ Financing application.
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
 + `order` (Order, optional) - Order data. One and only one of `order` or `liability` objects is provided
 + `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
-+ `type`: `TRY_AND_PAY` (enum, optional) - Financing type
++ `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplaĚ pozdžji")
+<!--
     + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkouöej a zaplaĚ")
     + `INSTALLMENT` - Pay in monthly installments ("nŠkup na splŠtky")
     + `SUBSCRIPTION` - Recurring payment ("pÝedplatnť, nebo opakovanŠ platba")
     + `INTERNAL` - Application created "technical way"
+-->
 + `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
 + `gatewayRedirectUrl`: `https://myloan.homecredit.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
 + `applicationOrigin` (object, optional) - if the application was created based on other application
@@ -1453,10 +1455,12 @@ Financing application.
     + `revolvingPaymentInfo` (object, optional) - information about revolving loan payment method (installments or balance)
         + `availability` (RevolvingPaymentAvailability, optional) - information about possibility to pay application by revolving loan
         + `application` (ApplicationBase, optional) - information about revolving payment application (Homer application)
+<!--
 + `installmentAdditionalInfo` (object, optional) - additional application information for INSTALLMENT application type
     + `financedAmount` (Amount, required) - amount really financed by HC (price minus downPayment)
     + `applicationSignDate`: `2017-01-19` (string, optional) - Date of signature confirmation of the application by client
     + `installmentProgram` (InstallmentProgram, optional) - installment program information
+-->    
 
 
 ## RevolvingPaymentAvailabilityRequest (object)
