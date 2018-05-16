@@ -532,7 +532,7 @@ Customer profile information
 ### Get client information [GET]
 Get information about logged-in user.
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (Client, required)
 
 + Response 400 (application/json; charset=utf-8)
@@ -1154,7 +1154,7 @@ Financial amount with VAT rate.
   + middleNames: Peter, Frank (array[string], optional) - middle names
   + lastName: Doe (string, required) - user family name
 + fullName: `Ing. John Petetr Frank Doe, PhD.` (string, optional) - client full name
-+ salutation: Mr. (string, optional) - salutation, e.g. Mr. or Mrs.
++ salutation: Mr. (string, optional, nullable) - salutation, e.g. Mr. or Mrs.
 + gender: `MALE` (enum, required)
     + `MALE`
     + `FEMALE`
