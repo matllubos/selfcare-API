@@ -657,7 +657,8 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
     + Attributes (object)
         + data (array[Transaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
-
+        
+<!-- Transaction detail na vše vrací HTTP404
 ## Specific transaction [/my/contracts/{contractNumber}/transactions/{transactionId}]
 Actions on specified transaction
 
@@ -675,7 +676,7 @@ Get a detail of one transaction
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (Transaction)
-
+-->
 ## Applications [/my/contracts/{contractNumber}/applications]
 Applications of given contract.
 
