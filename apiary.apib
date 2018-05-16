@@ -381,7 +381,7 @@ Resources handling information about currently logged-in user. You need valid cl
 # Group Account management
 Resource group for managing customer's account.
 
-## Customer login [/account/login]
+## Customer login - T [/account/login]
 
 ### Login customer [POST]
 Use this endpoint to obtain the access token.
@@ -448,7 +448,7 @@ Use this endpoint to set a new password for:
     Password set was not successful.
     + Attributes (Errors)
     
-## Request password reset [/account/password/reset]
+## Request password reset - T [/account/password/reset]
 
 ### Request password reset [POST]
 Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as a part of the password reset link. For security reasons, the response will not contain any information if the e-mail was actually sent.
@@ -466,7 +466,7 @@ Use this endpoint to request a password reset. If the request is successful, a v
             {
             "string": "nonsense"
             }
-    ```Fix reset tests
+    ```
 + Response 422 (application/json; charset=utf-8)
     Invalid input data.
     + Attributes (Errors)
@@ -484,7 +484,7 @@ Use this endpoint to request a password reset. If the request is successful, a v
     + Attributes (Errors)
 
 
-## Forgotten e-mail [/account/forgottenEmail]
+## Forgotten e-mail - TBD [/account/forgottenEmail]
 Use this resource to remind the customer of his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
 
 ### Send e-mail address via SMS [POST]
@@ -506,7 +506,7 @@ Use this resource to remind the customer of his e-mail address (which is needed 
     * CUSTOMER_DOES_NOT_EXIST
     + Attributes (Errors)
     
-## Resend registration e-mail [/account/resendRegistrationEmail]
+## Resend registration e-mail - TBD [/account/resendRegistrationEmail]
 
 ### Resend registration e-mail [POST]
 Use this resource to resend a registration e-mail to the customer. E-mail can be resent only in case it was already sent. For security reasons, the response will not contain any information if the e-mail was actually sent.
