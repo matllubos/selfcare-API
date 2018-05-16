@@ -366,12 +366,12 @@ This should be used for applications that run solely on client (e.g. single page
 ## Exchange code for token [POST /customer/hc-oauth2/token]
 Exchange authorization code for access token
 
-+ Request Get token from authorization code  (application/json;charset=UTF-8)
++ Request Get token from authorization code  (application/json; charset=utf-8)
 
     + Attributes (TokenCodeRequest)
 
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
 
     + Attributes (TokenResponse)
 -->
@@ -400,9 +400,9 @@ Use this endpoint to obtain the access token.
 Use this resource to invalidate existing token, which in effect logs out the customer.
 
 ### Invalidate existing token [POST]           
-+ Request (application/json;charset=UTF-8)
++ Request (application/json; charset=utf-8)
 
-+ Response 204 (application/json;charset=UTF-8)
++ Response 204 (application/json; charset=utf-8)
     Logout successful.
     + Body
 
@@ -572,7 +572,7 @@ feature                         | supported by resource
 [filtering](#header-filtering)  | no
 
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Contract], fixed-type, required)
 
@@ -589,14 +589,14 @@ Get details about one customer contract.
     + Parameters
         + contractNumber: `01-3700227718`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
    + Attributes (Contract)
 
 + Request Non-existing contract
     + Parameters
         + contractNumber: `this_is_no_contract`
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     + Attributes (Errors)
     
 ## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
@@ -604,16 +604,20 @@ Transactions of given contract.
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + include: `HOLD` (string, optional) - which trasactions to include. Possible values: `HOLD` (only authorization holds, e.g. non-processed transactions), `PROCESSED` (only processed transactions), `BOTH` (include both processed transactions and authorization holds)
+    + include: `HOLD` (enum, optional) - which trasactions to include. Possible values:
+        + `HOLD` - only authorization holds, e.g. non-processed transactions
+        + `PROCESSED` - only processed transactions
+        + `BOTH` - include both processed transactions and authorization holds
+
 
 ### Transactions on contract [GET]
 Get a list of transactions on contract
 
-feature | supported by resource
---- | ---
-[paging](#header-paging) | yes
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | yes
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
 
 #### Paging
 This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
@@ -649,7 +653,7 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
     + Parameters
         + contractNumber: `54307275`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Transaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
@@ -669,7 +673,7 @@ Get a detail of one transaction
         + contractNumber: `54307275`
         + transactionId: `a123`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (Transaction)
 
 ## Applications [/my/contracts/{contractNumber}/applications]
@@ -707,7 +711,7 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
     + Parameters
         + contractNumber: `54307275`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Application], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
@@ -726,7 +730,7 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
     + Parameters
         + contractNumber: `54307275`
 
-+ Response 422 (application/json;charset=UTF-8)
++ Response 422 (application/json; charset=utf-8)
     Some attributes cannot be assigned.
         + Attributes (Errors)-->
 
@@ -740,30 +744,30 @@ Specific application.
 ### Application detail [GET]
 Get details of one application.
 
-+ Request  (application/json;charset=UTF-8)
++ Request  (application/json; charset= utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     Existing application
     + Attributes (Application)
 
-+ Request Non-existing contract (application/json;charset=UTF-8)
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     Contract not found.
     + Attributes (Errors)
 
-+ Request Non-existing application (application/json;charset=UTF-8)
++ Request Non-existing application (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `6605812455` (string, required) - ID of contract
         + applicationId: `this_is_no_application` (string, required) - ID of application
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     Application not found.
     + Attributes (Errors)
 
@@ -772,37 +776,37 @@ Get details of one application.
         + contractNumber: `54307275`
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 422 (application/json;charset=UTF-8)
++ Response 422 (application/json; charset=utf-8)
     Some attributes cannot be assigned.
     + Attributes (Errors)
 
 ### Cancel application [DELETE]
 Cancel application processing.
 
-+ Request  (application/json;charset=UTF-8)
++ Request  (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 204 (application/json;charset=UTF-8)
++ Response 204 (application/json; charset=utf-8)
     Application processing was cancelled.
     + Body
 
-+ Request Invalid application state (application/json;charset=UTF-8)
++ Request Invalid application state (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 422 (application/json;charset=UTF-8)
++ Response 422 (application/json; charset=utf-8)
     Application cannot be cancelled.
     + Attributes (Errors)
 
-+ Request Non-existing contract (application/json;charset=UTF-8)
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     Contract or application not found.
     + Attributes (Errors)
 
@@ -839,11 +843,11 @@ filter name      | possible operators | example
 ---              | ---                | ---
 type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEMENT` only documents of type "MžsŪŤnŪ vżpis"
 
-+ Request  (application/json;charset=UTF-8)
++ Request  (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
@@ -884,7 +888,7 @@ Payments operations.
 ### List of payments [GET]
 Get a list of all prepared payment orders.
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[DomesticPaymentOrderStatus], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
@@ -893,7 +897,7 @@ Get a list of all prepared payment orders.
 ### Request new payment [POST]
 Prepare payment order data for specified repayments. TODO: add payment method.
 
-+ Request TRANSFER/SAZKA (application/json;charset=UTF-8)
++ Request TRANSFER/SAZKA (application/json; charset=utf-8)
     + Attributes (PaymentRequest)
 
 + Response 200(application/json; charset=utf-8)
@@ -902,7 +906,7 @@ Prepare payment order data for specified repayments. TODO: add payment method.
 
     + Attributes (DomesticPaymentOrder)
 
-+ Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json;charset=UTF-8)
++ Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json; charset=utf-8)
     + Attributes (PaymentRequest)
     
 + Response 200(application/json; charset=utf-8)
@@ -928,7 +932,7 @@ Get all possible repayment options
 ### Repayment options [GET]
 Get prioritized list of possible installments that are available for repayment. If no amount is specified, upper bound of repayment is calculated according to business rules (e.g. including all possible installments).
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[PaymentItem], fixed-type, required)
 
@@ -1067,7 +1071,7 @@ filter name      | possible operators | example
 type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_AGREEMENT` only documents of type "Smlouva o pouěŪvŠnŪ online aplikacŪ"
 
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
