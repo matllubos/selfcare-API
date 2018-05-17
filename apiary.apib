@@ -723,7 +723,7 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
 
 + Response 404 
     Non-existing contract
-    + Attributes (Error)
+    + Attributes (Errors)
 
 <!-- may be only warning for particular application and correct response for the others
 + Request Bad data for application type resolution
@@ -1751,10 +1751,10 @@ Purchase transormed into installments
 + `method`: `TRANSFER` (enum, required) - payment method
     + `TRANSFER` - money transfer
     + `CARD` - card payment
+    + `SAZKA` - payment by Sazka - currently turned off
     + `PLATBA24` - Ceska Sporitelna online payment
     + `MOJE_PLATBA` - Komercni Banka online payment
     + `EKONTO` - Raiffeisen online payment
-    + `SAZKA` - payment by Sazka
 + `redirectUrls` (MerchantUrls, optional) - Collection of URLs used for redirection of a customer back to an application, based on payment result. Only usefull for method=`CARD`
 
 
