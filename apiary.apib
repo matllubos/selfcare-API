@@ -570,14 +570,14 @@ Specific customer contract.
 ### Contract detail [GET]
 Get details about one customer contract.
 
-+ Request Get contract details
++ Request Get contract details (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718`
 
 + Response 200 (application/json; charset=utf-8)
    + Attributes (Contract)
 
-+ Request Non-existing contract
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract`
 
@@ -693,7 +693,7 @@ state            |eq,in               | `applications?filter=state|in|READY` app
 stateReason      |eq,in               | `applications?filter=stateReason|in|READY_TO_SHIP` applications that are READY_TO_SHIP
 type             |eq,in               | `applications?filter=type|in|INSTALLMENT` applications financed by installment program
 
-+ Request Existing contract
++ Request Existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `54307275`
 
@@ -702,11 +702,11 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
         + data (array[Application], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
 
-+ Request Non-existing contract
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract`  (string)
 
-+ Response 404 
++ Response 404 (application/json; charset=utf-8)
     Non-existing contract
     + Attributes (Errors)
 
@@ -756,7 +756,7 @@ Get details of one application.
     Application not found.
     + Attributes (Errors)
 
-+ Request Bad data for application type resolution
++ Request Bad data for application type resolution (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `54307275`
         + applicationId: `a7718` (string, required) - ID of application
