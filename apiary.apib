@@ -1716,10 +1716,6 @@ Purchase transormed into installments
 ## PaymentItem (object)
 + `contractNumber`: `01-123456789` (string, required) - applications respective contract or a contract to be repaid as a whole
 + `applicationIds` (array[string], fixed-type, optional) - list of applications to be repaid
-+ `revolvingItemType`: `MIN_INSTALLMENT` (enum, optional) - revolving item type
-    + `MIN_INSTALLMENT` - minimal installment amount
-    + `GRACE_PERIOD` - amount to pay to use a grace period
-    + `WHOLE_DEBT` - amount to repay a whole debt
 
 ## PaymentRequest (object)
 + `items` (array[PaymentItem], fixed-type, required) - list of payment items to be repaid
