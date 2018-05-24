@@ -444,6 +444,11 @@ Use this endpoint to set a new password for:
     Password set successful. 
     + Body
 
++ Request Wrong data (application/json)
+    + Attributes (object)
+        + password: `f2FqYbmQZHXuPbdq` (string) - New password.
+        + token: `nonsensetoken` (string) - Verification token.
+
 + Response 422(application/json)
     Password set was not successful.
     + Attributes (Errors)
