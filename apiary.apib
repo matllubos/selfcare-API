@@ -452,6 +452,15 @@ Use this endpoint to set a new password for:
 + Response 422(application/json; charset=utf-8)
     Password set was not successful.
     + Attributes (Errors)
+
++ Request Short password (application/json; charset=utf-8)
+    + Attributes (object)
+        + password: `f2FqYbmQZHXuPbdq` (string) - New password.
+        + token: `short` (string) - Verification token.
+
++ Response 422(application/json; charset=utf-8)
+    Password set was not successful.
+    + Attributes (Errors)
     
 ## Request password reset - T [/account/password/reset]
 
