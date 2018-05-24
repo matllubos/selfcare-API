@@ -861,15 +861,6 @@ Create new *application* of particular type
 ## Payments [/my/payments]
 Payments operations.
 
-### List of payments [GET]
-Get a list of all prepared payment orders.
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[DomesticPaymentOrderStatus], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
-
-
 ### Request new payment [POST]
 Prepare payment order data for specified repayments. TODO: add payment method.
 
