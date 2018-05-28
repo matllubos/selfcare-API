@@ -202,179 +202,6 @@ There are 3 levels of error severity:
 ## Partial update
 We support partial update using PATCH method. Use JSON Merge Patch according to [RFC-7386](https://tools.ietf.org/html/rfc7386).
 
-## Group Security
-<!--
-## Securing APIs - OAuth2
-To access user sensitive data through API, user must grant your application a permission to do so. Open API uses [OAuth2](https://tools.ietf.org/html/rfc6749) mechanism to grant permissions to access user data. This section describes mechanism and resources to get valid access token and use it to access protected resources.
-
-- if you fail to specify OAuth2 token, you will receive `401 Unauthorized` error and following response body:
-
-```
-{
-   "error_description": "The access token is missing",
-   "error": "invalid_request"
-}
-```
-
-- if you provide invalid OAuth2 token, you will receive `403 Forbidden` error and following response body:
-
-```
-{
-    "error_description":"The access token is invalid or has expired",
-    "error":"invalid_token"
-}
-```
-
-
-
-Customer API supports following OAuth2 flows:
-
-- [authorization code grant](https://tools.ietf.org/html/rfc6749#section-4.1) 
-- [implicit grant](https://tools.ietf.org/html/rfc6749#section-4.2)
-
-For accessing Customer API, you need to specify scope `customer`.
-
-OAuth2 flows are described in sections below.
-
-### Authorization code grant flow
-This should be used for applications that have a place to securely store application credentials (`client_id` and `client_secret`) - that includes applications with server-side component, which in turn communicates with API.
-
-#### Developers perspective
-
-1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` and `client secret`.
-
-2. When you wish to access protected resource  for the first time, redirect user to `login page` with parameters:
-    + `client_id` - client ID parameter you received from previous step
-    + `response_type` - value `code` to indicate authorization code flow
-    + `state` - random value that will be returned to you
-    + `scope` - specify value needed for accessed API services, e.g. `customer`
-    + `redirect_uri` - optional. If your application has registered multiple redirect uris, you can choose by specifying one of them.
-
-    *Example login request:*
-
-    ```
-    https://idm.homecredit.net/login?client_id=MYID&response_type=code&state=ehshvnajgtf34&scope=customer
-    ```
-
-    > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
-
-3. User has to log in using his credentials and approve your application's access.
-
-4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `code`. This redirect should be handled by your application, in order to exchange code for valid access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
-
-    *Example redirect URI:*
-
-    ```
-    https://myapp.example.com/handle_authentication?code=123arjdmvcskfm&state=ehshvnajgtf34
-    ```
-
-5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
-    
-6. Access [token resource](#security-exchange-code-for-token-post) API and exchange `code` for access token. You will also receive refresh token; you can use it to get new access token when access token validity expires.
-
-7. You receive `access token` that has limited lifespan (usually approximately 20 minutes), along with `refresh token`. Refresh token can later be used to exchange for new access token when the&nbsp;old one expires.
-
-8. Use the retrieved `access token` to access protected resources by specifying it in `Authorization` header, together with its type, e.g.:
-
-    ```
-    curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
-    ```
-
-> IMPORTANT NOTE: You must keep your client secret safe. It serves as your application password. 
-
-#### User perspective
-
-1. User runs your application for the first time
-
-2. Your application redirects user to OpenAPI login page
-
-3. User provides its credentials (username and password, possibly combined with other data, like SMS code etc)
-
-4. User sees a page that displays details about your application and rights it requested.
-
-5. User authorizes your application's access and he can start using your application.
-
-
-
-### Implicit grant flow
-This should be used for applications that run solely on client (e.g. single page JavaScript applications). Refresh token is NOT supported in this flow.
-
-
-#### Developers perspective
-
-1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` value.
-
-2. When you wish to access protected resource for the first time, redirect user to `login page` with the following parameters:
-    + `client_id` - client ID parameter you received from previous step
-    + `response_type` - value `token` to indicate implicit grant flow
-    + `state` - random value that will be returned to you
-    + `scope` - specify value needed for accessed API services, e.g. `customer`
-    + `redirect_uri` - optional. If your application has registered multiple redirect URIs, you can choose by specifying one of them.
-
-    *Example login request:*
-
-    ```
-    https://idm.homecredit.net/login?client_id=MYID&response_type=token&state=ehshvnajgtf34&scope=customer
-    ```
-
-    > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
-
-3. User has to log in using his credentials 
-
-4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `token` in URI fragment. This redirect should be handled by your application, in order to extract access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
-
-    *Example redirect URI:*
-
-    ```
-    https://myapp.example.com/handle_authentication#access_token=0abc239da00a4f89a66c95a2cf76cea1&expires_in=7200&state=xyz&token_type=bearer
-    ```
-
-5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
-    
-6. You receive an `access token` of type `Bearer` that has limited lifespan (usually approximately 20 minutes); refresh token is NOT supported.
-
-7. Use the retrieved `access token` to access protected resources by specifying it in `Authorization` header, together with its type, e.g.:
-
-    ```
-    curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
-    ```
-
-> Note: The procedure described above is an "everything went well" scenario. Error responses are described in [OAuth2 RFC](https://tools.ietf.org/html/rfc6749#section-4.2).
-
-#### User perspective
-
-1. User runs your application for the first time.
-
-2. Your application redirects user to OpenAPI login page.
-
-3. User provides his credentials (username and password, possibly combined with other data, like SMS code etc).
-
-4. User is redirected back to your application.
-
-
-
-
-### OAuth2 resources
-| resource       | enviroment          | address                   |
-| ---            | ---                 | ---                       |
-| login page     | testing environment | https://TBD               |
-| login page     | production          | https://TBD               |
-| token resource | testing environment | /customer/hc-oauth2/token |
-| token resource | production          | /customer/hc-oauth2/token |
-
-
-## Exchange code for token [POST /customer/hc-oauth2/token]
-Exchange authorization code for access token
-
-+ Request Get token from authorization code  (application/json; charset=utf-8)
-
-    + Attributes (TokenCodeRequest)
-
-
-+ Response 200 (application/json; charset=utf-8)
-
-    + Attributes (TokenResponse)
--->
 # Group My Data
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
@@ -657,25 +484,6 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
         + data (array[Transaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
         
-<!-- Transaction detail na vše vrací HTTP404
-## Specific transaction [/my/contracts/{contractNumber}/transactions/{transactionId}]
-Actions on specified transaction
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + transactionId: `a7718` (string, required) - ID of transaction
-
-### Transaction detail [GET]
-Get a detail of one transaction
-
-+ Request Existing transaction
-    + Parameters
-        + contractNumber: `54307275`
-        + transactionId: `a123`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (Transaction)
--->
 ## Applications [/my/contracts/{contractNumber}/applications]
 Applications of given contract.
 
@@ -723,15 +531,6 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
 + Response 404 (application/json; charset=utf-8)
     Non-existing contract
     + Attributes (Errors)
-
-<!-- may be only warning for particular application and correct response for the others
-+ Request Bad data for application type resolution
-    + Parameters
-        + contractNumber: `54307275`
-
-+ Response 422 (application/json; charset=utf-8)
-    Some attributes cannot be assigned.
-        + Attributes (Errors)-->
 
 ## Specific application [/my/contracts/{contractNumber}/applications/{applicationId}]
 Specific application.
@@ -955,86 +754,6 @@ Check the availability to pay given Applications by revolving loan.
 
     + Attributes (Errors)
 
-<!--
-# Group My Offers
-
-## Installment programs calculations [/my/calculations]
-When a customer wants to use a loan as a payment method and he wants to see an offer of available installment programs, `/my/calculations` resource with properly filled request that contains at least following data is used:
-- Payment value
-
-If the request was successfully processed, HTTP status code 200 and array of objects of available installment programs with at least following information in the response is received:
-- Installment program (array)
-  - Installment program product code
-  - Installment program type
-  - Installment amount
-  - Number of installments
-
-In other cases, following errors are received:
-| Status code | Code                  | Message                     |
-| ---         | ---                   | ---                         |
-| 400         | INVALID_REQUEST       | *Various messages possible* |
-| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-
-### Calculate installment programs [POST]
-Calculate installment programs offer according to specified input
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramsCalculationsRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Installment programs collection
-
-    + Attributes (InstallmentProgramsCalculations, required)
-
-+ Response 400(application/json; charset=utf-8)
-        Error in processing request
-
-    + Attributes (Errors)
-
-
-## Installment program detail calculation [/my/calculationDetails]
-When a customer wants to know details of one of previously offered installment programs, `/my/calculation` resource with properly filled request that contains at least following data is used:
-- Product code of given installment program
-- Payment value
-
-If the request was successfully processed, HTTP status code 200 and object of information about specified installment program with at least following information in the response is received:
-- Installment program type
-- Installment amount
-- Number of installments
-- Installment program details
-
-In other cases, one of the following errors is received:
-| Status code | Code                  | Message                     |
-| ---         | ---                   | ---                         |
-| 400         | INVALID_REQUEST       | *Various messages possible* |
-| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-
-### Calculate installment program detail [POST]
-Calculate installment program detailed information.
-
-It returns the installment program that most closely matches specified input.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramCalculationRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Detailed information about installment program
-
-    + Attributes (InstallmentProgramCalculation)
-
-
-+ Response 422(application/json; charset=utf-8)
-
-        No installment program was found
-
-    + Attributes (Errors)
--->
 
 # Group My Documents
 
@@ -1174,7 +893,6 @@ Financial amount with VAT rate.
 + contractNumber: `12345678` (string, required) - ID of a contract
 + applicationCreatedAt: `2016-01-01` (string, required) - date when application was created
 + name: `Tesco karta` (string, required) - human-readable contract (product) name
-<!-- + productVisualUrl (string, optional) - URL of product visual for this contract -->
 + contractType: `CEL` (enum, required) - contract type
    + `CEL` - Close End Loan
    + `REL` - Revolving Loan
@@ -1190,39 +908,9 @@ Financial amount with VAT rate.
 + currentInstallmentDueDate: `2017-10-13` (string, optional) - current installment due date (DEFPAY closest application due date)
 + currentDPD: 8 (number, optional) - current days past due of contract (DEFPAY closest application DPD)
 + One Of
-<!--   + CELAdditionalInfo (object, required)
-        + approveDate: `2017-01-08` (string, required) - date when contract was approved
-        + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
-        + tenor: 10 (number, optional) - number of installment of contract when signed
-        + monthlyInstallment (Amount, required) - monthly installment amount a client need to repay
-        + monthlyInterestRate: 2.96 (number,  required) - monthly interest rate in percent
-        + credit (Amount, required) - total amount a client ask for loan, including insurance amount
-        + downPayment (Amount, required) - total down payment amount of  a client
-        + signedAt: `2016-01-25` (string, required) - date when contract was signed
-        + productInformation: `Credit card loan (REL_POS-01)` (string, optional)
-        + productCode:`CCX_INI_0001` (string, required) - code of product
-   + RELAdditionalInfo (object, required)
-        + approveDate: `2017-01-08` (string, required) - date when contract was approved
-        + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
-        + currentInstallmentGP (Amount, required) - current installment for using grace period amount
-        + signedAt: `2016-01-25` (string, required) - date when contract was signed
-        + productInformation: `Credit card loan (REL_POS-01)` (string, optional)
-        + productCode:`CCX_INI_0001` (string, required) - code of product
-        + availableCreditBalance (Amount, required) - available credit balance of an account
-        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account
-        + moneyTransferInfo (MoneyTransferAvailability, required) - money transfer availability information
-        + defPayInfo (object, required) - transactions for deferred payments info
-            + blockedAmount (Amount, required) - amount of all unconfirmed transactions for deferred payments
-            + blockedCount (number, required) - count of all unconfirmed transactions for deferred payments
-        + legalTermination (object, optional)
-            + status: `TERMINATED` (enum, required) - legal termination state
-                + `TO_TERMINATE` - legal termination is being processed
-                + `TERMINATED` - legal termination done
--->
    + DEFPAYAdditionalInfo (object, required)
         + availableCreditBalance (Amount, required) - available credit balance of an account
         + creditLimit (Amount, fixed-type, required) - credit limit amount of an account   
-<!--        + remainingOrdersCount: 4 (number, required) - count of orders that can be realised -->
 
 ## AccountNumber (object)
 + One Of
