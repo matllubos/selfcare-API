@@ -598,6 +598,14 @@ Cancel application processing.
     Contract or application not found.
     + Attributes (Errors)
 
++ Request non existent application (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Application cannot be cancelled.
+    + Attributes (Errors)
 
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
 Installments of given contract (installment schedule for CEL contract)
