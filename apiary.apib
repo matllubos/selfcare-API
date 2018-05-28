@@ -208,7 +208,7 @@ Resources handling information about currently logged-in user. You need valid cl
 # Group Account management
 Resource group for managing customer's account.
 
-## Customer login - T [/account/login]
+## Customer login [/account/login]
 
 ### Login customer [POST]
 Use this endpoint to obtain the access token.
@@ -289,7 +289,7 @@ Use this endpoint to set a new password for:
     Password set was not successful.
     + Attributes (Errors)
     
-## Request password reset - T [/account/password/reset]
+## Request password reset [/account/password/reset]
 
 ### Request password reset [POST]
 Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as a part of the password reset link. For security reasons, the response will not contain any information if the e-mail was actually sent.
