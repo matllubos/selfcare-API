@@ -73,7 +73,7 @@ Multiple filters can be specified on each request, separated by semi-colon. They
 GET /general/partners?filter=category|in|1,5,10
 ```
 
-- get a list of contracts with contractDate in (2016-02-10, 2016-04-28>
+- get a list of contracts with contractDate in greater than 2016-02-10 and lower or equal to 2016-04-28
 ```
 GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-04-28
 ```
@@ -140,7 +140,7 @@ We use following status codes throughout the API, except for OAuth flow when res
 - 503 `Service Unavailable` - there is planned service outage (TODO: should specify response headers with more details on service outage)
 
 ## Error handling
-Besides HTTP status codes, which are the main indication if something goes wrong, we also use `errors` object to report more details about errors.
+Besides HTTP status codes, which are the main indication if something goes wrong, we also use `errors` object to report more details about the errors.
 
 Errors object example:
 ```javascript
@@ -170,13 +170,13 @@ Errors object example:
 ```
 
 Error object attributes
-| attribute name | description |
-| --- | --- |
-| code | unique error code |
-| message | human readable error description (non-localized) |
-| severity | error severity (see below) |
-| attribute | json path of request attribute that caused the error (optional) |
-| ticketId | internal ticket ID, used for error backtracking |
+| attribute name | description                                                     |
+| ---            | ---                                                             |
+| code           | unique error code                                               |
+| message        | human readable error description (non-localized)                |
+| severity       | error severity (see below)                                      |
+| attribute      | json path of request attribute that caused the error (optional) |
+| ticketId       | internal ticket ID, used for error backtracking                 |
 
 There are 3 levels of error severity:
 
@@ -202,179 +202,6 @@ There are 3 levels of error severity:
 ## Partial update
 We support partial update using PATCH method. Use JSON Merge Patch according to [RFC-7386](https://tools.ietf.org/html/rfc7386).
 
-## Group Security
-
-## Securing APIs - OAuth2
-To access user sensitive data through API, user must grant your application a permission to do so. Open API uses [OAuth2](https://tools.ietf.org/html/rfc6749) mechanism to grant permissions to access user data. This section describes mechanism and resources to get valid access token and use it to access protected resources.
-
-- if you fail to specify OAuth2 token, you will receive `401 Unauthorized` error and following response body:
-
-```
-{
-   "error_description": "The access token is missing",
-   "error": "invalid_request"
-}
-```
-
-- if you provide invalid OAuth2 token, you will receive `403 Forbidden` error and following response body:
-
-```
-{
-    "error_description":"The access token is invalid or has expired",
-    "error":"invalid_token"
-}
-```
-
-
-
-Customer API supports following OAuth2 flows:
-
-- [authorization code grant](https://tools.ietf.org/html/rfc6749#section-4.1) 
-- [implicit grant](https://tools.ietf.org/html/rfc6749#section-4.2)
-
-For accessing Customer API, you need to specify scope `customer`.
-
-OAuth2 flows are described in sections below.
-
-### Authorization code grant flow
-This should be used for applications that have a place to securely store application credentials (`client_id` and `client_secret`) - that includes applications with server-side component, which in turn communicates with API.
-
-#### Developers perspective
-
-1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` and `client secret`.
-
-2. When you wish to access protected resource  for the first time, redirect user to `login page` with parameters:
-    + `client_id` - client ID parameter you received from previous step
-    + `response_type` - value `code` to indicate authorization code flow
-    + `state` - random value that will be returned to you
-    + `scope` - specify value needed for accessed API services, e.g. `customer`
-    + `redirect_uri` - optional. If your application has registered multiple redirect uris, you can choose by specifying one of them.
-
-    *Example login request:*
-
-    ```
-    https://idm.homecredit.net/login?client_id=MYID&response_type=code&state=ehshvnajgtf34&scope=customer
-    ```
-
-    > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
-
-3. User have to log-in using his credentials and approve your application's access
-
-4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `code`. This redirect should be handled by your application, in order to exchange code for valid access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
-
-    *Example redirect URI:*
-
-    ```
-    https://myapp.example.com/handle_authentication?code=123arjdmvcskfm&state=ehshvnajgtf34
-    ```
-
-5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
-    
-5. Access API [token resource](#security-exchange-code-for-token-post) and exchange `code` for access token. You will also receive refresh token; you can use it to get new access token when access token validity expires.
-
-6. You receive `access token` that has limited lifespan (usually to 20 min or so), along with `refresh token`. Refresh token can later be used to exchange for new access token, when old one expires.
-
-7. Use retireved `access token` to access protected resources by specifying it in header `Authorization`, together with its type, e.g.:
-
-    ```
-    curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
-    ```
-
-> IMPORTANT NOTE: You must keep your client secret safe. It serves as your application password. 
-
-#### User perspective
-
-1. User runs your application for the first time
-
-2. Your application redirects user to OpenAPI login page
-
-3. User provides its credentials (user + password, possibly combined with another factor like SMS code etc)
-
-4. User sees a page, that displays details about your application and rights it requested.
-
-5. User authorizes your application's access and he can start using your application.
-
-
-
-### Implicit grant flow
-This should be used for applications that runs solely on client (e.g. single page JavaScript applications). Refresh token is NOT supported in this flow.
-
-
-#### Developers perspective
-
-1. Register your application at developers portal and request access to OAuth2 protected resources. You have to provide (beside others) `redirect URI` attribute - this is the URI user is redirected to after he logs in and approves your application (see below to learn more). You will receive `client ID` value.
-
-2. When you wish to access protected resource for the first time, redirect user to `login page` with parameters:
-    + `client_id` - client ID parameter you received from previous step
-    + `response_type` - value `token` to indicate implicit grant flow
-    + `state` - random value that will be returned to you
-    + `scope` - specify value needed for accessed API services, e.g. `customer`
-    + `redirect_uri` - optional. If your application has registered multiple redirect uris, you can choose by specifying one of them.
-
-    *Example login request:*
-
-    ```
-    https://idm.homecredit.net/login?client_id=MYID&response_type=token&state=ehshvnajgtf34&scope=customer
-    ```
-
-    > IMPORTANT NOTE: Do not use embedded webview in mobile applications, use platform native browser instead.
-
-3. User have to log-in using his credentials 
-
-4. If successfull, user is redirected to `redirect URI` you specified at application registration, together with parameter `token` in URI fragment. This redirect should be handled by your application, in order to extract access token; for mobile applications, consider using custom URL scheme (iOS), intents (Android) or similar mechanism.
-
-    *Example redirect URI:*
-
-    ```
-    https://myapp.example.com/handle_authentication#access_token=0abc239da00a4f89a66c95a2cf76cea1&expires_in=7200&state=xyz&token_type=bearer
-    ```
-
-5. You have to check `state` parameter, it has to be the same as you passed to login page. **If it differs, you should not continue.**
-    
-6. You receive `access token` of type `Bearer` that has limited lifespan (usually to 20 min or so); refresh token is NOT supported.
-
-7. Use retireved `access token` to access protected resources by specifying it in header `Authorization`, together with its type, e.g.:
-
-    ```
-    curl -H "Authorization: Bearer access_token" https://apiendpoint/my/profile
-    ```
-
-> Note: above is the happy-day scenario. Error responses are described in [OAuth2 RFC](https://tools.ietf.org/html/rfc6749#section-4.2).
-
-#### User perspective
-
-1. User runs your application for the first time
-
-2. Your application redirects user to OpenAPI login page
-
-3. User provides its credentials (user + password, possibly combined with another factor like SMS code etc)
-
-4. User is redirected back to your application.
-
-
-
-
-### OAuth2 resources
-| resource | enviroment | address |
-| --- | --- | --- |
-| login page | testing environment | https://TBD |
-| login page | production | https://TBD |
-| token resource | testing environment | /customer/hc-oauth2/token |
-| token resource | production | /customer/hc-oauth2/token |
-
-
-## Exchange code for token [POST /customer/hc-oauth2/token]
-Exchange authorization code for access token
-
-+ Request Get token from authorization code  (application/json;charset=UTF-8)
-
-    + Attributes (TokenCodeRequest)
-
-
-+ Response 200 (application/json;charset=UTF-8)
-
-    + Attributes (TokenResponse)
-
 # Group My Data
 Resources handling information about currently logged-in user. You need valid client [OAuth2 access token](#header-authentication) to access these resources.
 
@@ -396,13 +223,13 @@ Use this endpoint to obtain the access token.
     Unable to authenticate the customer.
     + Attributes (Errors)
 
-## Customer logout [/account/logout]  
+## Customer logout - TBD [/account/logout]  
 Use this resource to invalidate existing token, which in effect logs out the customer.
 
 ### Invalidate existing token [POST]           
-+ Request (application/json;charset=UTF-8)
++ Request (application/json; charset=utf-8)
 
-+ Response 204 (application/json;charset=UTF-8)
++ Response 204 (application/json; charset=utf-8)
     Logout successful.
     + Body
 
@@ -410,25 +237,22 @@ Use this resource to invalidate existing token, which in effect logs out the cus
     Customer is not logged in.
     + Attributes (Errors)
 
-## Change password [/account/password]
+## Change password - TBD [/account/password]
 
 ### Change password [POST]
 Use this endpoint to change password of a logged-in customer.
 + Request (application/json)
     + Attributes (object)
-        + currentPassword (string) - Customer's current password.
-        + newPassword (string) - New password.
-    + Body
-    {
-        "currentPassword": "f2FqYbmQZHXuPbdq",
-        "newPassword": "xt3hP58vouL61H40"
-    }
+        + currentPassword: `f2FqYbmQZHXuPbdq` (string) - Customer's current password.
+        + newPassword: `xt3hP58vouL61H40` (string) - New password.
+
 
 + Response 204
     Password change successful.
     + Body
 
-+ Response 422(application/json)
+
++ Response 422 (application/json)
     Password change was not successful.
     + Attributes (Errors)
 
@@ -438,57 +262,76 @@ Use this endpoint to change password of a logged-in customer.
 Use this endpoint to set a new password for:
 * new customer (registration)
 * existing customer (forgotten password)
-+ Request (application/json)
++ Request (application/json; charset=utf-8)
     + Attributes (object)
-        + password (string) - New password.
-        + token (string) - Verification token.
-    + Body
-    {
-        "password": "f2FqYbmQZHXuPbdq",
-        "token": "a5d46273922540caa2432359367abc5c"
-    }
+        + password: `f2FqYbmQZHXuPbdq` (string) - New password.
+        + token: `a5d46273922540caa2432359367abc5c` (string) - Verification token.
 
 + Response 204
     Password set successful. 
     + Body
 
-+ Response 422(application/json)
++ Request Wrong data (application/json; charset=utf-8)
+    + Attributes (object)
+        + password: `f2FqYbmQZHXuPbdq` (string) - New password.
+        + token: `nonsensetoken` (string) - Verification token.
+
++ Response 422(application/json; charset=utf-8)
+    Password set was not successful.
+    + Attributes (Errors)
+
++ Request Short password (application/json; charset=utf-8)
+    + Attributes (object)
+        + password: `f2FqYbmQZHXuPbdq` (string) - New password.
+        + token: `short` (string) - Verification token.
+
++ Response 422(application/json; charset=utf-8)
     Password set was not successful.
     + Attributes (Errors)
     
 ## Request password reset [/account/password/reset]
 
 ### Request password reset [POST]
-Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as part of the password reset link. For security reasons, the response will not contain information if the e-mail was actually sent.
+Use this endpoint to request a password reset. If the request is successful, a verification token will be generated and send to customer's e-mail address as a part of the password reset link. For security reasons, the response will not contain any information if the e-mail was actually sent.
 
-+ Request (application/json)
++ Request (application/json; charset=utf-8)
     + Attributes (object)
-        + email (string) - Customer's e-mail address.
-    + Body
-    {
-        "email": "john.doe@yahoo.com",
-    }
-
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
 + Response 204
     Password reset request successful.
     + Body
-    
-+ Response 422(application/json)
+
++ Request Wrong Fields (application/json; charset=utf-8)
+    + Body
+    ```
+            {
+            "string": "nonsense"
+            }
+    ```
++ Response 422 (application/json; charset=utf-8)
     Invalid input data.
     + Attributes (Errors)
 
++ Request No Data (application/json; charset=utf-8)
+    + Body
++ Response 400 (application/json; charset=utf-8)
+    Invalid input data.
+    + Attributes (Errors)
 
-## Forgotten e-mail [/account/forgottenEmail]
-Use this resource to remind the customer his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
++ Request Not Found (application/json; charset=utf-8)
+    + Attributes (object)
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
++ Response 204 (application/json; charset=utf-8)
+
+
+## Forgotten e-mail - TBD [/account/forgottenEmail]
+Use this resource to remind the customer of his e-mail address (which is needed for login). The e-mail address will be sent to customer's phone via SMS. Customer does not need to be logged in to use this resource.
 
 ### Send e-mail address via SMS [POST]
 + Request (application/json)
     + Attributes (object)
-        + phone (string) - Customer's phone in international format.
-    + Body
-    {
-        "phone": "+420607123456",
-    }
+        + phone: `+420607123456` (string) - Customer's phone in international format.
+
 
 + Response 204
     SMS with e-mail address sent successfully.
@@ -506,14 +349,10 @@ Use this resource to remind the customer his e-mail address (which is needed for
 ## Resend registration e-mail [/account/resendRegistrationEmail]
 
 ### Resend registration e-mail [POST]
-Use this resource to resend registration e-mail to the customer. E-mail can be resent only in case it was already sent. For security reasons, the response will not contain information if the e-mail was actually sent.
+Use this resource to resend a registration e-mail to the customer. E-mail can be resent only in case it was already sent. For security reasons, the response will not contain any information if the e-mail was actually sent.
 + Request (application/json)
     + Attributes (object)
-        + email (string) - Customer's e-mail address.
-    + Body
-    {
-        "email": "john.doe@yahoo.com",
-    }
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
 
 + Response 204
     Registration e-mail was requested to be resent.
@@ -532,8 +371,8 @@ Customer profile information
 
 ### Get client information [GET]
 Get information about logged-in user.
-
-+ Response 200 (application/json;charset=UTF-8)
++ Request (application/json; charset=utf-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (Client, required)
 
 + Response 400 (application/json; charset=utf-8)
@@ -541,9 +380,7 @@ Get information about logged-in user.
         There was an error processing request
 
     + Attributes (Errors)
-    
 
-    
 # Group My contracts
 Set of resources to access and modify client's contracts.
 
@@ -553,14 +390,14 @@ Customer contracts.
 ### List of contracts [GET]
 Get a list of customer contracts.
 
-feature | supported by resource
---- | ---
-[paging](#header-paging) | no
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | no
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | no
 
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Contract], fixed-type, required)
 
@@ -573,18 +410,18 @@ Specific customer contract.
 ### Contract detail [GET]
 Get details about one customer contract.
 
-+ Request Get contract details
++ Request Get contract details (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
    + Attributes (Contract)
 
-+ Request Non-existing contract
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract`
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     + Attributes (Errors)
     
 ## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
@@ -592,16 +429,20 @@ Transactions of given contract.
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + include: `HOLD` (string, optional) - which trasactions to include. Possible values: `HOLD` (only authorization holds, e.g. non-processed transactions), `PROCESSED` (only processed transactions), `BOTH` (include both processed transactions and authorization holds)
+    + include: `HOLD` (enum, optional) - which trasactions to include. Possible values:
+        + `HOLD` - only authorization holds, e.g. non-processed transactions
+        + `PROCESSED` - only processed transactions
+        + `BOTH` - include both processed transactions and authorization holds
+
 
 ### Transactions on contract [GET]
 Get a list of transactions on contract
 
-feature | supported by resource
---- | ---
-[paging](#header-paging) | yes
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | yes
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
 
 #### Paging
 This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
@@ -637,29 +478,11 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
     + Parameters
         + contractNumber: `54307275`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Transaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
-
-## Specific transaction [/my/contracts/{contractNumber}/transactions/{transactionId}]
-Actions on specified transaction
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + transactionId: `a7718` (string, required) - ID of transaction
-
-### Transaction detail [GET]
-Get a detail of one transaction
-
-+ Request Existing transaction
-    + Parameters
-        + contractNumber: `54307275`
-        + transactionId: `a123`
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (Transaction)
-
+        
 ## Applications [/my/contracts/{contractNumber}/applications]
 Applications of given contract.
 
@@ -691,31 +514,22 @@ state            |eq,in               | `applications?filter=state|in|READY` app
 stateReason      |eq,in               | `applications?filter=stateReason|in|READY_TO_SHIP` applications that are READY_TO_SHIP
 type             |eq,in               | `applications?filter=type|in|INSTALLMENT` applications financed by installment program
 
-+ Request Existing contract
++ Request Existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `54307275`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Application], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
 
-+ Request Non-existing contract
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
-        + contractNumber: `this_is_no_contract`
+        + contractNumber: `this_is_no_contract`  (string)
 
-+ Response Non-existing contract
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-<!-- may be only warning for particular application and correct response for the others
-+ Request Bad data for application type resolution
-    + Parameters
-        + contractNumber: `54307275`
-
-+ Response 422 (application/json;charset=UTF-8)
-    Some attributes cannot be assigned.
-        + Attributes (Errors)-->
++ Response 404 (application/json; charset=utf-8)
+    Non-existing contract
+    + Attributes (Errors)
 
 ## Specific application [/my/contracts/{contractNumber}/applications/{applicationId}]
 Specific application.
@@ -727,72 +541,71 @@ Specific application.
 ### Application detail [GET]
 Get details of one application.
 
-+ Request  (application/json;charset=UTF-8)
++ Request  (application/json; charset= utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     Existing application
     + Attributes (Application)
 
-+ Request Non-existing contract (application/json;charset=UTF-8)
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     Contract not found.
     + Attributes (Errors)
 
-+ Request Non-existing application (application/json;charset=UTF-8)
++ Request Non-existing application (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `6605812455` (string, required) - ID of contract
         + applicationId: `this_is_no_application` (string, required) - ID of application
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     Application not found.
     + Attributes (Errors)
-
-+ Request Bad data for application type resolution
-    + Parameters
-        + contractNumber: `54307275`
-        + applicationId: `a7718` (string, required) - ID of application
-
-+ Response 422 (application/json;charset=UTF-8)
-    Some attributes cannot be assigned.
-        + Attributes (Errors)
 
 ### Cancel application [DELETE]
 Cancel application processing.
 
-+ Request  (application/json;charset=UTF-8)
++ Request  (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 204 (application/json;charset=UTF-8)
++ Response 204 (application/json; charset=utf-8)
     Application processing was cancelled.
     + Body
 
-+ Request Invalid application state (application/json;charset=UTF-8)
++ Request Invalid application state (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 422 (application/json;charset=UTF-8)
++ Response 422 (application/json; charset=utf-8)
     Application cannot be cancelled.
     + Attributes (Errors)
 
-+ Request Non-existing contract (application/json;charset=UTF-8)
++ Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract` (string, required) - ID of contract
         + applicationId: `a7718` (string, required) - ID of application
 
-+ Response 404 (application/json;charset=UTF-8)
++ Response 404 (application/json; charset=utf-8)
     Contract or application not found.
     + Attributes (Errors)
 
++ Request non existent application (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Application cannot be cancelled.
+    + Attributes (Errors)
 
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
 Installments of given contract (installment schedule for CEL contract)
@@ -826,11 +639,11 @@ filter name      | possible operators | example
 ---              | ---                | ---
 type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEMENT` only documents of type "MžsŪŤnŪ vżpis"
 
-+ Request  (application/json;charset=UTF-8)
++ Request  (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718`
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
@@ -838,10 +651,10 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
 If the request was recognized as duplication, HTTP status code 200 and the *application* object created during the first related successful request is received.
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                     |
+| ---         | ---                   | ---                         |
+| 400         | INVALID_REQUEST       | *Various messages possible* |
+| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 
 ### Create application [POST]
@@ -868,19 +681,10 @@ Create new *application* of particular type
 ## Payments [/my/payments]
 Payments operations.
 
-### List of payments [GET]
-Get a list of all prepared payment orders.
-
-+ Response 200 (application/json;charset=UTF-8)
-    + Attributes (object)
-        + data (array[DomesticPaymentOrderStatus], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
-
-
 ### Request new payment [POST]
 Prepare payment order data for specified repayments. TODO: add payment method.
 
-+ Request  (application/json;charset=UTF-8)
++ Request TRANSFER/SAZKA (application/json; charset=utf-8)
     + Attributes (PaymentRequest)
 
 + Response 200(application/json; charset=utf-8)
@@ -889,7 +693,9 @@ Prepare payment order data for specified repayments. TODO: add payment method.
 
     + Attributes (DomesticPaymentOrder)
 
-
++ Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json; charset=utf-8)
+    + Attributes (PaymentRequest)
+    
 + Response 200(application/json; charset=utf-8)
 
         Payment order method CARD/PLATBA24/MOJE_PLATBA/EKONTO was prepared and can be paid.
@@ -913,7 +719,7 @@ Get all possible repayment options
 ### Repayment options [GET]
 Get prioritized list of possible installments that are available for repayment. If no amount is specified, upper bound of repayment is calculated according to business rules (e.g. including all possible installments).
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[PaymentItem], fixed-type, required)
 
@@ -928,17 +734,16 @@ Get prioritized list of possible installments that are available for repayment. 
 Client may pay his deffered payments by revolving loan, either by installment program or by drawing from balance. This resource provide information about possibility to use this payment method.
 
 Possible error codes:
-| Status code | Code | Message |
-| --- | ---                   | ---                         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                     |
+| ---         | ---                   | ---                         |
+| 400         | INVALID_REQUEST       | *Various messages possible* |
+| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 ### Revolving payment availability [POST]
 Check the availability to pay given Applications by revolving loan.
 
 + Request (application/json; charset=utf-8)
     + Attributes (RevolvingPaymentAvailabilityRequest)
-
 
 + Response 200(application/json; charset=utf-8)
 
@@ -947,89 +752,16 @@ Check the availability to pay given Applications by revolving loan.
     + Attributes (RevolvingPaymentAvailability)
 
 
-+ Response 400(application/json; charset=utf-8)
++ Request Wrong data (application/json; charset=utf-8)
+    + Attributes (RevolvingPaymentAvailabilityRequest)
+
++ Response 422 (application/json; charset=utf-8)
 
         There was an error processing request
 
     + Attributes (Errors)
-# Group My Offers
-
-## Installment programs calculations [/my/calculations]
-When a customer wants to use a loan as a payment method and he wants to see an offer of available installment programs, `/my/calculations` resource with properly filled request that contains at least following data is used:
-- Payment value
-
-If the request was successfully processed, HTTP status code 200 and array of objects of available installment programs with at least following information in the response is received:
-- Installment program (array)
-  - Installment program product code
-  - Installment program type
-  - Installment amount
-  - Number of installments
-
-In other cases, following errors are received:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
 
 
-### Calculate installment programs [POST]
-Calculate installment programs offer according to specified input
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramsCalculationsRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Installment programs collection
-
-    + Attributes (InstallmentProgramsCalculations, required)
-
-+ Response 400(application/json; charset=utf-8)
-        Error in processing request
-
-    + Attributes (Errors)
-
-
-## Installment program detail calculation [/my/calculationDetails]
-When a customer wants to know details of one of previously offered installment programs, `/my/calculation` resource with properly filled request that contains at least following data is used:
-- Product code of given installment program
-- Payment value
-
-If the request was successfully processed, HTTP status code 200 and object of information about specified installment program with at least following information in the response is received:
-- Installment program type
-- Installment amount
-- Number of installments
-- Installment program details
-
-In other cases, one of the following errors is received:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-
-### Calculate installment program detail [POST]
-Calculate installment program detailed information.
-
-It returns the installment program that most closely matches specified input.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramCalculationRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Detailed information about installment program
-
-    + Attributes (InstallmentProgramCalculation)
-
-
-+ Response 422(application/json; charset=utf-8)
-
-        No installment program was found
-
-    + Attributes (Errors)
 # Group My Documents
 
 ## Documents for client [/my/documents]
@@ -1052,7 +784,7 @@ filter name      | possible operators | example
 type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_AGREEMENT` only documents of type "Smlouva o pouěŪvŠnŪ online aplikacŪ"
 
 
-+ Response 200 (application/json;charset=UTF-8)
++ Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
@@ -1152,7 +884,7 @@ Financial amount with VAT rate.
   + middleNames: Peter, Frank (array[string], optional) - middle names
   + lastName: Doe (string, required) - user family name
 + fullName: `Ing. John Petetr Frank Doe, PhD.` (string, optional) - client full name
-+ salutation: Mr. (string, optional) - salutation, e.g. Mr. or Mrs.
++ salutation: Mr. (string, optional, nullable) - salutation, e.g. Mr. or Mrs.
 + gender: `MALE` (enum, required)
     + `MALE`
     + `FEMALE`
@@ -1161,14 +893,13 @@ Financial amount with VAT rate.
 + phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
 + emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
 + username: `memyself@mine.com` (string, required) - client's self care zone username
-+ identityDocuments: (array[IdentityDocument], fixed-type, optional) - client identity documents
++ identityDocuments (array[IdentityDocument], fixed-type, optional) - client identity documents
 
 
 ## Contract (object)
 + contractNumber: `12345678` (string, required) - ID of a contract
 + applicationCreatedAt: `2016-01-01` (string, required) - date when application was created
 + name: `Tesco karta` (string, required) - human-readable contract (product) name
-+ productVisualUrl (string, optional) - URL of product visual for this contract
 + contractType: `CEL` (enum, required) - contract type
    + `CEL` - Close End Loan
    + `REL` - Revolving Loan
@@ -1184,38 +915,9 @@ Financial amount with VAT rate.
 + currentInstallmentDueDate: `2017-10-13` (string, optional) - current installment due date (DEFPAY closest application due date)
 + currentDPD: 8 (number, optional) - current days past due of contract (DEFPAY closest application DPD)
 + One Of
-   + CELAdditionalInfo (object, required)
-        + approveDate: `2017-01-08` (string, required) - date when contract was approved
-        + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
-        + tenor: 10 (number, optional) - number of installment of contract when signed
-        + monthlyInstallment (Amount, required) - monthly installment amount a client need to repay
-        + monthlyInterestRate: 2.96 (number,  required) - monthly interest rate in percent
-        + credit (Amount, required) - total amount a client ask for loan, including insurance amount
-        + downPayment (Amount, required) - total down payment amount of  a client
-        + signedAt: `2016-01-25` (string, required) - date when contract was signed
-        + productInformation: `Credit card loan (REL_POS-01)` (string, optional)
-        + productCode:`CCX_INI_0001` (string, required) - code of product
-   + RELAdditionalInfo (object, required)
-        + approveDate: `2017-01-08` (string, required) - date when contract was approved
-        + additionalDocumentsNeeded: `false` (boolean, optional) - true when client's additional documents needed for further contract processing
-        + currentInstallmentGP (Amount, required) - current installment for using grace period amount
-        + signedAt: `2016-01-25` (string, required) - date when contract was signed
-        + productInformation: `Credit card loan (REL_POS-01)` (string, optional)
-        + productCode:`CCX_INI_0001` (string, required) - code of product
-        + availableCreditBalance (Amount, required) - available credit balance of an account
-        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account
-        + moneyTransferInfo (MoneyTransferAvailability, required) - money transfer availability information
-        + defPayInfo (object, required) - transactions for deferred payments info
-            + blockedAmount (Amount, required) - amount of all unconfirmed transactions for deferred payments
-            + blockedCount (number, required) - count of all unconfirmed transactions for deferred payments
-        + legalTermination (object, optional)
-            + status: `TERMINATED` (enum, required) - legal termination state
-                + `TO_TERMINATE` - legal termination is being processed
-                + `TERMINATED` - legal termination done
    + DEFPAYAdditionalInfo (object, required)
         + availableCreditBalance (Amount, required) - available credit balance of an account
         + creditLimit (Amount, fixed-type, required) - credit limit amount of an account   
-        + remainingOrdersCount: 4 (number, required) - count of orders that can be realised
 
 ## AccountNumber (object)
 + One Of
@@ -1383,18 +1085,20 @@ Financing application base information
     + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
     + `PROCESSING_NEW` - New application created
     + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
-    + `REJECTED` - Rejected by HC
     + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
-    + `PROCESSING_REVIEW` - Manual review by HC in progress
+    + `PROCESSING_REVIEW` - Review in progress
     + `PROCESSING_WAIT_CLIENT` - To be completed by client
     + `PROCESSING_ALT_OFFER` - Alternative offered to client
     + `PROCESSING_SIGNED` - Signed by client, to verification by HC
-    + `CANCELLED_NOT_PAID` - Cancelled before delivery
+    + `PROCESSING_VALIDATION_IN_PROGRESS` - Processing, validation in progress
     + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
     + `READY_SHIPPED` - Goods shipped to client
     + `READY_DELIVERING` - Verification of goods delivery
     + `READY_DELIVERED` - Goods delivered to client
     + `READY_PAID` - Paid to merchant
+    + `READY_TO_PAY` - Ready - to pay
+    + `REJECTED` - Rejected by HC
+    + `CANCELLED_NOT_PAID` - Cancelled before delivery
     + `CANCELLED_TO_RETURN` - Cancelled after delivery, goods to be returned (not implemented)
     + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
 
@@ -1406,12 +1110,8 @@ Financing application.
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
 + `order` (Order, optional) - Order data. One and only one of `order` or `liability` objects is provided
 + `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
-+ `type`: `TRY_AND_PAY` (enum, optional) - Financing type
-    + `DEFERRED_PAYMENT` - Pay later ("zaplaĚ pozdžji")
-    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkouöej a zaplaĚ")
-    + `INSTALLMENT` - Pay in monthly installments ("nŠkup na splŠtky")
-    + `SUBSCRIPTION` - Recurring payment ("pÝedplatnť, nebo opakovanŠ platba")
-    + `INTERNAL` - Application created "technical way"
++ `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
+    + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
 + `gatewayRedirectUrl`: `https://myloan.homecredit.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
 + `applicationOrigin` (object, optional) - if the application was created based on other application
@@ -1420,22 +1120,18 @@ Financing application.
 + `eshopAdditionalInfo` (object, optional) - other information for particular salesroom connected to this application
     + `name`: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
     + `logoUrl`: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
-+ `defpayAdditionalInfo` (object, optional) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
++ `defpayAdditionalInfo` (object, optional, nullable) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
     + `currentDebt` (Amount, required) - Actual debt amount
-    + `dueDate`: `2016-11-15` (string, required) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
-    + `dueDateClient`: `2016-11-14` (string, optional) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
+    + `dueDate`: `2016-11-15` (string, optional, nullable) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
+    + `dueDateClient`: `2016-11-14` (string, optional, nullable) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
     + `currentDpd`: 2 (number, required) - current days past due
-    + `blockedOnContractNumber`: `01-6010027378` (string, optional) - contract when application is prepared to be paid from RU balance after dueDateClient
-    + `paidFromContractNumber`: `01-6010027378` (string, optional) - contract when application was paid by revolving loan
-    + `completelyPaid`: `true` (boolean, optional) - information if this application is completely paid and there is no expected payment from client
-    + `paymentAvailability`: (PaymentAvailability, optional) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
-    + `revolvingPaymentInfo`: (object, optional) - information about revolving loan payment method (installments or balance)
-        + `availability`: (RevolvingPaymentAvailability, optional) - information about possibility to pay application by revolving loan
-        + `application`: (ApplicationBase, optional) - information about revolving payment application (Homer application)
-+ `installmentAdditionalInfo` (object, optional) - additional application information for INSTALLMENT application type
-    + `financedAmount` (Amount, required) - amount really financed by HC (price minus downPayment)
-    + `applicationSignDate`: `2017-01-19` (string, optional) - Date of signature confirmation of the application by client
-    + `installmentProgram` (InstallmentProgram, optional) - installment program information
+    + `blockedOnContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application is prepared to be paid from RU balance after dueDateClient
+    + `paidFromContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application was paid by revolving loan
+    + `completelyPaid`: `true` (boolean, optional, nullable) - information if this application is completely paid and there is no expected payment from client
+    + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
+    + `revolvingPaymentInfo` (object, optional, nullable) - information about revolving loan payment method (installments or balance)
+        + `availability` (RevolvingPaymentAvailability, optional, nullable) - information about possibility to pay application by revolving loan
+        + `application` (ApplicationBase, optional, nullable) - information about revolving payment application (Homer application)
 
 
 ## RevolvingPaymentAvailabilityRequest (object)
@@ -1593,14 +1289,14 @@ Additional information about broker application
 ## Card (object)
 + id: 12 (number, required) - internal card ID
 + cardNumber: `516822******1234` (string, required) - masked card number
-+ cardStatus: (enum, required) - card status
++ cardStatus (enum, required) - card status
     + INACTIVE - card has yet to be activated
     + ACTIVE - card is active
     + BLOCKED - card is blocked
     + LOST - card is reported lost
     + STOLEN - card is reported stolen
     + CANCELLED - card is cancelled
-+ cardType: (enum, required)
++ cardType (enum, required)
     + CREDIT - credit card
     + STICKER - contactless sticker
     + VIRTUAL - virtual card
@@ -1720,10 +1416,6 @@ Purchase transormed into installments
 ## PaymentItem (object)
 + `contractNumber`: `01-123456789` (string, required) - applications respective contract or a contract to be repaid as a whole
 + `applicationIds` (array[string], fixed-type, optional) - list of applications to be repaid
-+ `revolvingItemType`: `MIN_INSTALLMENT` (enum, optional) - revolving item type
-    + `MIN_INSTALLMENT` - minimal installment amount
-    + `GRACE_PERIOD` - amount to pay to use a grace period
-    + `WHOLE_DEBT` - amount to repay a whole debt
 
 ## PaymentRequest (object)
 + `items` (array[PaymentItem], fixed-type, required) - list of payment items to be repaid
@@ -1731,10 +1423,10 @@ Purchase transormed into installments
 + `method`: `TRANSFER` (enum, required) - payment method
     + `TRANSFER` - money transfer
     + `CARD` - card payment
+    + `SAZKA` - payment by Sazka - currently turned off
     + `PLATBA24` - Ceska Sporitelna online payment
     + `MOJE_PLATBA` - Komercni Banka online payment
     + `EKONTO` - Raiffeisen online payment
-    + `SAZKA` - payment by Sazka
 + `redirectUrls` (MerchantUrls, optional) - Collection of URLs used for redirection of a customer back to an application, based on payment result. Only usefull for method=`CARD`
 
 
