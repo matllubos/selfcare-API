@@ -719,14 +719,6 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
         + data (array[HistoryApplication], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
 
-+ Request Non-existing contract (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `this_is_no_contract`  (string)
-
-+ Response 404 (application/json; charset=utf-8)
-    Non-existing contract
-    + Attributes (Errors)
-
 
 ## Specific application [/historydata/my/applications/{applicationId}]
 Specific application.
@@ -1314,7 +1306,6 @@ Financing application.
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
     + `TRY_AND_PAY` - Vyskoušej a zaplať
-+ `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
 + `applicationOrigin` (object, optional) - if the application was created based on other application
     + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
     + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
