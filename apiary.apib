@@ -900,23 +900,11 @@ type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_A
 + `currency`: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 
-## HistoryAmount (object)
-+ `amount`: 12590 (number, optional, nullable) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-+ `currency`: `CZK` (string, optional, nullable) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-
-
 ## VatAmount (Amount)
 Financial amount with VAT rate.
 
 ### Properties
 + `vatRate`: 15 (number, required) - VAT rate as natural number (15 represents 15% rate)
-
-
-## HistoryVatAmount (HistoryAmount)
-Financial amount with VAT rate.
-
-### Properties
-+ `vatRate`: 15 (number, optional, nullable) - VAT rate as natural number (15 represents 15% rate)
 
 
 ## TokenCodeRequest (object)
@@ -1418,7 +1406,7 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + `type`: `GOODS` (enum, required) - Order type
     + `GOODS` - Purchase of (physical) goods on eshop
     + `GOODS_BROKER` - Purchase of (physical) goods on eshop mediated by broker. "Deffered payment" or "Try and pay" are some examples of this type of order.
-+ `totalVat` (array[HistoryVatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
++ `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
 + `items` (array[HistoryItem], fixed-type, required) - Items in order
 + `documents` (array[HistoryDocument], fixed-type, optional) - Attached documents (invoices etc.)
 + `state`: `APPROVING` (enum, required) - Order state.
@@ -1453,7 +1441,7 @@ Detailed information about order (type `LIABILITY`)
 
 ## HistoryItemBase (object)
 + `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
-+ `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
++ `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
 + `image` (HistoryFile, optional) - Item image
 
 
@@ -1512,9 +1500,9 @@ Order item information, needed to create an application.
 + `variant`: `32GB SpaceGray` (string, optional) - Item variant
 + `description`: `Mobile phone with 32GB of RAM` (string, optional)
 + `producer`: `Apple` (string, optional)
-+ `unitPrice` (HistoryAmount, optional, nullable) - Price per one piece. If empty, automatically considered that `unitPrice` is `totalPrice` / `quantity`.
-+ `unitVat` (HistoryVatAmount, optional, nullable) - VAT amount per one piece. If empty, automatically considered that `unitVat` is `totalVat` / `quantity`.
-+ `totalVat` (HistoryVatAmount, optional, nullable) - Total VAT amount for all pieces
++ `unitPrice` (Amount, optional, nullable) - Price per one piece. If empty, automatically considered that `unitPrice` is `totalPrice` / `quantity`.
++ `unitVat` (VatAmount, optional, nullable) - VAT amount per one piece. If empty, automatically considered that `unitVat` is `totalVat` / `quantity`.
++ `totalVat` (VatAmount, optional, nullable) - Total VAT amount for all pieces
 + `productUrl`: `https://www.example.com?itemId=10` (string, optional) - URL of the item in e-shop
 + `state`: `PROCESSING` (enum, required) - Order state.
     + `PROCESSING` - Order item delivery is being processed by merchant
