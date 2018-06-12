@@ -682,52 +682,8 @@ Create new *application* of particular type
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
 
-## Customer contracts [/historydata/my/contracts]
-Customer contracts.
-
-### List of contracts [GET]
-Get a list of customer contracts.
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | no
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | no
-
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[HistoryContract], fixed-type, required)
-
-## Customer contract detail [/historydata/my/contracts/{contractNumber}]
-Specific customer contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Contract detail [GET]
-Get details about one customer contract.
-
-+ Request Get contract details (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json; charset=utf-8)
-   + Attributes (HistoryContract)
-
-+ Request Non-existing contract (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `this_is_no_contract`
-
-+ Response 404 (application/json; charset=utf-8)
-    + Attributes (Errors)
-
-        
-## Applications [/historydata/my/contracts/{contractNumber}/applications]
+## Applications [/historydata/my/applications]
 Applications of given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
 
 ### Applications on contract [GET]
 Get a list of applications on given contract.
@@ -772,11 +728,10 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
     + Attributes (Errors)
 
 
-## Specific application [/historydata/my/contracts/{contractNumber}/applications/{applicationId}]
+## Specific application [/historydata/my/applications/{applicationId}]
 Specific application.
 
 + Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
     + applicationId: `a7718` (string, required) - ID of application
 
 ### Application detail [GET]
@@ -808,48 +763,6 @@ Get details of one application.
 + Response 404 (application/json; charset=utf-8)
     Application not found.
     + Attributes (Errors)
-
-
-## Installments [/historydata/my/contracts/{contractNumber}/installments{?selection}]
-Installments of given contract (installment schedule for CEL contract)
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + selection: `current` (enum, optional) - request one specific installment
-        + `first` - first installment
-        + `previous` - installment preceding current installment (ie. installment with due date in previous month)
-        + `current` - current installment (ie. installment with due date in current month)
-
-## Documents for contract [/historydata/my/contracts/{contractNumber}/documents]
-Documents issued on given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Documents for contract [GET]
-Get a list of documents issued on given contract.
-
-feature                       | supported by resource
----                           | ---
-[paging](#header-paging)      | no
-[sorting](#header-sorting)    | no
-[filtering](#header-filtering)| yes
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name      | possible operators | example
----              | ---                | ---
-type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEMENT` only documents of type "MžsŪŤnŪ vżpis"
-
-+ Request  (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[Document], fixed-type, required)
-
 
 
 # Group My Payments
@@ -1397,8 +1310,7 @@ Financing application.
 
 ### Properties
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (HistoryOrder, optional) - Order data. One and only one of `order` or `liability` objects is provided
-+ `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
++ `order` (HistoryOrder, required) - Order data. One and only one of `order` or `liability` objects is provided
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
     + `TRY_AND_PAY` - Vyskoušej a zaplať
