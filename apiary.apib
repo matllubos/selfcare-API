@@ -381,6 +381,52 @@ Get information about logged-in user.
 
     + Attributes (Errors)
 
+# Group Personal data
+Resource group for managing customer's personal data
+
+## Personal data request [/personalData/request/]
+
+### Personal data request [POST]    
+Use this enpoint to request personal data operation
+
++ Request (application/json)
+    + Attributes (object)
+        + firstName (string) - First name
+        + lastName (string) - Last Name
+        + email (string, required) - email of person whom wants to process gdpr request
+        + subject (string, required) - GDPR request type
+        + message (string) - Additional user message for GDPR request
+        
++ Response 200 (application/json)
+    GDPR request successfully added, show message about email confirmation
+    + Attributes
+        + status: `ACCEPTED` (enum, required) - personal data request status
+            + `ACCEPTED` - request is accepted
+            + `UNCONFIRMED` - request needs to be confirmed via email
+    
++ Response 400 (application/json)
+    There was an error processing request
+    + Attributes (Errors)
+    
++ Response 422 (application/json)
+    Invalid input data.
+    + Attributes (Errors)
+    
+
+## Personal request confirm [/personalData/request/{token}/confirm]
+
+Specific customer contract.
+
+
+### Personal request confirm [GET]    
+Use this enpoint to confirm personal request operation
+
++ Parameters
+    + gdprToken: `s5as4d5a6s54d5sa6asd56` (string, required) - GDPR token
+    
++ Response 204
+    GDPR request successfull, there is no space for error
+    
 # Group My contracts
 Set of resources to access and modify client's contracts.
 
