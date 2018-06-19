@@ -362,6 +362,23 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
     Invalid input data.
     + Attributes (Errors)
 
+## Register customer [/account/registration]
+
+### Register a new customer [POST]
+Use this resource to register a new customer.
++ Request (application/json)
+    + Attributes (object)
+        + name: `John Doe` (string, required) - Customer's first and last name.
+        + email: `john.doe@yahoo.com` (string, required) - Customer's e-mail address.
+        + phone: `+420777777777` (string, required) - Customer's phone in international format.
+
++ Response 204
+    Customer has been created and registration e-mail was sent to provided e-mail address.
+    + Body
+
++ Response 422 (application/json)
+    Invalid input data or customer with provided e-mail address already exists.
+    + Attributes (Errors)
 
 # Group My profile
 Resources for accessing and modifying user personal data.
