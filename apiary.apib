@@ -318,6 +318,10 @@ Use this endpoint to request a password reset. If the request is successful, a v
     Invalid input data.
     + Attributes (Errors)
 
++ Response 429 (application/json)
+    Request throttling in effect.
+    + Attributes (Errors)
+
 + Request Not Found (application/json; charset=utf-8)
     + Attributes (object)
         + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
@@ -345,7 +349,7 @@ Use this resource to remind the customer of his e-mail address (which is needed 
     SMS with e-mail address was not sent. Following errors codes are possible:
     * CUSTOMER_DOES_NOT_EXIST
     + Attributes (Errors)
-    
+
 ## Resend registration e-mail [/account/resendRegistrationEmail]
 
 ### Resend registration e-mail [POST]
@@ -362,22 +366,30 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
     Invalid input data.
     + Attributes (Errors)
 
++ Response 429 (application/json)
+    Request throttling in effect.
+    + Attributes (Errors)
+
 ## Register customer [/account/registration]
 
 ### Register a new customer [POST]
 Use this resource to register a new customer.
 + Request (application/json)
     + Attributes (object)
-        + name: `John Doe` (string, required) - Customer's first and last name.
+        + name: `John Doe` (string, required) - Customer's full name (first and last name).
         + email: `john.doe@yahoo.com` (string, required) - Customer's e-mail address.
         + phone: `+420777777777` (string, required) - Customer's phone in international format.
 
 + Response 204
-    Customer has been created and registration e-mail was sent to provided e-mail address.
+    Customer has been created (or one with unfinished registration was matched based on e-mail/phone) and registration e-mail was sent to customer's e-mail address.
     + Body
 
 + Response 422 (application/json)
-    Invalid input data or customer with provided e-mail address already exists.
+    Invalid input data or customer with provided e-mail/phone and finished registration already exists.
+    + Attributes (Errors)
+
++ Response 429 (application/json)
+    Request throttling in effect.
     + Attributes (Errors)
 
 # Group My profile
