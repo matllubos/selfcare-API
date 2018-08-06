@@ -211,7 +211,14 @@ Resource group for managing customer's account.
 ## Customer login [/account/login]
 
 ### Login customer [POST]
-Use this endpoint to obtain the access token.
+Use this endpoint to obtain the access token. There are two possible ways to log in:
+
+#### Classic login
+Provide `username` and `password`.
+
+#### Facebook login
+Provide `facebookAccessToken`.
+
 + Request (application/json; charset=utf-8)
     + Attributes (CustomerLogin)
 
@@ -220,7 +227,10 @@ Use this endpoint to obtain the access token.
     + Attributes (CustomerLoginResult)
 
 + Response 422(application/json; charset=utf-8)
-    Unable to authenticate the customer.
+    Unable to authenticate the customer. List of error codes special for this endpoint:
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any Lymet account. Immediate registration is possible.
+    - `INVALID_LOGIN` - Username or password is wrong.
     + Attributes (Errors)
 
 ## Customer logout - TBD [/account/logout]  
@@ -373,19 +383,35 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
 ## Register customer [/account/registration]
 
 ### Register a new customer [POST]
-Use this resource to register a new customer.
+Use this resource to register a new customer. There are two ways of registration:
+
+#### Classic registration
+Provide `name`, `email` and `phone`.
+
+#### Facebook registration
+Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
+
 + Request (application/json)
     + Attributes (object)
-        + name: `John Doe` (string, required) - Customer's full name (first and last name).
-        + email: `john.doe@yahoo.com` (string, required) - Customer's e-mail address.
-        + phone: `+420777777777` (string, required) - Customer's phone in international format.
+        + name: `John Doe` (string) - Customer's full name (first and last name).
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
+        + phone: `+420777777777` (string) - Customer's phone in international format.
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
 
-+ Response 204
-    Customer has been created (or one with unfinished registration was matched based on e-mail/phone) and registration e-mail was sent to customer's e-mail address.
-    + Body
-
++ Response 200
+    Customer has been registered.
+    + Attributes (object)
+        + status: `REGISTRATION_FINISHED` (enum, required) - Registration status.
+            + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
+            + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
+        
 + Response 422 (application/json)
-    Invalid input data or customer with provided e-mail/phone and finished registration already exists.
+    Customer has not been registered. List of error codes special for this endpoint:
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing Lymet account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing Lymet account. Immediate login is possible.
+    - `ALREADY_EXISTS` - Lymet account with this email/phone already exists.
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched Lymet account e-mail address.
     + Attributes (Errors)
 
 + Response 429 (application/json)
@@ -1894,8 +1920,12 @@ Collection of URLs used for redirection of a customer back to a partner website 
 
 ## CustomerLogin (object)
 ### Properties
-+ `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
-+ `password`: `secretpassword1234` (string, required) - Customer's password
++ One of
+    + Properties
+        + `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
+        + `password`: `secretpassword1234` (string, required) - Customer's password
+    + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+
 
 ## CustomerLoginResult (object)
 ### Properties
