@@ -401,7 +401,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
 + Response 200
     Customer has been registered.
     + Attributes (object)
-        + status: `REGISTRATION_FINISHED` (enum, required) - Registration status.
+        + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
             + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
         
