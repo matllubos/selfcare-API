@@ -418,6 +418,47 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     Request throttling in effect.
     + Attributes (Errors)
 
+## Request account upgrade [/account/requestUpgrade]
+Use this resource to manage customer's requests for upgrading his account type.
+
+### Create account upgrade request [POST]
+Use this endpoint to create a new account upgrade request for a logged in user. The request will be created implicitly for PREMIUM account type.
+
++ Request (application/json)
+    + Attributes (object)
+        + personalId: `790812/5566` (string, required) - Customer's personal ID.
+        + idCardNo: `112365447` (string, required) - Customer's ID card number.
+        + idCardExpiryDate: `2025-01-01` (string, required) - Customer's ID card expiration date.
+        + documents (array[PersonalDocument], required) - Two personal documents scanned from both sides (i.e. 4 documents).
+
++ Response 201
+    Account upgrade request has been created.
+
++ Response 422 (application/json)
+    Account upgrade request has not been created.
+
+    All errors have error messages that can be directly displayed to user. Possible error codes for a non-attribute errors are following:
+    - `PROCESSING_REQUEST` - There already exists account upgrade request in processing state. It must be resolved before proceeding.
+    - `ALREADY_APPROVED` - Previous account upgrade request was already approved, there's no point for creating a new one.
+    + Attributes (Errors)
+
+### Get last account upgrade request state [GET]
+Use this endpoing to query last account upgrade request's state.
+
++ Request (application/json)
+
++ Response 200
+    + Attributes (object)
+        + state: `PROCESSING` (enum, required) - last account upgrade request state.
+            + `PROCESSING` - Account upgrade request is beeing processed by Lymet staff.
+            + `APPROVED` - Account upgrade request has been approved.
+            + `DENIED` - Account upgrade request has been denied.
+
++ Response 404
+    No account upgrade request exists.
+    + Body
+
+
 # Group My profile
 Resources for accessing and modifying user personal data.
 
@@ -1931,3 +1972,20 @@ Collection of URLs used for redirection of a customer back to a partner website 
 ### Properties
 + `accessToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Access token
 + `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
+
+## PersonalDocumentFile (object)
+### Properties
++ `filename`: `driving_license_scan.jpg` (string, optional) - File name
++ `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content (Base64 encoded)
+
+## PersonalDocument (object)
+Customer's personal document
+### Properties
++ `type` (enum, required) - Type of the document
+    + `ID_CARD_FRONT` - ID Card (front side)
+    + `ID_CARD_BACK` - ID Card (back side)
+    + `PASSPORT_FRONT` - Passport (front side)
+    + `PASSPORT_BACK` - Passport (back side)
+    + `DRIVING_LICENSE_FRONT` - Driving license (front side)
+    + `DRIVING_LICENSE_BACK` - Driving license (back side)
++ `file` (PersonalDocumentFile, required) - Attached file
