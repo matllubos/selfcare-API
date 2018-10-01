@@ -749,6 +749,80 @@ Cancel application processing.
     Application cannot be cancelled.
     + Attributes (Errors)
 
+## Getting list of application item services [/my/contracts/{contractNumber}/application/item/service]
+Services on given application items
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | no
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+item             |in,eq               | `service?item=id|eq|single_item_id` only items with id of "single_item_id"
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### List of application items with services [GET]
+Get a list of application order items, that have services
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+
++ Response 200 (application/json, charset=utf-8)
+    + Attributes (object)
+        + `items` (array[Item], required) - List of application order items
+
++ Request Non-existing contract (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
+## Ordering services for application items [/my/contracts/{contractNumber}/application/item/service/{serviceId}]
+Ordering Services on given application items
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + serviceId: `service-adp` (string, required) - ID of service
+
+### Ordering services for application items [PUT]
+Allows ordering of the service based on previous offer
+
++ Request (application/json; charset=utf-8)
+    Correct request.
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + serviceId: `service-adp` (string, required) - ID of service
+    
++ Response 204 (application/json; charset=utf-8)
+
++ Request Non-existing contract (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+        + serviceId: `service-adp` (string, required) - ID of service
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
++ Request Non-existing service (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + serviceId: `this_is_no_service` (string, required) - ID of service
+
++ Response 404 (application/json; charset=utf-8)
+    Service not found.
+    + Attributes (Errors)
+
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
 Installments of given contract (installment schedule for CEL contract)
 
@@ -1632,6 +1706,7 @@ Order item information, needed to create an application.
 + `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional) - Date and time when item was sent. Only when the whole order was NOT sent at once.
 + `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
++ `services` (array[InsuranceService]) - insurance services objects for item
 
 
 ## HistoryItem (HistoryItemBase)
@@ -1669,6 +1744,23 @@ Order item information, needed to create an application.
 + `deliveryTrackingNumber`: `EX21121` (string, optional, nullable) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
 
+## InsuranceService (object)
+MIA Service object
+
+### Properties
++ `id`: 'service-01' (string, required) - service Id
++ `status`: OFFER (enum, required) - status of service
+    + `OFFER`
+    + `WAITING_PAYMENT`
+    + `ACTIVE`
++ `priority`: 1 (number, optional) - priority of service
++ `price` (Amount, required) - Price of service
++ `itemId`: `item-string-id` (string, required)
++ `applicationId`: `application-string-id` (string, required)
++ `groupSlug`: `ADVANCED_DAMAGE_PROTECTION` (string, required)
++ `excludesIds` (array[string]) - list of service IDs this service is mutually exclusive with
++ `extraData`
+    + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
 
 ## LiabilityItem (ItemBase)
 Order item information, needed to create an application.
