@@ -749,27 +749,31 @@ Cancel application processing.
     Application cannot be cancelled.
     + Attributes (Errors)
 
-## Getting list of application item services [/my/contracts/{contractNumber}/application/item/service]
+## Getting list of application item services [/my/contracts/{contractNumber}/application/item]
 Services on given application items
 
 feature                       | supported by resource
 ---                           | ---
-[paging](#header-paging)      | no
+[paging](#header-paging)      | yes
 [sorting](#header-sorting)    | no
 [filtering](#header-filtering)| yes
+
+#### Paging
+This resource supports [paging](#header-paging). As a value to `before` and `after` parameters, use `Id` attribute.
 
 #### Filtering
 This resource supports [filtering](#header-filtering). You can use following filters:
 
 filter name      | possible operators | example
 ---              | ---                | ---
-item             |in,eq               | `service?item=id|eq|single_item_id` only items with id of "single_item_id"
+data             |in,eq               | `item?filter=data|eq|list_of_item_ids` only items in "list_of_item_ids"
+service_active   |in,eq               | `item?filter=service_active|eq|true` only items with active services
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
 
 ### List of application items with services [GET]
-Get a list of application order items, that have services
+Services on given application items
 
 + Request (application/json; charset=utf-8)
     + Parameters
@@ -787,14 +791,14 @@ Get a list of application order items, that have services
     Contract not found.
     + Attributes (Errors)
 
-## Ordering services for application items [/my/contracts/{contractNumber}/application/item/service/{serviceId}]
-Ordering Services on given application items
+## Purchasing services for application items [/my/contracts/{contractNumber}/application/item/service/{serviceId}]
+Purchasing Services on given application items
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
     + serviceId: `service-adp` (string, required) - ID of service
 
-### Ordering services for application items [PUT]
+### Purchasing services for application items [PUT]
 Allows ordering of the service based on previous offer
 
 + Request (application/json; charset=utf-8)
@@ -1753,6 +1757,7 @@ MIA Service object
     + `OFFER`
     + `WAITING_PAYMENT`
     + `ACTIVE`
+    + `CANCELLED`
 + `priority`: 1 (number, optional) - priority of service
 + `price` (Amount, required) - Price of service
 + `itemId`: `item-string-id` (string, required)
