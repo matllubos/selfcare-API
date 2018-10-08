@@ -1710,7 +1710,7 @@ Order item information, needed to create an application.
 + `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional) - Date and time when item was sent. Only when the whole order was NOT sent at once.
 + `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
-+ `services` (array[InsuranceService]) - insurance services objects for item
++ `services` (array[Service]) - insurance services objects for item
 
 
 ## HistoryItem (HistoryItemBase)
@@ -1748,7 +1748,7 @@ Order item information, needed to create an application.
 + `deliveryTrackingNumber`: `EX21121` (string, optional, nullable) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
 
-## InsuranceService (object)
+## Service (object)
 MIA Service object
 
 ### Properties
@@ -1817,23 +1817,6 @@ Additional information about broker application
 + validTo: `2017-12-31` (string, optional) - insurance validity from to
 + fee (Amount, optional) - total insurance fee
 + insuredSum (Amount, optional) - total insured sum
-
-
-## Service (object)
-+ id: `12345` (string, required) - service identificator
-+ type: `FULL_EARLY_REPAYMENT` (enum, optional) - type of services
-   + `FULL_EARLY_REPAYMENT` - service for early repayment of CEL contract
-   + `GIFT_PAYMENT` - gift service
-   + `GRACE_PERIOD` - grace period service for CEL
-   + `GRACE_PERIOD_FOR_REL` - grace period service for REL
-   + `LOYALTY` - loyalty service for REL customer
-   + `INSTALLMENT_PLAN_FOR_REL_TRANSACTION` - initial transaction of REL contract
-   + `SMS_NOTIFICATION` - notification service
-   + `STANDARD_PAYMENT_CARD` - REL only, standard payment card type Personalized or Instant
-+ code: `FER01` (string, optional) - code of service
-+ name: `Early repayment 1` (string, optional) - name of service
-+ validFrom: `2017-01-01` (string, optional) - validity from date
-+ validTo: `2017-12-31` (string, optional) - validity from to
 
 
 ## Installment (object)
