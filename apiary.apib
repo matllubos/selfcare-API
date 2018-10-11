@@ -749,6 +749,84 @@ Cancel application processing.
     Application cannot be cancelled.
     + Attributes (Errors)
 
+## Getting list of application item services [/my/contracts/{contractNumber}/application/item]
+Services on given application items
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | yes
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Paging
+This resource supports [paging](#header-paging). As a value to `before` and `after` parameters, use `Id` attribute.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+data             |in,eq               | `item?filter=data|eq|list_of_item_ids` only items in "list_of_item_ids"
+service_active   |in,eq               | `item?filter=service_active|eq|true` only items with active services
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### List of application items with services [GET]
+Services on given application items
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+
++ Response 200 (application/json, charset=utf-8)
+    + Attributes (object)
+        + `items` (array[Item], required) - List of application order items
+
++ Request Non-existing contract (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
+## Purchasing services for application items [/my/contracts/{contractNumber}/application/item/service/{serviceId}/purchase]
+Purchasing Services on given application items
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + serviceId: `service-adp` (string, required) - ID of service
+
+### Purchasing services for application items [POST]
+Allows ordering of the service based on previous offer
+
++ Request (application/json; charset=utf-8)
+    Correct request.
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + serviceId: `service-adp` (string, required) - ID of service
+    
++ Response 204 (application/json; charset=utf-8)
+
++ Request Non-existing contract (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+        + serviceId: `service-adp` (string, required) - ID of service
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
++ Request Non-existing service (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + serviceId: `this_is_no_service` (string, required) - ID of service
+
++ Response 404 (application/json; charset=utf-8)
+    Service not found.
+    + Attributes (Errors)
+
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
 Installments of given contract (installment schedule for CEL contract)
 
@@ -1632,6 +1710,7 @@ Order item information, needed to create an application.
 + `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional) - Date and time when item was sent. Only when the whole order was NOT sent at once.
 + `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
++ `services` (array[Service]) - insurance services objects for item
 
 
 ## HistoryItem (HistoryItemBase)
@@ -1669,6 +1748,23 @@ Order item information, needed to create an application.
 + `deliveryTrackingNumber`: `EX21121` (string, optional, nullable) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
 
+## Service (object)
+MIA Service object
+
+### Properties
++ `id`: 'service-01' (string, required) - service Id
++ `slug`: 'service-slug' (string, required) - service slug
++ `state`: OFFERED (enum, required) - status of service
+    + `OFFERED`
+    + `WAITING_PAYMENT`
+    + `ACTIVE`
+    + `CANCELLED`
++ `priority`: 1 (number, optional) - priority of service
++ `price` (Amount, required) - Price of service
++ `groupSlug`: `ADVANCED_DAMAGE_PROTECTION` (string, required)
++ `excludesIds` (array[string]) - list of service IDs this service is mutually exclusive with
++ `extraData`
+    + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
 
 ## LiabilityItem (ItemBase)
 Order item information, needed to create an application.
@@ -1720,23 +1816,6 @@ Additional information about broker application
 + validTo: `2017-12-31` (string, optional) - insurance validity from to
 + fee (Amount, optional) - total insurance fee
 + insuredSum (Amount, optional) - total insured sum
-
-
-## Service (object)
-+ id: `12345` (string, required) - service identificator
-+ type: `FULL_EARLY_REPAYMENT` (enum, optional) - type of services
-   + `FULL_EARLY_REPAYMENT` - service for early repayment of CEL contract
-   + `GIFT_PAYMENT` - gift service
-   + `GRACE_PERIOD` - grace period service for CEL
-   + `GRACE_PERIOD_FOR_REL` - grace period service for REL
-   + `LOYALTY` - loyalty service for REL customer
-   + `INSTALLMENT_PLAN_FOR_REL_TRANSACTION` - initial transaction of REL contract
-   + `SMS_NOTIFICATION` - notification service
-   + `STANDARD_PAYMENT_CARD` - REL only, standard payment card type Personalized or Instant
-+ code: `FER01` (string, optional) - code of service
-+ name: `Early repayment 1` (string, optional) - name of service
-+ validFrom: `2017-01-01` (string, optional) - validity from date
-+ validTo: `2017-12-31` (string, optional) - validity from to
 
 
 ## Installment (object)
