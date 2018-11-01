@@ -211,7 +211,14 @@ Resource group for managing customer's account.
 ## Customer login [/account/login]
 
 ### Login customer [POST]
-Use this endpoint to obtain the access token.
+Use this endpoint to obtain the access token. There are two possible ways to log in:
+
+#### Classic login
+Provide `username` and `password`.
+
+#### Facebook login
+Provide `facebookAccessToken`.
+
 + Request (application/json; charset=utf-8)
     + Attributes (CustomerLogin)
 
@@ -220,7 +227,10 @@ Use this endpoint to obtain the access token.
     + Attributes (CustomerLoginResult)
 
 + Response 422(application/json; charset=utf-8)
-    Unable to authenticate the customer.
+    Unable to authenticate the customer. List of error codes special for this endpoint:
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any Lymet account. Immediate registration is possible.
+    - `INVALID_LOGIN` - Username or password is wrong.
     + Attributes (Errors)
 
 ## Customer logout - TBD [/account/logout]  
@@ -318,6 +328,10 @@ Use this endpoint to request a password reset. If the request is successful, a v
     Invalid input data.
     + Attributes (Errors)
 
++ Response 429 (application/json)
+    Request throttling in effect.
+    + Attributes (Errors)
+
 + Request Not Found (application/json; charset=utf-8)
     + Attributes (object)
         + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
@@ -345,7 +359,7 @@ Use this resource to remind the customer of his e-mail address (which is needed 
     SMS with e-mail address was not sent. Following errors codes are possible:
     * CUSTOMER_DOES_NOT_EXIST
     + Attributes (Errors)
-    
+
 ## Resend registration e-mail [/account/resendRegistrationEmail]
 
 ### Resend registration e-mail [POST]
@@ -361,6 +375,88 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
 + Response 422 (application/json)
     Invalid input data.
     + Attributes (Errors)
+
++ Response 429 (application/json)
+    Request throttling in effect.
+    + Attributes (Errors)
+
+## Register customer [/account/registration]
+
+### Register a new customer [POST]
+Use this resource to register a new customer. There are two ways of registration:
+
+#### Classic registration
+Provide `name`, `email` and `phone`.
+
+#### Facebook registration
+Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
+
++ Request (application/json)
+    + Attributes (object)
+        + name: `John Doe` (string) - Customer's full name (first and last name).
+        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
+        + phone: `+420777777777` (string) - Customer's phone in international format.
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
+
++ Response 200
+    Customer has been registered.
+    + Attributes (object)
+        + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
+            + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
+            + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
+        
++ Response 422 (application/json)
+    Customer has not been registered. List of error codes special for this endpoint:
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing Lymet account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing Lymet account. Immediate login is possible.
+    - `ALREADY_EXISTS` - Lymet account with this email/phone already exists.
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched Lymet account e-mail address.
+    + Attributes (Errors)
+
++ Response 429 (application/json)
+    Request throttling in effect.
+    + Attributes (Errors)
+
+## Request account upgrade [/account/requestUpgrade]
+Use this resource to manage customer's requests for upgrading his account type.
+
+### Create account upgrade request [POST]
+Use this endpoint to create a new account upgrade request for a logged in user. The request will be created implicitly for PREMIUM account type.
+
++ Request (application/json)
+    + Attributes (object)
+        + personalId: `790812/5566` (string, required) - Customer's personal ID.
+        + idCardNo: `112365447` (string, required) - Customer's ID card number.
+        + idCardExpiryDate: `2025-01-01` (string, required) - Customer's ID card expiration date.
+        + documents (array[PersonalDocument], required) - Two personal documents scanned from both sides (i.e. 4 documents).
+
++ Response 201
+    Account upgrade request has been created.
+
++ Response 422 (application/json)
+    Account upgrade request has not been created.
+
+    All errors have error messages that can be directly displayed to user. Possible error codes for a non-attribute errors are following:
+    - `PROCESSING_REQUEST` - There already exists account upgrade request in processing state. It must be resolved before proceeding.
+    - `ALREADY_APPROVED` - Previous account upgrade request was already approved, there's no point for creating a new one.
+    + Attributes (Errors)
+
+### Get last account upgrade request state [GET]
+Use this endpoing to query last account upgrade request's state.
+
++ Request (application/json)
+
++ Response 200
+    + Attributes (object)
+        + state: `PROCESSING` (enum, required) - last account upgrade request state.
+            + `PROCESSING` - Account upgrade request is beeing processed by Lymet staff.
+            + `APPROVED` - Account upgrade request has been approved.
+            + `DENIED` - Account upgrade request has been denied.
+
++ Response 404
+    No account upgrade request exists.
+    + Body
 
 
 # Group My profile
@@ -667,6 +763,84 @@ Cancel application processing.
 
 + Response 404 (application/json; charset=utf-8)
     Application cannot be cancelled.
+    + Attributes (Errors)
+
+## Getting list of application item services [/my/contracts/{contractNumber}/application/item]
+Services on given application items
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | yes
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Paging
+This resource supports [paging](#header-paging). As a value to `before` and `after` parameters, use `Id` attribute.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+data             |in,eq               | `item?filter=data|eq|list_of_item_ids` only items in "list_of_item_ids"
+service_active   |in,eq               | `item?filter=service_active|eq|true` only items with active services
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+
+### List of application items with services [GET]
+Services on given application items
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+
++ Response 200 (application/json, charset=utf-8)
+    + Attributes (object)
+        + `items` (array[Item], required) - List of application order items
+
++ Request Non-existing contract (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
+## Purchasing services for application items [/my/contracts/{contractNumber}/application/item/service/{serviceId}/purchase]
+Purchasing Services on given application items
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + serviceId: `service-adp` (string, required) - ID of service
+
+### Purchasing services for application items [POST]
+Allows ordering of the service based on previous offer
+
++ Request (application/json; charset=utf-8)
+    Correct request.
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + serviceId: `service-adp` (string, required) - ID of service
+    
++ Response 204 (application/json; charset=utf-8)
+
++ Request Non-existing contract (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
+        + serviceId: `service-adp` (string, required) - ID of service
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
++ Request Non-existing service (application/json; charset=utf-8)
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + serviceId: `this_is_no_service` (string, required) - ID of service
+
++ Response 404 (application/json; charset=utf-8)
+    Service not found.
     + Attributes (Errors)
 
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
@@ -1552,6 +1726,7 @@ Order item information, needed to create an application.
 + `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional) - Date and time when item was sent. Only when the whole order was NOT sent at once.
 + `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
++ `services` (array[Service]) - insurance services objects for item
 
 
 ## HistoryItem (HistoryItemBase)
@@ -1589,6 +1764,23 @@ Order item information, needed to create an application.
 + `deliveryTrackingNumber`: `EX21121` (string, optional, nullable) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
 
+## Service (object)
+MIA Service object
+
+### Properties
++ `id`: `service-01` (string, required) - service Id
++ `slug`: `service-slug` (string, required) - service slug
++ `state`: OFFERED (enum, required) - status of service
+    + `OFFERED`
+    + `WAITING_PAYMENT`
+    + `ACTIVE`
+    + `CANCELLED`
++ `priority`: 1 (number, optional) - priority of service
++ `price` (Amount, required) - Price of service
++ `groupSlug`: `ADVANCED_DAMAGE_PROTECTION` (string, required)
++ `excludesIds` (array[string]) - list of service IDs this service is mutually exclusive with
++ `extraData`
+    + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
 
 ## LiabilityItem (ItemBase)
 Order item information, needed to create an application.
@@ -1640,23 +1832,6 @@ Additional information about broker application
 + validTo: `2017-12-31` (string, optional) - insurance validity from to
 + fee (Amount, optional) - total insurance fee
 + insuredSum (Amount, optional) - total insured sum
-
-
-## Service (object)
-+ id: `12345` (string, required) - service identificator
-+ type: `FULL_EARLY_REPAYMENT` (enum, optional) - type of services
-   + `FULL_EARLY_REPAYMENT` - service for early repayment of CEL contract
-   + `GIFT_PAYMENT` - gift service
-   + `GRACE_PERIOD` - grace period service for CEL
-   + `GRACE_PERIOD_FOR_REL` - grace period service for REL
-   + `LOYALTY` - loyalty service for REL customer
-   + `INSTALLMENT_PLAN_FOR_REL_TRANSACTION` - initial transaction of REL contract
-   + `SMS_NOTIFICATION` - notification service
-   + `STANDARD_PAYMENT_CARD` - REL only, standard payment card type Personalized or Instant
-+ code: `FER01` (string, optional) - code of service
-+ name: `Early repayment 1` (string, optional) - name of service
-+ validFrom: `2017-01-01` (string, optional) - validity from date
-+ validTo: `2017-12-31` (string, optional) - validity from to
 
 
 ## Installment (object)
@@ -1881,8 +2056,12 @@ Collection of URLs used for redirection of a customer back to a partner website 
 
 ## CustomerLogin (object)
 ### Properties
-+ `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
-+ `password`: `secretpassword1234` (string, required) - Customer's password
++ One of
+    + Properties
+        + `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
+        + `password`: `secretpassword1234` (string, required) - Customer's password
+    + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+
 
 ## CustomerLoginResult (object)
 ### Properties
@@ -1903,3 +2082,20 @@ Collection of URLs used for redirection of a customer back to a partner website 
 + `label`: `Proč jste hodnotil/a právě touto známkou?` (string) - question text
 + `choices`: `1, 2, 3` (array[string]) - choices for example for radioselect
 + `fields` (array[Subfield]) - question subfields
+
+## PersonalDocumentFile (object)
+### Properties
++ `filename`: `driving_license_scan.jpg` (string, optional) - File name
++ `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content (Base64 encoded)
+
+## PersonalDocument (object)
+Customer's personal document
+### Properties
++ `type` (enum, required) - Type of the document
+    + `ID_CARD_FRONT` - ID Card (front side)
+    + `ID_CARD_BACK` - ID Card (back side)
+    + `PASSPORT_FRONT` - Passport (front side)
+    + `PASSPORT_BACK` - Passport (back side)
+    + `DRIVING_LICENSE_FRONT` - Driving license (front side)
+    + `DRIVING_LICENSE_BACK` - Driving license (back side)
++ `file` (PersonalDocumentFile, required) - Attached file
