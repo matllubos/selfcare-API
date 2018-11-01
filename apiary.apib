@@ -477,6 +477,22 @@ Get information about logged-in user.
 
     + Attributes (Errors)
 
+## Questionnaire [/my/profile/questionnaire/{hash}/]
+Questionnaire for customer
+
+### Get questionnaire data [GET]
+Get questions (data) for questionnaire construction
++ Request (application/json; charset=utf-8)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + questions (array[Question], fixed-type, required) 
+
++ Response 400 (application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+
 # Group Personal data
 Resource group for managing customer's personal data
 
@@ -2051,6 +2067,21 @@ Collection of URLs used for redirection of a customer back to a partner website 
 ### Properties
 + `accessToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Access token
 + `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
+
+## Subfield (object)
+### Properties
++ `required`: `false` (boolean) - if answer is required
++ `type`: `textarea` (string) - ui widget
++ `choices`: `1, 2, 3` (array[string]) - choices for example for radioselect
+
+## Question (object)
+### Properties
++ `name`: `q1` (string) - question name
++ `required`: `false` (boolean) - if answer is required
++ `type`: `textarea` (string) - ui widget
++ `label`: `Proč jste hodnotil/a právě touto známkou?` (string) - question text
++ `choices`: `1, 2, 3` (array[string]) - choices for example for radioselect
++ `fields` (array[Subfield]) - question subfields
 
 ## PersonalDocumentFile (object)
 ### Properties
