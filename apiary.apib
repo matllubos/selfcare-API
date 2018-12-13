@@ -276,6 +276,9 @@ Use this endpoint to set a new password for:
     + Attributes (object)
         + password: `f2FqYbmQZHXuPbdq` (string) - New password.
         + token: `a5d46273922540caa2432359367abc5c` (string) - Verification token.
+        + consents (array) - List of consents given by customer
+            + `REGISTRATION` - Consent with service terms and conditions
+            + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
 
 + Response 204
     Password set successful. 
@@ -397,6 +400,9 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
         + phone: `+420777777777` (string) - Customer's phone in international format.
         + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
+        + consents  (array, required) - List of consents given by customer
+            + `REGISTRATION` - Consent with service terms and conditions (required)
+            + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
 
 + Response 200
     Customer has been registered.
@@ -1763,15 +1769,6 @@ Order item information, needed to create an application.
 + `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional, nullable) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional, nullable) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
-## ServiceDocument (object)
-+ `type`: `CONTRACT` (enum, required) - Type of the document
-    + `CONTRACT` - Contract
-    + `INVOICE` - Invoice
-    + `PROFORMA_INVOICE` - Proforma Invoice
-    + `CREDIT_NOTE` - Credit note
-    + `OTHER` - Other type of document
-    + `IPID` - IPID document
-+ `file` (File, required) - Attached file
 
 ## Service (object)
 MIA Service object
@@ -1790,7 +1787,6 @@ MIA Service object
 + `excludesIds` (array[string]) - list of service IDs this service is mutually exclusive with
 + `extraData`
     + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
-+ documents (array[ServiceDocument], required) - Array of service documents.
 
 ## LiabilityItem (ItemBase)
 Order item information, needed to create an application.
