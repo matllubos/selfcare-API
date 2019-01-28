@@ -219,6 +219,9 @@ Provide `username` and `password`.
 #### Facebook login
 Provide `facebookAccessToken`.
 
+#### Mobile app token login
+Provide `mobileLoginToken`.
+
 + Request (application/json; charset=utf-8)
     + Attributes (CustomerLogin)
 
@@ -231,6 +234,7 @@ Provide `facebookAccessToken`.
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
     - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any Lymet account. Immediate registration is possible.
     - `INVALID_LOGIN` - Username or password is wrong.
+    - `INVALID_TOKEN_LOGIN` - Mobile login token is invalid.
     + Attributes (Errors)
 
 ## Customer logout - TBD [/account/logout]  
@@ -246,6 +250,19 @@ Use this resource to invalidate existing token, which in effect logs out the cus
 + Response 422 (application/json; charset=utf-8)
     Customer is not logged in.
     + Attributes (Errors)
+
+## Mobile login token management [/account/mobileLoginToken]
+Use this endpoint for generate new `mobileLoginToken` for specified device, used for login in biometric login services.
+
+### Generate new token [POST]
+Use this endpoint to get new mobile login token:
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + deviceUuid: `a5d46273922540caa2432359367abc5c` (string) - Device UUID.
+
++ Response 200
+    Mobile login token issued.
+    + Attributes (CustomerMobileTokenResult)
 
 ## Change password - TBD [/account/password]
 
@@ -2125,12 +2142,19 @@ Collection of URLs used for redirection of a customer back to a partner website 
         + `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
         + `password`: `secretpassword1234` (string, required) - Customer's password
     + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+    + Properties
+        + `deviceUuid`: `deviceuuid123456789` (string, required) - Device UUID
+        + `mobileLoginToken`: `secretToken123456` (string, required) - Mobile login token
 
 
 ## CustomerLoginResult (object)
 ### Properties
 + `accessToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Access token
 + `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
+
+## CustomerMobileTokenResult (object)
+### Properties
++ `mobileLoginToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Mobile login token
 
 ## Subfield (object)
 ### Properties
