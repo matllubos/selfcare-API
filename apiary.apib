@@ -1531,6 +1531,7 @@ Financing application.
     + `revolvingPaymentInfo` (object, optional, nullable) - information about revolving loan payment method (installments or balance)
         + `availability` (RevolvingPaymentAvailability, optional, nullable) - information about possibility to pay application by revolving loan
         + `application` (ApplicationBase, optional, nullable) - information about revolving payment application (Homer application)
++ `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
 
 
 ## HistoryApplication (ApplicationBase)
@@ -1645,7 +1646,6 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + `deliveryDate`: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of delivery
 + `deliveryTrackingNumber`: `EX12221` (string, optional) - Delivery tracking number
 + `sentDate`: `2017-01-12T10:34:44+01:00` (string, optional) - Date and time of order shipping
-+ `paymentDate`: `2017-01-12` (string, required) - Date when was order paid
 
 
 ## HistoryOrder (HistoryFinancedSubject)
