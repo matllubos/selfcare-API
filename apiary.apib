@@ -458,6 +458,19 @@ Use this endpoing to query last account upgrade request's state.
     No account upgrade request exists.
     + Body
 
+## Mailing lists [/account/consents/subscribe]
+Mailing list subscription for given slug
+
+### Subscribe to mailing lists [POST]
+
++ Request (application/json)
+    + Attributes (object)
+        + slugs (array, required) - List of consent slugs
+            + (enum)
+                + MARKETING_EXTENDED
+
++ Response 204 (application/json; charset=utf-8)
+
 
 # Group My profile
 Resources for accessing and modifying user personal data.
@@ -640,7 +653,7 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
     + Attributes (object)
         + data (array[Transaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
-        
+
 ## Applications [/my/contracts/{contractNumber}/applications]
 Applications of given contract.
 
@@ -763,6 +776,44 @@ Cancel application processing.
 
 + Response 404 (application/json; charset=utf-8)
     Application cannot be cancelled.
+    + Attributes (Errors)
+
+## Promo codes [/my/contracts/{contractNumber}/applications/{applicationId}/applyPromocode]
+Customer can apply for discount price by submitting promo code.
+
++ Parameters
+    + applicationId: `a7718` (string, required) - ID of application
+
+### Submit promo code [POST]
+
++ Request  (application/json; charset= utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+    + Attributes (object)
+        + promocode: `MALL1SAW3S0M3` (string, required) - promo code key
+
++ Response 200 (application/json; charset=utf-8)
+    Existing application and valid applicable promo code
+    + Attributes (Application)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+    + Attributes (object)
+        + promocode: `MALL1SAW3S0M3` (string, required) - promo code key
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
++ Request Invalid promo code (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+    + Attributes (object)
+        + promocode: `this_is_invalid_promocode_key` (string, required) - promo code key
+
++ Response 422 (application/json; charset=utf-8)
+    Promo code is invalid or expired.
     + Attributes (Errors)
 
 ## Getting list of application item services [/my/contracts/{contractNumber}/application/item]
@@ -912,7 +963,6 @@ Create new *application* of particular type
         There was an error processing request
 
     + Attributes (Errors)
-
 
 
 # Group My history data contracts
@@ -1134,6 +1184,11 @@ type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_A
 ## Amount (object)
 + `amount`: 12590 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 + `currency`: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+
+## Promocode (object)
++ `code`: `MALL1SAW3S0M3` (string, required) - Promo code key applied on order.
++ `discountPrice` (Amount, required) - Promo code discount price of order
 
 
 ## HistoryAmount (object)
@@ -1635,6 +1690,7 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
     + `GOODS` - Purchase of (physical) goods on eshop
     + `GOODS_BROKER` - Purchase of (physical) goods on eshop mediated by broker. "Deffered payment" or "Try and pay" are some examples of this type of order.
 + `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
++ `promocodeDiscounts` (array[Promocode], fixed-type, required) - Promo codes discounts applied on order
 + `items` (array[Item], fixed-type, required) - Items in order
 + `documents` (array[Document], fixed-type, optional) - Attached documents (invoices etc.)
 + `state`: `PROCESSING` (enum, required) - Order state.
