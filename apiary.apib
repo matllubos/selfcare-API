@@ -276,6 +276,9 @@ Use this endpoint to set a new password for:
     + Attributes (object)
         + password: `f2FqYbmQZHXuPbdq` (string) - New password.
         + token: `a5d46273922540caa2432359367abc5c` (string) - Verification token.
+        + consents (array) - List of consents given by customer
+            + `REGISTRATION` - Consent with service terms and conditions
+            + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
 
 + Response 204
     Password set successful. 
@@ -397,6 +400,9 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
         + phone: `+420777777777` (string) - Customer's phone in international format.
         + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
+        + consents  (array, required) - List of consents given by customer
+            + `REGISTRATION` - Consent with service terms and conditions (required)
+            + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
 
 + Response 200
     Customer has been registered.
@@ -474,6 +480,35 @@ Mailing list subscription for given slug
 
 # Group My profile
 Resources for accessing and modifying user personal data.
+
+## Facebook connection [/account/facebook]
+
+### Connect facebook account to a customer [POST]
+Use this resource to connect facebook account to a customer.
+
++ Request (application/json)
+    + Attributes (object)
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
+
++ Response 200
+    Customer has been registered.
+    + Attributes (object)
+        + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
+            + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
+            + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
+
++ Response 422 (application/json)
+    Customer has not been registered. List of error codes special for this endpoint:
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing Lymet account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing Lymet account. Immediate login is possible.
+    - `ALREADY_EXISTS` - Lymet account with this email/phone already exists.
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched Lymet account e-mail address.
+    + Attributes (Errors)
+
+### Disconnect facebook account from a customer [DELETE]
+Use this resource to disconnect facebook account from a customer.
+
 
 ## Customer information [/my/profile]
 Customer profile information
