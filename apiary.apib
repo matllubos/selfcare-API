@@ -512,6 +512,41 @@ Get questions (data) for questionnaire construction
 
     + Attributes (Errors)
 
+# Group Notifications
+Resource group for managing customer's notifications.
+
+## Notifications [/notifications]
+
+### Get list of notifications [GET]    
+Use this endpoint to get list of notifications. This endpoint supports pagination.
+
++ Request (application/json)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Notification], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+        
+### Mark notification as read/triggered [PATCH]
+Use this endpoint to indicate, that user has seen the notification(s) and/or interacted with it/them (e.g. he clicked or tapped it).
+
+Filter by ID to limit set of affected notifications.
+
++ Request  (application/json; charset=utf-8)
+    + Attributes (object)
+        + isRead: `true` (boolean) - Mark notification as read (i.e. user has seen the notification)
+        + isTriggered: `true` (boolean) - Mark notification as triggered (i.e. user has interacted with the notification, e.g. he clicked or tapped it)
++ Response 204 (application/json; charset=utf-8)
+
+## Number of unread notifications [/notifications/unread]
+
+### Get number of unread notifications [GET]    
+Use this endpoint to get number of unread notifications.
+
++ Request (application/json)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + count (number) - Number of unread notifications
+
 # Group Personal data
 Resource group for managing customer's personal data
 
@@ -2163,3 +2198,17 @@ Customer's personal document
     + `DRIVING_LICENSE_FRONT` - Driving license (front side)
     + `DRIVING_LICENSE_BACK` - Driving license (back side)
 + `file` (PersonalDocumentFile, required) - Attached file
+
+## Notification (object)
++ `id`: 45688987 (number) - Notification ID
++ `createdDate` : `2017-01-18T10:34:44+01:00` (string) - Date and time of notification creation
++ `title`: `Order has been cancelled` (string) - Title of the notification
++ `text`: `Your order no.4566221 has been cancelled` (string, optional) - Text of the notification
++ `triggerActionUrl`: `http://someurl.com/` (string, optional) - URL user should be redirected to, when he triggers the notification (i.e. when he clicks/taps it).
++ `isRead`: `True` (boolean) - Flag indicating that user has seen the notification.
++ `isTriggered`: `True` (boolean) - Flag indicating that user has interacted with the notification (e.g. clicked/tapped on it)
++ `slug`: `order-cancelled` (string, optional) - Notification template slug.
++ `relatedData`: (NotificationRelatedDataObject, optional) - Related objects.
+
+## NotificationRelatedDataObject (object)
++ `application` (Application, optional) - Related application.
