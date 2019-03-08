@@ -540,6 +540,23 @@ Mailing list subscription for given slug
 
 + Response 204 (application/json; charset=utf-8)
 
+
+## Push notification devices [/account/push-notification-devices]
+Push notification devices for customer.
+
+### Register new device [POST]
+
++ Request (application/json)
+    + Attributes (PushNotificationDeviceToken)
+
++ Response 204 (application/json; charset=utf-8)
+
++ Response 422 (application/json; charset=utf-8)
+    Push notification device already exists. Following codes are possible.
+    * PUSH_NOTIFICATION_DEVICE_EXISTS
+    + Attributes (Errors)
+
+
 # Group My profile
 Resources for accessing and modifying user personal data.
 
@@ -2156,3 +2173,12 @@ Customer's coin account overview. Is based on Amount object, but the requirement
 ### Properties
 + `coinOverview`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
     + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## PushNotificationDeviceToken (object)
+Customer's device for receiving push notifications.
+
+### Properties
++ `type` (enum, required) - Type of the device
+    + `ANDROID`
+    + `IOS`
++ `token` (string, required) - Actual token of the device
