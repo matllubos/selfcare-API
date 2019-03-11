@@ -1163,6 +1163,19 @@ type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_A
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
+# Group MALL Coin
+
+## Client's MALL Coin overview [/coin]
+Overview of client's coin account. Currently only account coin balance.
+
+### MALL Coin account overview [GET]
+Get coin account overview
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (CoinOverview)
+
 # Data Structures
 
 ## Error (object)
@@ -2163,3 +2176,10 @@ Customer's personal document
     + `DRIVING_LICENSE_FRONT` - Driving license (front side)
     + `DRIVING_LICENSE_BACK` - Driving license (back side)
 + `file` (PersonalDocumentFile, required) - Attached file
+
+## CoinOverview (object)
+Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
+### Properties
++ coinBalance
+    + `amount`: 12500 (number, required) - Amount in minor units (12500 represents 125 coins/units)
+    + `currency`: `MC` (string, required) - Coin currency. Use `MC` for MALL Coins.
