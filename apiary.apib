@@ -940,37 +940,6 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
-## Create application [/my/applications]
-If the request was recognized as duplication, HTTP status code 200 and the *application* object created during the first related successful request is received.
-
-In other cases, you receive one of the following errors:
-| Status code | Code                  | Message                     |
-| ---         | ---                   | ---                         |
-| 400         | INVALID_REQUEST       | *Various messages possible* |
-| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-
-### Create application [POST]
-Create new *application* of particular type
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (ApplicationRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Application was created
-
-    + Attributes (ApplicationResponse)
-
-
-+ Response 400(application/json; charset=utf-8)
-
-        There was an error processing request
-
-    + Attributes (Errors)
-
-
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
 
@@ -1101,40 +1070,6 @@ Get prioritized list of possible installments that are available for repayment. 
         There was an error processing request
 
     + Attributes (Errors)
-
-
-## Revolving payment availability [/my/payments/revolvingPaymentAvailability]
-Client may pay his deffered payments by revolving loan, either by installment program or by drawing from balance. This resource provide information about possibility to use this payment method.
-
-Possible error codes:
-| Status code | Code                  | Message                     |
-| ---         | ---                   | ---                         |
-| 400         | INVALID_REQUEST       | *Various messages possible* |
-| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-### Revolving payment availability [POST]
-Check the availability to pay given Applications by revolving loan.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (RevolvingPaymentAvailabilityRequest)
-
-+ Response 200(application/json; charset=utf-8)
-
-        Payment possibility checked successfully
-
-    + Attributes (RevolvingPaymentAvailability)
-
-
-+ Request Wrong data (application/json; charset=utf-8)
-    + Attributes (RevolvingPaymentAvailabilityRequest)
-
-+ Response 422 (application/json; charset=utf-8)
-
-        There was an error processing request
-
-    + Attributes (Errors)
-
-
 
 
 # Group My Documents
@@ -1569,8 +1504,7 @@ Financing application.
 
 ### Properties
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (Order, optional) - Order data. One and only one of `order` or `liability` objects is provided
-+ `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
++ `order` (Order, required) - Order data.
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
@@ -1586,13 +1520,8 @@ Financing application.
     + `dueDate`: `2016-11-15` (string, optional, nullable) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
     + `dueDateClient`: `2016-11-14` (string, optional, nullable) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
     + `currentDpd`: 2 (number, required) - current days past due
-    + `blockedOnContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application is prepared to be paid from RU balance after dueDateClient
-    + `paidFromContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application was paid by revolving loan
     + `completelyPaid`: `true` (boolean, optional, nullable) - information if this application is completely paid and there is no expected payment from client
     + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
-    + `revolvingPaymentInfo` (object, optional, nullable) - information about revolving loan payment method (installments or balance)
-        + `availability` (RevolvingPaymentAvailability, optional, nullable) - information about possibility to pay application by revolving loan
-        + `application` (ApplicationBase, optional, nullable) - information about revolving payment application (Homer application)
 + `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
 
 
@@ -1601,7 +1530,7 @@ Financing application.
 
 ### Properties
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (HistoryOrder, required) - Order data. One and only one of `order` or `liability` objects is provided
++ `order` (HistoryOrder, required) - Order data.
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
     + `TRY_AND_PAY` - Vyskoušej a zaplať
@@ -1612,22 +1541,6 @@ Financing application.
     + `name`: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
     + `logoUrl`: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
 
-
-## RevolvingPaymentAvailabilityRequest (object)
-+ `applications` (array[ApplicationId], fixed-type, required) - Applications of type `DEFERRED_PAYMENT` that will be financed by revolving loan
-
-
-## RevolvingPaymentAvailability (object)
-Information about possibility to pay application by revolving loan, either by installment program or by drawing from balance
-
-### Properties
-+ `availability` (enum, required)
-    + `AVAILABLE`
-    + `NOT_AVAILABLE`
-+ `reasons` (array[string], optional) - List of reasons.
-    Possible values in array: `UNDESIRABLE`, `TOO_LOW_AMOUNT`, `ALREADY_PAID`, `BLOCKED`, `OVERDUE`, `IN_REVOLVING_PAYMENT_PROCESS`.
-+ `suitableContracts` (array[string], fixed-type, optional) - list of suitable target revolving loan contract numbers (if available)
-
 ## PaymentAvailability (object)
 Information about possibility to pay application
 
@@ -1637,24 +1550,6 @@ Information about possibility to pay application
     + `NOT_AVAILABLE`
 + `reasons` (array[string], optional) - List of reasons.
     Possible values in array: `ALREADY_PAID`, `BLOCKED`, `IN_REVOLVING_PAYMENT_PROCESS`.
-
-## ApplicationRequest (object)
-Application request
-
-### Properties
-+ `applications` (array[ApplicationId], fixed-type, required) - Applications of type `DEFERRED_PAYMENT` that will be financed by revolving loan
-+ `type`: `INSTALLMENT` (enum, required) - Financing type
-    + `INSTALLMENT` - Pay in monthly installments ("rozklad odloěenżch nŠkupý")
-    + `BALANCE` - Pay by charging client's revolving loan (NOT SUPPORTED YET)
-+ `settingsInstallment` (object, optional) - Settings for INSTALLMENT Application type.
-    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-+ `returnUrls` (ReturnUrls, required) - Collection of URLs used for redirection of a customer back to a Self care
-
-
-## ApplicationResponse (ApplicationBase)
-+ `redirectUrl`: `https://clientredirect.lymet.cz?applicationId=77d665d7-da44-402e-b7f7-6354d6076b32` (string, required) - URL where the client should be redirected after successfull creation of application.
 
 
 ## ReturnUrls (object)
@@ -1737,30 +1632,14 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + `deliveryTrackingNumber`: `EX12221` (string, optional, nullable) - Delivery tracking number
 + `sentDate`: `2017-01-12T10:34:44+01:00` (string, optional, nullable) - Date and time of order shipping
 
-## Liability (FinancedSubject)
-Detailed information about order (type `LIABILITY`)
 
-### Properties
-+ `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
-+ `items` (array[LiabilityItem], fixed-type, required) -  Items in order
-
-
-## ItemBase (object)
-+ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
-+ `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (File, optional) - Item image
-
-
-## HistoryItemBase (object)
-+ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
-+ `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (HistoryFile, optional) - Item image
-
-
-## Item (ItemBase)
+## Item (object)
 Order item information, needed to create an application.
 
 ### Properties
++ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
++ `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
++ `image` (File, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -1793,10 +1672,13 @@ Order item information, needed to create an application.
 + `services` (array[Service]) - insurance services objects for item
 
 
-## HistoryItem (HistoryItemBase)
+## HistoryItem (object)
 Order item information, needed to create an application.
 
 ### Properties
++ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
++ `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
++ `image` (HistoryFile, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -1845,17 +1727,6 @@ MIA Service object
 + `excludesIds` (array[string]) - list of service IDs this service is mutually exclusive with
 + `extraData`
     + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
-
-## LiabilityItem (ItemBase)
-Order item information, needed to create an application.
-
-### Properties
-+ `brokerApplicationId`: `02-11b00a1ef1` (string, required) - Broker application ID (`KNJapplicationId`)
-+ `homerApplicationId`: `01-11b00a1ef2` (string, optional) - Homer application ID ("Odklad na RU" application id)
-+ `creditor`: `Mall.cz` (string, optional) - Creditor of liability item
-+ `dateCreated`:  `2017-01-10T10:34:44+01:00` (string, optional) - Date of creation of liability
-+ `dateDue`:  `2017-02-20` (string, required) - Due date of liability
-+ `itemsQuantity`: 3 (number, optional) - Quantity of items in financed liability, if applicable (f.e. quantity of items purchased by Deffered payment). If empty, considered as 0
 
 ## Broker (object)
 Additional information about broker application
