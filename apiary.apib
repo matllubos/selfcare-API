@@ -127,7 +127,7 @@ Unless stated otherwise, all responses are sent as `Content-Type: application/js
 ## HTTP status codes
 We use following status codes throughout the API, except for OAuth flow when response codes are prescribed in RFC
 - 200 `OK` - request was successful
-- 201 `Created` - request was successfull and resource was created
+- 201 `Created` - request was successful and resource was created
 - 204 `No content` - we accepted your request but there is nothing to return (e.g. response is empty)
 - 400 `Bad Request` - request is missing required parameters
 - 401 `Unauthorized` - your API key is wrong or user not authorized (not logged in)
@@ -219,6 +219,9 @@ Provide `username` and `password`.
 #### Facebook login
 Provide `facebookAccessToken`.
 
+#### Mobile app token login
+Provide `mobileToken`.
+
 + Request (application/json; charset=utf-8)
     + Attributes (CustomerLogin)
 
@@ -231,6 +234,7 @@ Provide `facebookAccessToken`.
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
     - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any MALL Pay account. Immediate registration is possible.
     - `INVALID_LOGIN` - Username or password is wrong.
+    - `INVALID_MOBILE_LOGIN` - Mobile login token is invalid.
     + Attributes (Errors)
 
 ## Customer logout - TBD [/account/logout]  
@@ -246,6 +250,37 @@ Use this resource to invalidate existing token, which in effect logs out the cus
 + Response 422 (application/json; charset=utf-8)
     Customer is not logged in.
     + Attributes (Errors)
+
+## Mobile login token management [/account/mobileToken]
+Use this endpoint to generate new `mobileToken` for specified device, used for login in biometric login services.
+
+### Generate new token [POST]
+Use this endpoint to get new mobile login token:
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + deviceUuid: `a5d46273922540caa2432359367abc5c` (string) - Device UUID.
+
++ Response 200
+    Mobile login token issued.
+    + Attributes (CustomerMobileTokenResult)
+
++ Response 422 (application/json; charset=utf-8)
+    Unable to generate a new mobile token:
+    - `UUID_NOT_VALID` - UUID provided is not in valid format.
+    - `TOKEN_FOR_SAME_UUID_EXISTS` - Mobile token for given UUID already exists. In order to generate a new token one must delete the old token first.
+    + Attributes (Errors)
+
+## Mobile login token removal [/account/mobileToken/{deviceUuid}]
+Use this endpoint to delete mobile token for specified device, used for login in biometric login services.
+
+### Remove mobile token [DELETE]
+Entry of mobile token with given `deviceUuid` will be removed. This combination of `deviceUuid` and `mobileToken` will no longer work to log in.
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + deviceUuid: `deviceuuid123456789` (string, required) - Device UUID
+
++ Response 200
+    Mobile token asociated with given `deviceUuid` was removed.
 
 ## Change password - TBD [/account/password]
 
@@ -2028,12 +2063,19 @@ Collection of URLs used for redirection of a customer back to a partner website 
         + `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
         + `password`: `secretpassword1234` (string, required) - Customer's password
     + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+    + Properties
+        + `deviceUuid`: `deviceuuid123456789` (string, required) - Device UUID
+        + `mobileToken`: `secretToken123456` (string, required) - Mobile login token
 
 
 ## CustomerLoginResult (object)
 ### Properties
 + `accessToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Access token
 + `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
+
+## CustomerMobileTokenResult (object)
+### Properties
++ `mobileToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Mobile login token
 
 ## Subfield (object)
 ### Properties
