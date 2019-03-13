@@ -2,7 +2,7 @@ FORMAT: 1A
 HOST: https://api.platba.lymet.cz/customer/v1
 
 # New SC API
-This is documentation of Lymet NEW Self-Care API
+This is documentation of MALL Pay NEW Self-Care API
 
 **Base prefix: /customer/v1**.
 
@@ -229,7 +229,7 @@ Provide `facebookAccessToken`.
 + Response 422(application/json; charset=utf-8)
     Unable to authenticate the customer. List of error codes special for this endpoint:
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any Lymet account. Immediate registration is possible.
+    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any MALL Pay account. Immediate registration is possible.
     - `INVALID_LOGIN` - Username or password is wrong.
     + Attributes (Errors)
 
@@ -413,11 +413,11 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         
 + Response 422 (application/json)
     Customer has not been registered. List of error codes special for this endpoint:
-    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing Lymet account, but customer must finish registration.
-    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing Lymet account. Immediate login is possible.
-    - `ALREADY_EXISTS` - Lymet account with this email/phone already exists.
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
+    - `ALREADY_EXISTS` - MALL Pay account with this email/phone already exists.
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched Lymet account e-mail address.
+    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched MALL Pay account e-mail address.
     + Attributes (Errors)
 
 + Response 429 (application/json)
@@ -456,7 +456,7 @@ Use this endpoing to query last account upgrade request's state.
 + Response 200
     + Attributes (object)
         + state: `PROCESSING` (enum, required) - last account upgrade request state.
-            + `PROCESSING` - Account upgrade request is beeing processed by Lymet staff.
+            + `PROCESSING` - Account upgrade request is beeing processed by MALL Pay staff.
             + `APPROVED` - Account upgrade request has been approved.
             + `DENIED` - Account upgrade request has been denied.
 
@@ -477,9 +477,40 @@ Mailing list subscription for given slug
 
 + Response 204 (application/json; charset=utf-8)
 
-
 # Group My profile
 Resources for accessing and modifying user personal data.
+
+## Facebook connection [/account/facebook]
+
+### Connect facebook account to a customer [POST]
+Use this resource to connect facebook account to a customer.
+
++ Request (application/json)
+    + Attributes (object)
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+
++ Response 204
+    Facebook account was connected
+        + Body
+
++ Response 422 (application/json)
+    Facebook account was not connected. List of error codes special for this endpoint:
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    + Attributes (Errors)
+
+### Disconnect facebook account from a customer [DELETE]
+Use this resource to disconnect facebook account from a customer.
+
++ Response 204
+    Facebook account was disconnected
+        + Body
+
++ Response 422 (application/json)
+    Facebook account was not connected. List of error codes special for this endpoint:
+    - `NOT_CONNECTED` - The Facebook account isn't connected to an the account
+    + Attributes (Errors)
 
 ## Customer information [/my/profile]
 Customer profile information
@@ -1220,6 +1251,7 @@ Financial amount with VAT rate.
 + addresses (array[Address], fixed-type, optional) - client addresses
 + phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
 + emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
++ facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + identityDocuments (array[IdentityDocument], fixed-type, optional) - client identity documents
 
