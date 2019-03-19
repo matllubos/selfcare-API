@@ -1222,6 +1222,19 @@ Get coin account overview
 + Response 200 (application/json; charset=utf-8)
     + Attributes (CoinOverview)
 
+## Client's MALL Coin transactions [/coins/transactions]
+Overview of client's MALL Coin transactions.
+
+### MALL Coin transactions list [GET]
+Get customer coin transactions list
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[CoinTransaction], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+
 # Data Structures
 
 ## Error (object)
@@ -2168,12 +2181,6 @@ Customer's personal document
     + `DRIVING_LICENSE_BACK` - Driving license (back side)
 + `file` (PersonalDocumentFile, required) - Attached file
 
-## CoinOverview (object)
-Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
-### Properties
-+ `coinOverview`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
-    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-
 ## PushNotificationDeviceToken (object)
 Customer's device for receiving push notifications.
 
@@ -2182,3 +2189,29 @@ Customer's device for receiving push notifications.
     + `ANDROID`
     + `IOS`
 + `token` (string, required) - Actual token of the device
+
+## CoinAmount (object)
+### Properties
++ `amount`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
+    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## CoinOverview (object)
+Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
+### Properties
++ `coinOverview`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
+    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## CoinTransaction (CoinAmount)
+Detail of customer's Mall Coin transaction
+### Properties
++ `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
++ `transactionType` (enum, required) - type of transaction
+    + `CREDIT`
+    + `DEBIT`
++ `transactionReason` (enum, required) - reason for creating the transaction
+    + `OTHER - Coins were received for other reason
+    + `ORDER_PAID` - Coins were received for order payment
+    + `SERVICES_DISCOUNT` - Coins were spent on services discount
+    + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
+    + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
+    + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
