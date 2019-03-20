@@ -282,14 +282,13 @@ Entry of mobile token with given `deviceUuid` will be removed. This combination 
 + Response 200
     Mobile token asociated with given `deviceUuid` was removed.
 
-## Change password - TBD [/account/password]
+## Change password [/account/password]
 
-### Change password [POST]
-Use this endpoint to change password of a logged-in customer.
+### Set password [POST]
+Use this endpoint to set password of a logged-in customer.
 + Request (application/json)
     + Attributes (object)
-        + currentPassword: `f2FqYbmQZHXuPbdq` (string) - Customer's current password.
-        + newPassword: `xt3hP58vouL61H40` (string) - New password.
+        + newPassword: `xt3hP58vouL61H40` (string, required) - New password.
 
 
 + Response 204
@@ -299,7 +298,36 @@ Use this endpoint to change password of a logged-in customer.
 
 + Response 422 (application/json)
     Password change was not successful.
+    - `PASSWORD_TOO_SHORT` - New password is too short.
+    - `PASSWORD_NO_LOWERCASE_CHARACTER` - New password must contain lowercase character.
+    - `PASSWORD_NO_UPPRECASE_CHARACTER` - New password must contain uppercase character.
+    - `PASSWORD_NO_NUMERIC_CHARACTER` - New password must contain numeric character.
     + Attributes (Errors)
+
+
+### Change password [PUT]
+Use this endpoint to change password of a logged-in customer.
++ Request (application/json)
+    + Attributes (object)
+        + currentPassword: `f2FqYbmQZHXuPbdq` (string, required) - Customer's current password.
+        + newPassword: `xt3hP58vouL61H40` (string, required) - New password.
+
+
++ Response 204
+    Password change successful.
+    + Body
+
+
++ Response 422 (application/json)
+    Password change was not successful.
+    - `CURRENT_PASSWORD_WRONG` - Current password is wrong.
+    - `NEW_PASSWORD_EQUALS_CURRENT_PASSWORD` - New password is the same as the old password.
+    - `PASSWORD_TOO_SHORT` - New password is too short.
+    - `PASSWORD_NO_LOWERCASE_CHARACTER` - New password must contain lowercase character.
+    - `PASSWORD_NO_UPPRECASE_CHARACTER` - New password must contain uppercase character.
+    - `PASSWORD_NO_NUMERIC_CHARACTER` - New password must contain numeric character.
+    + Attributes (Errors)
+
 
 ## Password set [/account/password/set]
 
@@ -1289,6 +1317,7 @@ Financial amount with VAT rate.
 + facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + identityDocuments (array[IdentityDocument], fixed-type, optional) - client identity documents
++ hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
 
 
 ## Contract (object)
