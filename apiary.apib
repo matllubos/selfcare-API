@@ -1221,7 +1221,78 @@ Get coin account overview
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (CoinOverview)
+    + Attributes (CoinBalance)
+
+## Client's MALL Coin transactions [/coins/transactions]
+Overview of client's MALL Coin transactions.
+
+### MALL Coin transactions list [GET]
+Get customer coin transactions list
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+TBD.
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `created_at descending`.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name        | possible operators | example
+---                | ---                | ---
+amount             |eq,gt,lt            | `applications?filter=amount|gt|0` transactions that have amount higher than 0
+transactionReason  |eq                  | `applications?filter=transactionReason|eq|PAID_ORDER` transactions that were created as a result of order paid
+transactionType    |eq                  | `applications?filter=transactionType|eq|CREDIT` transactions by type, credit or debit
+isExpired          |eq                  | `applications?filter=isExpired|eq|0` transactions that are not expired
+expirationDatetime |lt,eq,gt            | `applications?filter=expirationDatetime|lt|2020-01-01` transactions by expiration datetime
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[CoinTransaction], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+
+# Group Rewards
+
+## Promocode offers [/rewards/promocodes/offers]
+Promocode offers available to customers
+
+### Promocode offers [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[BasicPromocodeOffer], fixed-type, required) - array of available promocode offers
+
+## Promocode purchases [/rewards/promocodes/purchases/]
+
+### Customer promocode purchase [POST]
+
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + `promocode`
+            + `id`: `10` (number, fixed-type, required) - pk of the offer the customer wishes to buy
+
++ Response 201 (application/json; charset=utf-8)
+    + Attributes (PurchasedPromocodeOffer, required)
+
+### Customer purchased promocodes list [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PurchasedPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
+
 
 # Data Structures
 
@@ -2169,12 +2240,6 @@ Customer's personal document
     + `DRIVING_LICENSE_BACK` - Driving license (back side)
 + `file` (PersonalDocumentFile, required) - Attached file
 
-## CoinOverview (object)
-Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
-### Properties
-+ `coinOverview`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
-    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-
 ## PushNotificationDeviceToken (object)
 Customer's device for receiving push notifications.
 
@@ -2183,3 +2248,62 @@ Customer's device for receiving push notifications.
     + `ANDROID`
     + `IOS`
 + `token` (string, required) - Actual token of the device
+
+## CoinAmount (Amount)
+### Properties
++ `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## BasicPromocodeOffer (object)
+Promocode offer - voucher offered to customer
+
+### Properties
++ id (number, required) - Id of offer
++ title (string, required) - Offer title
++ description (string, required) - Offer description
++ coinsRequired (CoinAmount, required) - Price of offer in MALL Coins
++ validFrom: `2019-01-18T10:34:44+01:00` (string, required) - The offer is valid from this datetime
++ validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetimr
++ priority: 100 (number, required) - Priority of offer in a list of offers
++ createdAt: `2017-01-18T10:34:44+01:00` (string, required) - When was the offer created
++ productImages (array[File], required) - Images for the offer
++ productPriceNonDiscounted (Amount, optional, nullable) - Display original non-discounted price
++ productPriceDiscounted (Amount, optional, nullable) - Display discounted price
++ productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information 
++ voucherValidFrom: `2019-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - starting datetime
++ voucherValidUntil: `2020-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - ending info
++ voucherValue: `55%` (string, optional, nullable) - Display info about value of voucher
+    
+## PurchasedPromocodeOffer (object)
+Promocode offer purchased by a customer
+
+### Properties
++ purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
++ offer (BasicPromocodeOffer, required) - Offer the key is based on
+
+## CoinBalance (object)
+Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
+### Properties
++ `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
+    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## CoinRelatedData (object)
+### Properties
++ application (Application, optional, nullable) - Application containing order whose payment created transaction
+
+## CoinTransaction (object)
+Detail of customer's Mall Coin transaction
+
+### Properties
++ `amount` (CoinAmount, required) - poznamka
++ `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
++ `transactionType` (enum, required) - type of transaction
+    + `CREDIT`
+    + `DEBIT`
++ `transactionReason` (enum, required) - reason for creating the transaction
+    + `OTHER - Coins were received for other reason
+    + `ORDER_PAID` - Coins were received for order payment
+    + `SERVICES_DISCOUNT` - Coins were spent on services discount
+    + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
+    + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
+    + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
++ `relatedData` (CoinRelatedData, optional, nullable) - data and objects related to the MALL Coin transaction
