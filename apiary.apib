@@ -1220,7 +1220,7 @@ Get coin account overview
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (CoinOverview)
+    + Attributes (CoinBalance)
 
 ## Client's MALL Coin transactions [/coins/transactions]
 Overview of client's MALL Coin transactions.
@@ -1237,6 +1237,9 @@ feature                         | supported by resource
 #### Paging
 TBD.
 This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `created_at descending`.
 
 #### Filtering
 This resource supports [filtering](#header-filtering). You can use following filters:
@@ -2211,25 +2214,25 @@ Customer's device for receiving push notifications.
     + `IOS`
 + `token` (string, required) - Actual token of the device
 
-## CoinAmount (object)
+## CoinAmount (Amount)
 ### Properties
-+ `amount`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
-    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
-## CoinOverview (object)
+## CoinBalance (object)
 Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
 ### Properties
-+ `coinOverview`: 12500 (Amount, required) - Amount in minor units (12500 represents 125 coins/units)
++ `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
     + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 ## CoinRelatedData (object)
 ### Properties
 + application (Application, optional, nullable) - Application containing order whose payment created transaction
 
-## CoinTransaction (CoinAmount)
+## CoinTransaction (object)
 Detail of customer's Mall Coin transaction
 
 ### Properties
++ `amount` (CoinAmount, required) - poznamka
 + `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
 + `transactionType` (enum, required) - type of transaction
     + `CREDIT`
