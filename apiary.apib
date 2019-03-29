@@ -1260,6 +1260,39 @@ expirationDatetime |lt,eq,gt            | `applications?filter=expirationDatetim
         + data (array[CoinTransaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
 
+# Group Rewards
+
+## Promocode offers [/rewards/promocodes/offers]
+Promocode offers available to customers
+
+### Promocode offers [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[BasicPromocodeOffer], fixed-type, required) - array of available promocode offers
+
+## Promocode purchases [/rewards/promocodes/purchases/]
+
+### Customer promocode purchase [POST]
+
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + `promocode`
+            + `id`: `10` (number, fixed-type, required) - pk of the offer the customer wishes to buy
+
++ Response 201 (application/json; charset=utf-8)
+    + Attributes (PurchasedPromocodeOffer, required)
+
+### Customer purchased promocodes list [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PurchasedPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
+
 # Data Structures
 
 ## Error (object)
@@ -2219,11 +2252,37 @@ Customer's device for receiving push notifications.
 ### Properties
 + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
+## BasicPromocodeOffer (object)
+Promocode offer - voucher offered to customer
+
+### Properties
++ id (number, required) - Id of offer
++ title (string, required) - Offer title
++ description (string, required) - Offer description
++ coinsRequired (CoinAmount, required) - Price of offer in MALL Coins
++ validFrom: `2019-01-18T10:34:44+01:00` (string, required) - The offer is valid from this datetime
++ validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetimr
++ priority: 100 (number, required) - Priority of offer in a list of offers
++ createdAt: `2017-01-18T10:34:44+01:00` (string, required) - When was the offer created
++ productImages (array[File], required) - Images for the offer
++ productPriceNonDiscounted (Amount, optional, nullable) - Display original non-discounted price
++ productPriceDiscounted (Amount, optional, nullable) - Display discounted price
++ productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information 
++ voucherValidFrom: `2019-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - starting datetime
++ voucherValidUntil: `2020-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - ending info
++ voucherValue: `55%` (string, optional, nullable) - Display info about value of voucher
+    
+## PurchasedPromocodeOffer (object)
+Promocode offer purchased by a customer
+
+### Properties
++ purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
++ offer (BasicPromocodeOffer, required) - Offer the key is based on
+
 ## CoinBalance (object)
-Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
+Customer's coin account overview. Is based on CoinAmount object.
 ### Properties
 + `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
-    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 ## CoinRelatedData (object)
 ### Properties
