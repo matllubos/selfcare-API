@@ -2281,10 +2281,9 @@ Promocode offer purchased by a customer
 + offer (BasicPromocodeOffer, required) - Offer the key is based on
 
 ## CoinBalance (object)
-Customer's coin account overview. Is based on Amount object, but the requirement for ISO based currency is dropped.
+Customer's coin account overview. Is based on Amount object.
 ### Properties
 + `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
-    + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 ## CoinRelatedData (object)
 ### Properties
