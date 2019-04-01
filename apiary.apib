@@ -529,7 +529,7 @@ Use this endpoing to query last account upgrade request's state.
     + Body
 
 ## Mailing lists [/account/consents/subscribe]
-Mailing list subscription for given slug
+Mailing list subscription for given slug. This endpoint is deprecated and replaced by `/account/consents`.
 
 ### Subscribe to mailing lists [POST]
 
@@ -541,6 +541,51 @@ Mailing list subscription for given slug
 
 + Response 204 (application/json; charset=utf-8)
 
+## Consents [/account/consents]
+All consents user is able to subscribe and unsubscribe.
+
+### Available consents [GET]
+Get all aconsents a can be subscribed to. Allowed subscriptions are `MARKETING` and `MARKETING_EXTENDED`.
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
+### Change subscription of consents [PUT]
+Subscribe or unsubscribe user to filtered consents.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+filter name | possible operators | example
+---         | ---                | ---
+slug        | eq                 | `consents?filter=slug|eq|MARKETING`  consent with slug `MARKETING`
+slug        | in                 | `consents?filter=slug|in|MARKETING,MARKETING_EXTENDED`  consent with slugs `MARKETING` and `MARKETING_EXTENDED`
+
++ Request (application/json)
+    + Attributes (object)
+        + subscribe: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
++ Request unknown consent in filter (application/json; charset=utf-8)
+    + Parameters
+        + filter: `slug|eq|UNKNOWN_CONSENT`
+
++ Response 400 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
++ Request with bad filter format (application/json; charset=utf-8)
+    + Parameters
+        + filter: `wrong_filter_name|eq|MARKETING_EXTENDED`
+
++ Response 400 (application/json; charset=utf-8)
+    + Attributes (Errors)
 
 ## Push notification devices [/account/push-notification-devices]
 Push notification devices for customer.
@@ -630,7 +675,7 @@ Resource group for managing customer's personal data
 ## Personal data request [/personalData/request/]
 
 ### Personal data request [POST]    
-Use this enpoint to request personal data operation
+Use this endpoint to request personal data operation
 
 + Request (application/json)
     + Attributes (object)
@@ -1924,6 +1969,15 @@ MIA Service object
 + `excludesIds` (array[string]) - list of service IDs this service is mutually exclusive with
 + `extraData`
     + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
+
+## Consent (object)
+Consent subscription object
+
+### Properties
++ `slug`: `MARKETING_EXTENDED` (enum, required) - slug of consents user is able to subscribe or unsubscribe
+    + `MARKETING`
+    + `MARKETING_EXTENDED`
++ `subscribe`: `true` (boolean, required) - true if user is subscribed to consents with given slug
 
 ## Broker (object)
 Additional information about broker application
