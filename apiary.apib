@@ -1247,9 +1247,9 @@ This resource supports [filtering](#header-filtering). You can use following fil
 
 filter name        | possible operators | example
 ---                | ---                | ---
-amount             |eq,gt,lt            | `applications?filter=amount|gt|0` transactions that have amount higher than 0
+value.amount       |eq,gt,lt            | `applications?filter=value.amount|gt|0` transactions that have amount higher than 0
 transactionReason  |eq                  | `applications?filter=transactionReason|eq|PAID_ORDER` transactions that were created as a result of order paid
-transactionType    |eq                  | `applications?filter=transactionType|eq|CREDIT` transactions by type, credit or debit
+direction          |eq                  | `applications?filter=direction|eq|CREDIT` transactions by type, credit or debit
 isExpired          |eq                  | `applications?filter=isExpired|eq|0` transactions that are not expired
 expirationDatetime |lt,eq,gt            | `applications?filter=expirationDatetime|lt|2020-01-01` transactions by expiration datetime
 
@@ -2292,9 +2292,9 @@ Customer's coin account overview. Is based on CoinAmount object.
 Detail of customer's Mall Coin transaction
 
 ### Properties
-+ `amount` (CoinAmount, required) - poznamka
++ `value` (CoinAmount, required) - poznamka
 + `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
-+ `transactionType` (enum, required) - type of transaction
++ `direction` (enum, required) - type of transaction
     + `CREDIT`
     + `DEBIT`
 + `transactionReason` (enum, required) - reason for creating the transaction
