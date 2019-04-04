@@ -786,7 +786,7 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[Transaction], fixed-type, required)
+        + data (array[MoneyTransaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
 
 ## Applications [/my/contracts/{contractNumber}/applications]
@@ -1485,11 +1485,14 @@ Financial amount with VAT rate.
 
 ## Transaction (object)
 + id: `12312345` (string, required) - internal transaction identifier
-+ contractNumber: `01-123456789` (string, required) - contract to that transaction belongs (to which it is accounted)
 + value (Amount, required) - amount & currency used for bookkeeping (e.g. amount in account's currency). Can be negative e.g. if something was withdrawn from an account. Original transaction amount and currency will be specified in `additionalInfo` object if applicable
 + direction: `CREDIT` (enum, required) - direction of transaction
     + `CREDIT` - credit transaction (+)
     + `DEBIT` - debit transaction (-)
+
+
+## MoneyTransaction (Transaction)
++ contractNumber: `01-123456789` (string, required) - contract to that transaction belongs (to which it is accounted)
 + status: `PROCESSED` (enum, required) - transaction status
     + `UNPROCESSED` - unprocessed transaction
     + `PROCESSED` - processed transaction
@@ -1519,29 +1522,29 @@ Financial amount with VAT rate.
 + payerMessage: `need to pay this` (string, optional) - message for payer. Empty for incoming transactions.
 + payeeMessage: `info` (string, optional) - message for payee (e.g. for client receiving transaction)
 + transactionFeeCanceled: `false` (boolean, optional) - set to true if transaction fee is canceled.
-+ additionalInfoDomestic (TransactionInfoDomestic, optional) - domestic payments additional info (symbols for fomestic payments)
-+ additionalInfoForeign (TransactionInfoForeign, optional) - foreign payments additional info (original value and exchange rate)
-+ additionalInfoCard (TransactionInfoCard, optional) - card payemnts additional info (card number, mcc and merchant name)
-+ additionalInfoApplication (TransactionInfoApplication, optional) - transaction info related to application
++ additionalInfoDomestic (MoneyTransactionInfoDomestic, optional) - domestic payments additional info (symbols for fomestic payments)
++ additionalInfoForeign (MoneyTransactionInfoForeign, optional) - foreign payments additional info (original value and exchange rate)
++ additionalInfoCard (MoneyTransactionInfoCard, optional) - card payemnts additional info (card number, mcc and merchant name)
++ additionalInfoApplication (MoneyTransactionInfoApplication, optional) - transaction info related to application
 
-## TransactionInfoDomestic (object)
+## MoneyTransactionInfoDomestic (object)
 + `constantSymbol`: `0558` (string, optional)
 + `variableSymbol`: `9` (string, optional)
 + `specificSymbol`: `100011` (string, optional)
 
-## TransactionInfoCard (object)
+## MoneyTransactionInfoCard (object)
 + `mcc`: `3081` (string, optional) - Merchant Category code
 + `merchantName`: `SomeCompany, Ltd.` (string, optional)
 + `cardNumber`: `34xx-xxxx-xxxx-6289` (string, required) - Masked card number used for transaction
 + `cardName`: `äikovnŠ karta Home Credit` (string, optional) - Card name
 
-## TransactionInfoForeign (object)
+## MoneyTransactionInfoForeign (object)
 + `originalValue` (Amount, optional) - amount & currency in which transaction was originated
 + `exchangeRate`: 12.80 (number, optional) - exchange rate valid at the time of transfer
 
-## TransactionInfoApplication (object)
+## MoneyTransactionInfoApplication (object)
 + `applicationId`: `11200a0ee1` (string, required) - identifier of application related to transaction
-+ `contractNumber`: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with Transaction.contractNumber)
++ `contractNumber`: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with MoneyTransaction.contractNumber)
 + `applicationOrigin` (object, optional) - if related application was created based on other application
     + `applicationId`: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
     + `contractNumber`: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
@@ -2082,7 +2085,7 @@ Purchase transormed into installments
 + `dueDate`: `2018-01-22` (string, optional) - payment order due date
 + `payeeMessage`: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.` (string, optional) - message for payee
 + `payerMessage`: `Mauris mollis justo neque, ac iaculis erat lacinia vel.` (string, optional) - message for payer
-+ `additionalInfo` (TransactionInfoDomestic, optional) - payment order additional info (symbols)
++ `additionalInfo` (MoneyTransactionInfoDomestic, optional) - payment order additional info (symbols)
 + `sazkaCode`: `54764` (string, optional) - SAZKA code
 
 ## DomesticPaymentOrderStatus (DomesticPaymentOrder)
@@ -2305,15 +2308,12 @@ Customer's coin account overview. Is based on CoinAmount object.
 ### Properties
 + application (Application, optional, nullable) - Application containing order whose payment created transaction
 
-## CoinTransaction (object)
+## CoinTransaction (Transaction)
 Detail of customer's Mall Coin transaction
 
 ### Properties
 + `value` (CoinAmount, required) - amount of coins moved in the transaction
 + `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
-+ `direction` (enum, required) - type of transaction
-    + `CREDIT`
-    + `DEBIT`
 + `transactionReason` (enum, required) - reason for creating the transaction
     + `OTHER` - Coins were received for other reason
     + `ORDER_PAID` - Coins were received for order payment
