@@ -66,6 +66,18 @@ You can specify filtering by passing `filter` attribute. General pattern to spec
 
 Multiple filters can be specified on each request, separated by semi-colon. They are joined by "AND", so each result item must satisfy all conditions.
 
+__Note__: Some resources (stated in documentation) support filtering by specified embedded child object attributes. Suppose you have the following object structure:
+```
+{
+  "value": {
+    "amount": 100,
+    "currency": "CZK"
+    },
+  "some_attribute": "some_attribute_value"
+}
+```
+Then filtering by `amount` can be specified in the filter name as `value.amount`, filtering by currency would be specified as `value.currency` etc. Please se examples below.
+
 ### Filtering examples
 
 - get a list of partners with category in (1, 5, 10)
@@ -76,6 +88,11 @@ GET /general/partners?filter=category|in|1,5,10
 - get a list of contracts with contractDate in greater than 2016-02-10 and lower or equal to 2016-04-28
 ```
 GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-04-28
+```
+
+- get a list of transactions with amount greater then 100 (please see explanation above)
+```
+GET /general/transactions?filter=value.amount|gt|100
 ```
 
 ### List of operators
@@ -1262,20 +1279,20 @@ expirationDatetime |lt,eq,gt            | `applications?filter=expirationDatetim
 
 # Group Rewards
 
-## Promocode offers [/rewards/promocodes/offers]
-Promocode offers available to customers
+## Partner promocode offers [/rewards/partnerPromocodes/offers]
+Partner promocode offers available to customers
 
-### Promocode offers [GET]
+### Partner promocode offers [GET]
 
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[BasicPromocodeOffer], fixed-type, required) - array of available promocode offers
+        + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
 
-## Promocode purchases [/rewards/promocodes/purchases/]
+## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
 
-### Customer promocode purchase [POST]
+### Customer partner promocode purchase [POST]
 
 + Request (application/json; charset=utf-8)
     + Attributes (object)
@@ -1283,15 +1300,15 @@ Promocode offers available to customers
             + `id`: `10` (number, fixed-type, required) - pk of the offer the customer wishes to buy
 
 + Response 201 (application/json; charset=utf-8)
-    + Attributes (PurchasedPromocodeOffer, required)
+    + Attributes (PurchasedPartnerPromocodeOffer, required)
 
-### Customer purchased promocodes list [GET]
+### Customer purchased partner promocodes list [GET]
 
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[PurchasedPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
+        + data (array[PurchasedPartnerPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
 
 # Data Structures
 
@@ -2252,7 +2269,7 @@ Customer's device for receiving push notifications.
 ### Properties
 + `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
-## BasicPromocodeOffer (object)
+## BasicPartnerPromocodeOffer (object)
 Promocode offer - voucher offered to customer
 
 ### Properties
@@ -2272,12 +2289,12 @@ Promocode offer - voucher offered to customer
 + voucherValidUntil: `2020-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - ending info
 + voucherValue: `55%` (string, optional, nullable) - Display info about value of voucher
     
-## PurchasedPromocodeOffer (object)
+## PurchasedPartnerPromocodeOffer (object)
 Promocode offer purchased by a customer
 
 ### Properties
 + purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
-+ offer (BasicPromocodeOffer, required) - Offer the key is based on
++ offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
 
 ## CoinBalance (object)
 Customer's coin account overview. Is based on CoinAmount object.
@@ -2292,7 +2309,7 @@ Customer's coin account overview. Is based on CoinAmount object.
 Detail of customer's Mall Coin transaction
 
 ### Properties
-+ `value` (CoinAmount, required) - poznamka
++ `value` (CoinAmount, required) - amount of coins moved in the transaction
 + `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
 + `direction` (enum, required) - type of transaction
     + `CREDIT`
