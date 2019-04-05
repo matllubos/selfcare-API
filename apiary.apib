@@ -1486,6 +1486,7 @@ Financial amount with VAT rate.
 
 ## Transaction (object)
 + id: `12312345` (string, required) - internal transaction identifier
++ createdAt: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
 + value (Amount, required) - amount & currency used for bookkeeping (e.g. amount in account's currency). Can be negative e.g. if something was withdrawn from an account. Original transaction amount and currency will be specified in `additionalInfo` object if applicable
 + direction: `CREDIT` (enum, required) - direction of transaction
     + `CREDIT` - credit transaction (+)
@@ -2314,7 +2315,6 @@ Detail of customer's Mall Coin transaction
 
 ### Properties
 + `value` (CoinAmount, required) - amount of coins moved in the transaction
-+ `createdAt`: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
 + `transactionReason` (enum, required) - reason for creating the transaction
     + `OTHER` - Coins were received for other reason
     + `ORDER_PAID` - Coins were received for order payment
