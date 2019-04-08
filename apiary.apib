@@ -2,7 +2,7 @@ FORMAT: 1A
 HOST: https://api.platba.lymet.cz/customer/v1
 
 # New SC API
-This is documentation of Lymet NEW Self-Care API
+This is documentation of MALL Pay NEW Self-Care API
 
 **Base prefix: /customer/v1**.
 
@@ -66,6 +66,18 @@ You can specify filtering by passing `filter` attribute. General pattern to spec
 
 Multiple filters can be specified on each request, separated by semi-colon. They are joined by "AND", so each result item must satisfy all conditions.
 
+__Note__: Some resources (stated in documentation) support filtering by specified embedded child object attributes. Suppose you have the following object structure:
+```
+{
+  "value": {
+    "amount": 100,
+    "currency": "CZK"
+    },
+  "someAttribute": "some_attribute_value"
+}
+```
+Then filtering by `amount` can be specified in the filter name as `value.amount`, filtering by currency would be specified as `value.currency` etc. Please se examples below.
+
 ### Filtering examples
 
 - get a list of partners with category in (1, 5, 10)
@@ -76,6 +88,11 @@ GET /general/partners?filter=category|in|1,5,10
 - get a list of contracts with contractDate in greater than 2016-02-10 and lower or equal to 2016-04-28
 ```
 GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-04-28
+```
+
+- get a list of transactions with amount greater then 100 (please see explanation above)
+```
+GET /general/transactions?filter=value.amount|gt|100
 ```
 
 ### List of operators
@@ -127,7 +144,7 @@ Unless stated otherwise, all responses are sent as `Content-Type: application/js
 ## HTTP status codes
 We use following status codes throughout the API, except for OAuth flow when response codes are prescribed in RFC
 - 200 `OK` - request was successful
-- 201 `Created` - request was successfull and resource was created
+- 201 `Created` - request was successful and resource was created
 - 204 `No content` - we accepted your request but there is nothing to return (e.g. response is empty)
 - 400 `Bad Request` - request is missing required parameters
 - 401 `Unauthorized` - your API key is wrong or user not authorized (not logged in)
@@ -219,6 +236,9 @@ Provide `username` and `password`.
 #### Facebook login
 Provide `facebookAccessToken`.
 
+#### Mobile app token login
+Provide `mobileToken`.
+
 + Request (application/json; charset=utf-8)
     + Attributes (CustomerLogin)
 
@@ -229,8 +249,9 @@ Provide `facebookAccessToken`.
 + Response 422(application/json; charset=utf-8)
     Unable to authenticate the customer. List of error codes special for this endpoint:
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any Lymet account. Immediate registration is possible.
+    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any MALL Pay account. Immediate registration is possible.
     - `INVALID_LOGIN` - Username or password is wrong.
+    - `INVALID_MOBILE_LOGIN` - Mobile login token is invalid.
     + Attributes (Errors)
 
 ## Customer logout - TBD [/account/logout]  
@@ -247,14 +268,44 @@ Use this resource to invalidate existing token, which in effect logs out the cus
     Customer is not logged in.
     + Attributes (Errors)
 
-## Change password - TBD [/account/password]
+## Mobile login token management [/account/mobileToken]
+Use this endpoint to generate new `mobileToken` for specified device, used for login in biometric login services.
 
-### Change password [POST]
-Use this endpoint to change password of a logged-in customer.
+### Generate new token [POST]
+Use this endpoint to get new mobile login token:
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + deviceUuid: `a5d46273922540caa2432359367abc5c` (string) - Device UUID.
+
++ Response 200
+    Mobile login token issued.
+    + Attributes (CustomerMobileTokenResult)
+
++ Response 422 (application/json; charset=utf-8)
+    Unable to generate a new mobile token:
+    - `UUID_NOT_VALID` - UUID provided is not in valid format.
+    - `TOKEN_FOR_SAME_UUID_EXISTS` - Mobile token for given UUID already exists. In order to generate a new token one must delete the old token first.
+    + Attributes (Errors)
+
+## Mobile login token removal [/account/mobileToken/{deviceUuid}]
+Use this endpoint to delete mobile token for specified device, used for login in biometric login services.
+
+### Remove mobile token [DELETE]
+Entry of mobile token with given `deviceUuid` will be removed. This combination of `deviceUuid` and `mobileToken` will no longer work to log in.
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + deviceUuid: `deviceuuid123456789` (string, required) - Device UUID
+
++ Response 200
+    Mobile token asociated with given `deviceUuid` was removed.
+
+## Change password [/account/password]
+
+### Set password [POST]
+Use this endpoint to set password of a logged-in customer.
 + Request (application/json)
     + Attributes (object)
-        + currentPassword: `f2FqYbmQZHXuPbdq` (string) - Customer's current password.
-        + newPassword: `xt3hP58vouL61H40` (string) - New password.
+        + newPassword: `xt3hP58vouL61H40` (string, required) - New password.
 
 
 + Response 204
@@ -264,7 +315,36 @@ Use this endpoint to change password of a logged-in customer.
 
 + Response 422 (application/json)
     Password change was not successful.
+    - `PASSWORD_TOO_SHORT` - New password is too short.
+    - `PASSWORD_NO_LOWERCASE_CHARACTER` - New password must contain lowercase character.
+    - `PASSWORD_NO_UPPRECASE_CHARACTER` - New password must contain uppercase character.
+    - `PASSWORD_NO_NUMERIC_CHARACTER` - New password must contain numeric character.
     + Attributes (Errors)
+
+
+### Change password [PUT]
+Use this endpoint to change password of a logged-in customer.
++ Request (application/json)
+    + Attributes (object)
+        + currentPassword: `f2FqYbmQZHXuPbdq` (string, required) - Customer's current password.
+        + newPassword: `xt3hP58vouL61H40` (string, required) - New password.
+
+
++ Response 204
+    Password change successful.
+    + Body
+
+
++ Response 422 (application/json)
+    Password change was not successful.
+    - `CURRENT_PASSWORD_WRONG` - Current password is wrong.
+    - `NEW_PASSWORD_EQUALS_CURRENT_PASSWORD` - New password is the same as the old password.
+    - `PASSWORD_TOO_SHORT` - New password is too short.
+    - `PASSWORD_NO_LOWERCASE_CHARACTER` - New password must contain lowercase character.
+    - `PASSWORD_NO_UPPRECASE_CHARACTER` - New password must contain uppercase character.
+    - `PASSWORD_NO_NUMERIC_CHARACTER` - New password must contain numeric character.
+    + Attributes (Errors)
+
 
 ## Password set [/account/password/set]
 
@@ -403,6 +483,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         + consents  (array, required) - List of consents given by customer
             + `REGISTRATION` - Consent with service terms and conditions (required)
             + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
+        + promoSource (string) - Promo source from URL
 
 + Response 200
     Customer has been registered.
@@ -413,11 +494,11 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         
 + Response 422 (application/json)
     Customer has not been registered. List of error codes special for this endpoint:
-    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing Lymet account, but customer must finish registration.
-    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing Lymet account. Immediate login is possible.
-    - `ALREADY_EXISTS` - Lymet account with this email/phone already exists.
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
+    - `ALREADY_EXISTS` - MALL Pay account with this email/phone already exists.
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched Lymet account e-mail address.
+    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched MALL Pay account e-mail address.
     + Attributes (Errors)
 
 + Response 429 (application/json)
@@ -456,7 +537,7 @@ Use this endpoing to query last account upgrade request's state.
 + Response 200
     + Attributes (object)
         + state: `PROCESSING` (enum, required) - last account upgrade request state.
-            + `PROCESSING` - Account upgrade request is beeing processed by Lymet staff.
+            + `PROCESSING` - Account upgrade request is beeing processed by MALL Pay staff.
             + `APPROVED` - Account upgrade request has been approved.
             + `DENIED` - Account upgrade request has been denied.
 
@@ -465,7 +546,7 @@ Use this endpoing to query last account upgrade request's state.
     + Body
 
 ## Mailing lists [/account/consents/subscribe]
-Mailing list subscription for given slug
+Mailing list subscription for given slug. This endpoint is deprecated and replaced by `/account/consents`.
 
 ### Subscribe to mailing lists [POST]
 
@@ -477,9 +558,102 @@ Mailing list subscription for given slug
 
 + Response 204 (application/json; charset=utf-8)
 
+## Consents [/account/consents]
+All consents user is able to subscribe and unsubscribe.
+
+### Available consents [GET]
+Get all aconsents a can be subscribed to. Allowed subscriptions are `MARKETING` and `MARKETING_EXTENDED`.
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
+### Change subscription of consents [PUT]
+Subscribe or unsubscribe user to filtered consents.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+filter name | possible operators | example
+---         | ---                | ---
+slug        | eq                 | `consents?filter=slug|eq|MARKETING`  consent with slug `MARKETING`
+slug        | in                 | `consents?filter=slug|in|MARKETING,MARKETING_EXTENDED`  consent with slugs `MARKETING` and `MARKETING_EXTENDED`
+
++ Request (application/json)
+    + Attributes (object)
+        + subscribe: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
++ Request unknown consent in filter (application/json; charset=utf-8)
+    + Parameters
+        + filter: `slug|eq|UNKNOWN_CONSENT`
+
++ Response 400 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
++ Request with bad filter format (application/json; charset=utf-8)
+    + Parameters
+        + filter: `wrong_filter_name|eq|MARKETING_EXTENDED`
+
++ Response 400 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
+## Push notification devices [/account/push-notification-devices]
+Push notification devices for customer.
+
+### Register new device [POST]
+
++ Request (application/json)
+    + Attributes (PushNotificationDeviceToken)
+
++ Response 204 (application/json; charset=utf-8)
+
++ Response 422 (application/json; charset=utf-8)
+    Push notification device already exists. Following codes are possible.
+    * PUSH_NOTIFICATION_DEVICE_EXISTS
+    + Attributes (Errors)
+
 
 # Group My profile
 Resources for accessing and modifying user personal data.
+
+## Facebook connection [/account/facebook]
+
+### Connect facebook account to a customer [POST]
+Use this resource to connect facebook account to a customer.
+
++ Request (application/json)
+    + Attributes (object)
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+
++ Response 204
+    Facebook account was connected
+        + Body
+
++ Response 422 (application/json)
+    Facebook account was not connected. List of error codes special for this endpoint:
+    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
+    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
+    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
+    + Attributes (Errors)
+
+### Disconnect facebook account from a customer [DELETE]
+Use this resource to disconnect facebook account from a customer.
+
++ Response 204
+    Facebook account was disconnected
+        + Body
+
++ Response 422 (application/json)
+    Facebook account was not connected. List of error codes special for this endpoint:
+    - `NOT_CONNECTED` - The Facebook account isn't connected to an the account
+    + Attributes (Errors)
 
 ## Customer information [/my/profile]
 Customer profile information
@@ -553,7 +727,7 @@ Resource group for managing customer's personal data
 ## Personal data request [/personalData/request/]
 
 ### Personal data request [POST]    
-Use this enpoint to request personal data operation
+Use this endpoint to request personal data operation
 
 + Request (application/json)
     + Attributes (object)
@@ -692,7 +866,7 @@ transactionType  | eq, in             | `transactions?filter=transactionType|in|
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[Transaction], fixed-type, required)
+        + data (array[MoneyTransaction], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
 
 ## Applications [/my/contracts/{contractNumber}/applications]
@@ -975,37 +1149,6 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
     + Attributes (object)
         + data (array[Document], fixed-type, required)
 
-## Create application [/my/applications]
-If the request was recognized as duplication, HTTP status code 200 and the *application* object created during the first related successful request is received.
-
-In other cases, you receive one of the following errors:
-| Status code | Code                  | Message                     |
-| ---         | ---                   | ---                         |
-| 400         | INVALID_REQUEST       | *Various messages possible* |
-| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-
-### Create application [POST]
-Create new *application* of particular type
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (ApplicationRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Application was created
-
-    + Attributes (ApplicationResponse)
-
-
-+ Response 400(application/json; charset=utf-8)
-
-        There was an error processing request
-
-    + Attributes (Errors)
-
-
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
 
@@ -1138,40 +1281,6 @@ Get prioritized list of possible installments that are available for repayment. 
     + Attributes (Errors)
 
 
-## Revolving payment availability [/my/payments/revolvingPaymentAvailability]
-Client may pay his deffered payments by revolving loan, either by installment program or by drawing from balance. This resource provide information about possibility to use this payment method.
-
-Possible error codes:
-| Status code | Code                  | Message                     |
-| ---         | ---                   | ---                         |
-| 400         | INVALID_REQUEST       | *Various messages possible* |
-| 500         | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-### Revolving payment availability [POST]
-Check the availability to pay given Applications by revolving loan.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (RevolvingPaymentAvailabilityRequest)
-
-+ Response 200(application/json; charset=utf-8)
-
-        Payment possibility checked successfully
-
-    + Attributes (RevolvingPaymentAvailability)
-
-
-+ Request Wrong data (application/json; charset=utf-8)
-    + Attributes (RevolvingPaymentAvailabilityRequest)
-
-+ Response 422 (application/json; charset=utf-8)
-
-        There was an error processing request
-
-    + Attributes (Errors)
-
-
-
-
 # Group My Documents
 
 ## Documents for client [/my/documents]
@@ -1197,6 +1306,90 @@ type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_A
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Document], fixed-type, required)
+
+# Group MALL Coin
+
+## Client's MALL Coin overview [/coins/overview]
+Overview of client's coin account. Currently only account coin balance.
+
+### MALL Coin account overview [GET]
+Get coin account overview
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (CoinBalance)
+
+## Client's MALL Coin transactions [/coins/transactions]
+Overview of client's MALL Coin transactions.
+
+### MALL Coin transactions list [GET]
+Get customer coin transactions list
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+TBD.
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `created_at descending`.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name        | possible operators | example
+---                | ---                | ---
+id                 |eq,in               | `applications?filter=id|in|1,3` transactions that have id 1 or 3
+value.amount       |eq,gt,lt            | `applications?filter=value.amount|gt|0` transactions that have amount higher than 0
+transactionReason  |eq                  | `applications?filter=transactionReason|eq|PAID_ORDER` transactions that were created as a result of order paid
+direction          |eq                  | `applications?filter=direction|eq|CREDIT` transactions by type, credit or debit
+isExpired          |eq                  | `applications?filter=isExpired|eq|0` transactions that are not expired
+expirationDatetime |lt,eq,gt            | `applications?filter=expirationDatetime|lt|2020-01-01` transactions by expiration datetime
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[CoinTransaction], fixed-type, required)
+        + pagingInfo (PagingInfo, optional)
+
+# Group Rewards
+
+## Partner promocode offers [/rewards/partnerPromocodes/offers]
+Partner promocode offers available to customers
+
+### Partner promocode offers [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
+
+## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
+
+### Customer partner promocode purchase [POST]
+
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + `promocode`
+            + `id`: `10` (number, fixed-type, required) - pk of the offer the customer wishes to buy
+
++ Response 201 (application/json; charset=utf-8)
+    + Attributes (PurchasedPartnerPromocodeOffer, required)
+
+### Customer purchased partner promocodes list [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PurchasedPartnerPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
 
 # Data Structures
 
@@ -1320,8 +1513,10 @@ Financial amount with VAT rate.
 + addresses (array[Address], fixed-type, optional) - client addresses
 + phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
 + emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
++ facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + identityDocuments (array[IdentityDocument], fixed-type, optional) - client identity documents
++ hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
 
 
 ## Contract (object)
@@ -1371,11 +1566,15 @@ Financial amount with VAT rate.
 
 ## Transaction (object)
 + id: `12312345` (string, required) - internal transaction identifier
-+ contractNumber: `01-123456789` (string, required) - contract to that transaction belongs (to which it is accounted)
++ createdAt: `2017-01-18T10:34:44+01:00` (string, required) - date of transaction creation
 + value (Amount, required) - amount & currency used for bookkeeping (e.g. amount in account's currency). Can be negative e.g. if something was withdrawn from an account. Original transaction amount and currency will be specified in `additionalInfo` object if applicable
 + direction: `CREDIT` (enum, required) - direction of transaction
     + `CREDIT` - credit transaction (+)
     + `DEBIT` - debit transaction (-)
+
+
+## MoneyTransaction (Transaction)
++ contractNumber: `01-123456789` (string, required) - contract to that transaction belongs (to which it is accounted)
 + status: `PROCESSED` (enum, required) - transaction status
     + `UNPROCESSED` - unprocessed transaction
     + `PROCESSED` - processed transaction
@@ -1405,29 +1604,29 @@ Financial amount with VAT rate.
 + payerMessage: `need to pay this` (string, optional) - message for payer. Empty for incoming transactions.
 + payeeMessage: `info` (string, optional) - message for payee (e.g. for client receiving transaction)
 + transactionFeeCanceled: `false` (boolean, optional) - set to true if transaction fee is canceled.
-+ additionalInfoDomestic (TransactionInfoDomestic, optional) - domestic payments additional info (symbols for fomestic payments)
-+ additionalInfoForeign (TransactionInfoForeign, optional) - foreign payments additional info (original value and exchange rate)
-+ additionalInfoCard (TransactionInfoCard, optional) - card payemnts additional info (card number, mcc and merchant name)
-+ additionalInfoApplication (TransactionInfoApplication, optional) - transaction info related to application
++ additionalInfoDomestic (MoneyTransactionInfoDomestic, optional) - domestic payments additional info (symbols for fomestic payments)
++ additionalInfoForeign (MoneyTransactionInfoForeign, optional) - foreign payments additional info (original value and exchange rate)
++ additionalInfoCard (MoneyTransactionInfoCard, optional) - card payemnts additional info (card number, mcc and merchant name)
++ additionalInfoApplication (MoneyTransactionInfoApplication, optional) - transaction info related to application
 
-## TransactionInfoDomestic (object)
+## MoneyTransactionInfoDomestic (object)
 + `constantSymbol`: `0558` (string, optional)
 + `variableSymbol`: `9` (string, optional)
 + `specificSymbol`: `100011` (string, optional)
 
-## TransactionInfoCard (object)
+## MoneyTransactionInfoCard (object)
 + `mcc`: `3081` (string, optional) - Merchant Category code
 + `merchantName`: `SomeCompany, Ltd.` (string, optional)
 + `cardNumber`: `34xx-xxxx-xxxx-6289` (string, required) - Masked card number used for transaction
 + `cardName`: `äikovnŠ karta Home Credit` (string, optional) - Card name
 
-## TransactionInfoForeign (object)
+## MoneyTransactionInfoForeign (object)
 + `originalValue` (Amount, optional) - amount & currency in which transaction was originated
 + `exchangeRate`: 12.80 (number, optional) - exchange rate valid at the time of transfer
 
-## TransactionInfoApplication (object)
+## MoneyTransactionInfoApplication (object)
 + `applicationId`: `11200a0ee1` (string, required) - identifier of application related to transaction
-+ `contractNumber`: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with Transaction.contractNumber)
++ `contractNumber`: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with MoneyTransaction.contractNumber)
 + `applicationOrigin` (object, optional) - if related application was created based on other application
     + `applicationId`: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
     + `contractNumber`: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
@@ -1604,8 +1803,7 @@ Financing application.
 
 ### Properties
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (Order, optional) - Order data. One and only one of `order` or `liability` objects is provided
-+ `liability` (Liability, optional) - Order data. One and only one of `order` or `liability` objects is provided
++ `order` (Order, required) - Order data.
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
@@ -1621,13 +1819,8 @@ Financing application.
     + `dueDate`: `2016-11-15` (string, optional, nullable) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
     + `dueDateClient`: `2016-11-14` (string, optional, nullable) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
     + `currentDpd`: 2 (number, required) - current days past due
-    + `blockedOnContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application is prepared to be paid from RU balance after dueDateClient
-    + `paidFromContractNumber`: `01-6010027378` (string, optional, nullable) - contract when application was paid by revolving loan
     + `completelyPaid`: `true` (boolean, optional, nullable) - information if this application is completely paid and there is no expected payment from client
     + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
-    + `revolvingPaymentInfo` (object, optional, nullable) - information about revolving loan payment method (installments or balance)
-        + `availability` (RevolvingPaymentAvailability, optional, nullable) - information about possibility to pay application by revolving loan
-        + `application` (ApplicationBase, optional, nullable) - information about revolving payment application (Homer application)
 + `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
 
 
@@ -1636,7 +1829,7 @@ Financing application.
 
 ### Properties
 + `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (HistoryOrder, required) - Order data. One and only one of `order` or `liability` objects is provided
++ `order` (HistoryOrder, required) - Order data.
 + `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
     + `TRY_AND_PAY` - Vyskoušej a zaplať
@@ -1647,22 +1840,6 @@ Financing application.
     + `name`: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
     + `logoUrl`: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
 
-
-## RevolvingPaymentAvailabilityRequest (object)
-+ `applications` (array[ApplicationId], fixed-type, required) - Applications of type `DEFERRED_PAYMENT` that will be financed by revolving loan
-
-
-## RevolvingPaymentAvailability (object)
-Information about possibility to pay application by revolving loan, either by installment program or by drawing from balance
-
-### Properties
-+ `availability` (enum, required)
-    + `AVAILABLE`
-    + `NOT_AVAILABLE`
-+ `reasons` (array[string], optional) - List of reasons.
-    Possible values in array: `UNDESIRABLE`, `TOO_LOW_AMOUNT`, `ALREADY_PAID`, `BLOCKED`, `OVERDUE`, `IN_REVOLVING_PAYMENT_PROCESS`.
-+ `suitableContracts` (array[string], fixed-type, optional) - list of suitable target revolving loan contract numbers (if available)
-
 ## PaymentAvailability (object)
 Information about possibility to pay application
 
@@ -1672,24 +1849,6 @@ Information about possibility to pay application
     + `NOT_AVAILABLE`
 + `reasons` (array[string], optional) - List of reasons.
     Possible values in array: `ALREADY_PAID`, `BLOCKED`, `IN_REVOLVING_PAYMENT_PROCESS`.
-
-## ApplicationRequest (object)
-Application request
-
-### Properties
-+ `applications` (array[ApplicationId], fixed-type, required) - Applications of type `DEFERRED_PAYMENT` that will be financed by revolving loan
-+ `type`: `INSTALLMENT` (enum, required) - Financing type
-    + `INSTALLMENT` - Pay in monthly installments ("rozklad odloěenżch nŠkupý")
-    + `BALANCE` - Pay by charging client's revolving loan (NOT SUPPORTED YET)
-+ `settingsInstallment` (object, optional) - Settings for INSTALLMENT Application type.
-    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-+ `returnUrls` (ReturnUrls, required) - Collection of URLs used for redirection of a customer back to a Self care
-
-
-## ApplicationResponse (ApplicationBase)
-+ `redirectUrl`: `https://clientredirect.lymet.cz?applicationId=77d665d7-da44-402e-b7f7-6354d6076b32` (string, required) - URL where the client should be redirected after successfull creation of application.
 
 
 ## ReturnUrls (object)
@@ -1772,30 +1931,14 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + `deliveryTrackingNumber`: `EX12221` (string, optional, nullable) - Delivery tracking number
 + `sentDate`: `2017-01-12T10:34:44+01:00` (string, optional, nullable) - Date and time of order shipping
 
-## Liability (FinancedSubject)
-Detailed information about order (type `LIABILITY`)
 
-### Properties
-+ `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
-+ `items` (array[LiabilityItem], fixed-type, required) -  Items in order
-
-
-## ItemBase (object)
-+ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
-+ `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (File, optional) - Item image
-
-
-## HistoryItemBase (object)
-+ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
-+ `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (HistoryFile, optional) - Item image
-
-
-## Item (ItemBase)
+## Item (object)
 Order item information, needed to create an application.
 
 ### Properties
++ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
++ `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
++ `image` (File, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -1828,10 +1971,13 @@ Order item information, needed to create an application.
 + `services` (array[Service]) - insurance services objects for item
 
 
-## HistoryItem (HistoryItemBase)
+## HistoryItem (object)
 Order item information, needed to create an application.
 
 ### Properties
++ `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
++ `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
++ `image` (HistoryFile, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -1881,16 +2027,14 @@ MIA Service object
 + `extraData`
     + `reportDamageURL`: `https://example.com/reportdamage` (string, optional)
 
-## LiabilityItem (ItemBase)
-Order item information, needed to create an application.
+## Consent (object)
+Consent subscription object
 
 ### Properties
-+ `brokerApplicationId`: `02-11b00a1ef1` (string, required) - Broker application ID (`KNJapplicationId`)
-+ `homerApplicationId`: `01-11b00a1ef2` (string, optional) - Homer application ID ("Odklad na RU" application id)
-+ `creditor`: `Mall.cz` (string, optional) - Creditor of liability item
-+ `dateCreated`:  `2017-01-10T10:34:44+01:00` (string, optional) - Date of creation of liability
-+ `dateDue`:  `2017-02-20` (string, required) - Due date of liability
-+ `itemsQuantity`: 3 (number, optional) - Quantity of items in financed liability, if applicable (f.e. quantity of items purchased by Deffered payment). If empty, considered as 0
++ `slug`: `MARKETING_EXTENDED` (enum, required) - slug of consents user is able to subscribe or unsubscribe
+    + `MARKETING`
+    + `MARKETING_EXTENDED`
++ `subscribe`: `true` (boolean, required) - true if user is subscribed to consents with given slug
 
 ## Broker (object)
 Additional information about broker application
@@ -2032,7 +2176,7 @@ Purchase transormed into installments
 + `dueDate`: `2018-01-22` (string, optional) - payment order due date
 + `payeeMessage`: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.` (string, optional) - message for payee
 + `payerMessage`: `Mauris mollis justo neque, ac iaculis erat lacinia vel.` (string, optional) - message for payer
-+ `additionalInfo` (TransactionInfoDomestic, optional) - payment order additional info (symbols)
++ `additionalInfo` (MoneyTransactionInfoDomestic, optional) - payment order additional info (symbols)
 + `sazkaCode`: `54764` (string, optional) - SAZKA code
 
 ## DomesticPaymentOrderStatus (DomesticPaymentOrder)
@@ -2160,12 +2304,19 @@ Collection of URLs used for redirection of a customer back to a partner website 
         + `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
         + `password`: `secretpassword1234` (string, required) - Customer's password
     + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
+    + Properties
+        + `deviceUuid`: `deviceuuid123456789` (string, required) - Device UUID
+        + `mobileToken`: `secretToken123456` (string, required) - Mobile login token
 
 
 ## CustomerLoginResult (object)
 ### Properties
 + `accessToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Access token
 + `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
+
+## CustomerMobileTokenResult (object)
+### Properties
++ `mobileToken`: `6ca0a5f2cb1f5bf1e15259e7689114fa` (string) - Mobile login token
 
 ## Subfield (object)
 ### Properties
@@ -2199,6 +2350,7 @@ Customer's personal document
     + `DRIVING_LICENSE_BACK` - Driving license (back side)
 + `file` (PersonalDocumentFile, required) - Attached file
 
+
 ## Notification (object)
 + `id`: 45688987 (number) - Notification ID
 + `createdDate` : `2017-01-18T10:34:44+01:00` (string) - Date and time of notification creation
@@ -2212,3 +2364,66 @@ Customer's personal document
 
 ## NotificationRelatedDataObject (object)
 + `application` (Application, optional) - Related application.
+
+## PushNotificationDeviceToken (object)
+Customer's device for receiving push notifications.
+
+### Properties
++ `type` (enum, required) - Type of the device
+    + `ANDROID`
+    + `IOS`
++ `token` (string, required) - Actual token of the device
+
+## CoinAmount (Amount)
+### Properties
++ `currency`: `XXX` (string, required) - Coin currency. Used `XXX` for MALL Coins.  [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+## BasicPartnerPromocodeOffer (object)
+Promocode offer - voucher offered to customer
+
+### Properties
++ id (number, required) - Id of offer
++ title (string, required) - Offer title
++ description (string, required) - Offer description
++ coinsRequired (CoinAmount, required) - Price of offer in MALL Coins
++ validFrom: `2019-01-18T10:34:44+01:00` (string, required) - The offer is valid from this datetime
++ validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetimr
++ priority: 100 (number, required) - Priority of offer in a list of offers
++ createdAt: `2017-01-18T10:34:44+01:00` (string, required) - When was the offer created
++ productImages (array[File], required) - Images for the offer
++ productPriceNonDiscounted (Amount, optional, nullable) - Display original non-discounted price
++ productPriceDiscounted (Amount, optional, nullable) - Display discounted price
++ productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information 
++ voucherValidFrom: `2019-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - starting datetime
++ voucherValidUntil: `2020-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - ending info
++ descriptionShort: `Sleva 55%` (string, optional, nullable) - Display short info about a value of the voucher
+    
+## PurchasedPartnerPromocodeOffer (object)
+Promocode offer purchased by a customer
+
+### Properties
++ purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
++ offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
+
+## CoinBalance (object)
+Customer's coin account overview. Is based on CoinAmount object.
+### Properties
++ `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
+
+## CoinRelatedData (object)
+### Properties
++ application (Application, optional, nullable) - Application containing order whose payment created transaction
+
+## CoinTransaction (Transaction)
+Detail of customer's Mall Coin transaction
+
+### Properties
++ `value` (CoinAmount, required) - amount of coins moved in the transaction
++ `transactionReason` (enum, required) - reason for creating the transaction
+    + `OTHER` - Coins were received for other reason
+    + `ORDER_PAID` - Coins were received for order payment
+    + `SERVICES_DISCOUNT` - Coins were spent on services discount
+    + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
+    + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
+    + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
++ `relatedData` (CoinRelatedData, optional, nullable) - data and objects related to the MALL Coin transaction
