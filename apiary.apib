@@ -722,6 +722,8 @@ Use this endpoint to get list of notifications. This endpoint supports paginatio
 ### Mark notification as read/triggered [PATCH]
 Use this endpoint to indicate, that user has seen the notification(s) and/or interacted with it/them (e.g. he clicked or tapped it).
 
+Use filter (by ID) to limit set of affected notifications.
+
 + Request  (application/json; charset=utf-8)
     + Attributes (object)
         + isRead: `true` (boolean) - Mark notification as read (i.e. user has seen the notification)
