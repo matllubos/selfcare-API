@@ -1128,6 +1128,58 @@ Allows ordering of the service based on previous offer
     Service not found.
     + Attributes (Errors)
 
+## Purchasing rewards for application items [/my/contracts/{contractNumber}/application/{applicationId}/item/rewards/purchase]
+Purchasing Rewards on given application items
+
++ Parameters
+    + contractNumber: `01-3700227718` (string, required) - ID of contract
+    + applicationId: `application_id` (string, required) - ID of application
+
+### Purchasing rewards for application order items [POST]
+Allows purchasing/ordering of the reward based on info in an application
+
++ Request (application/json; charset=utf-8)
+    Correct request.
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `service-adp` (string, required) - ID of service
+    + Attributes
+        + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (Application)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+    + Attributes (object)
+        + type: `FREE_DELIVERY` (enum, required) - reward type
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
++ Request Invalid reward type (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+    + Attributes (object)
+        + type: `this_is_invalid_reward_type` (enum, required) - invalid enum value
+
++ Response 404 (application/json; charset=utf-8)
+    Reward not found.
+    + Attributes (Errors)
+
++ Request Cannot apply rewards (application/json; charset=utf-8)
+    Request is correct but the reward has already been applied or customer does not have enough coins, etc.
+    + Parameters
+        + contractNumber: `01-3700227718` (string, required) - ID of contract
+        + applicationId: `service-adp` (string, required) - ID of service
+    + Attributes
+        + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
+
++ Response 422 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
 Installments of given contract (installment schedule for CEL contract)
 
@@ -2013,6 +2065,7 @@ Order item information, needed to create an application.
 + `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
 + `services` (array[Service]) - insurance services objects for item
++ `rewards` (array[Reward], fixed-type, optional, nullable) - rewards purchasable for order item
 
 
 ## HistoryItem (object)
@@ -2475,3 +2528,17 @@ Detail of customer's Mall Coin transaction
     + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
     + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
 + `relatedData` (CoinRelatedData, optional, nullable) - data and objects related to the MALL Coin transaction
+
+## Reward (object)
+Reward description
+
+### Properties
++ `name`: `Doprava zdarma` (string, optional, nullable) - Displayable name of the discount
++ `coins` (CoinAmount, required) - how much the reward will cost or did cost
++ `discount` (Amount, optional, nullable) - how much did the customer save in his currency
++ `type` (enum, required) - type of reward
+    + `FREE_DELIVERY`
++ `status` (enum, required) - status of the reward
+    + `PURCHASED` - reward was purchased
+    + `AVAILABLE` - reward is available for purchase
+    + `NOT_ENOUGH_COINS` - customer does not have enough coins to purchase the reward
