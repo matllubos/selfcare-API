@@ -468,22 +468,44 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
 ### Register a new customer [POST]
 Use this resource to register a new customer. There are two ways of registration:
 
++ Attributes (object)
+    + name: `John Doe` (string) - Customer's full name (first and last name).
+    + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
+    + phone: `+420777777777` (string) - Customer's phone in international format.
+    + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
+    + consents  (array, required) - List of consents given by customer
+        + `REGISTRATION` - Consent with service terms and conditions (required)
+        + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
+    + promoSource: `referral:JNOVAK586` (string) - Contains either promo source URL or referral code of referrer (if it starts with `referral:` prefix)
+
 #### Classic registration
 Provide `name`, `email` and `phone`.
+
++ Request (application/json)
+    + Attributes (object)
+        + name: `John Doe`
+        + email: `john.doe@yahoo.com`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
+        + promoSource: `referral:JNOVAK586` (string) - referral code of referrer (customer who send registration link)
+
++ Response 200
+    Customer has been registered.
+    + Attributes (object)
+        + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
+            + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
 #### Facebook registration
 Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
 
 + Request (application/json)
     + Attributes (object)
-        + name: `John Doe` (string) - Customer's full name (first and last name).
-        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
-        + phone: `+420777777777` (string) - Customer's phone in international format.
-        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
-        + consents  (array, required) - List of consents given by customer
-            + `REGISTRATION` - Consent with service terms and conditions (required)
-            + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
-        + promoSource (string) - Promo source from URL
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
+        + promoSource: `example.com/mallpaycampaign` (string) - the site which redirected the customer here
 
 + Response 200
     Customer has been registered.
@@ -631,6 +653,50 @@ Push notification devices for customer.
     * PUSH_NOTIFICATION_DEVICE_EXISTS
     + Attributes (Errors)
 
+## Referral promo code stats [/account/referral/stats]
+
+### Get referral code stats [GET]
+Get referral code information of the customer.
+
++ Request (application/json; charset=utf-8)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ReferralCodeStats, required)
+
+## Referral promo code stats by key [/account/referral/{key}/stats]
+Referral promo code information found by key of promo code from customer.
+
++ Parameters
+    + key: `JOEDOE123` (string, required) - referral promo code key
+
+### Get referral code stats by key [GET]
+Get referral code information by promo code key provided. No authorization is required.
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + key: `JOEDOE123`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ReferralCodeStats, required)
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + key: `INVALID_KEY`
+
++ Response 404 (application/json; charset=utf-8)
+
+        Promo code with given key not found.
+
+    + Attributes (Errors)
+
+## Referral reward codes [/account/referral/rewards]
+
+### Get referral reward codes received [GET]
+Get reward promo codes customer received for each new customer (referee).
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (array[ReferralRewardCodesReceived], required)
 
 # Group My profile
 Resources for accessing and modifying user personal data.
@@ -1036,7 +1102,7 @@ Customer can apply for discount price by submitting promo code.
     + Parameters
         + applicationId: `a7718` (string, required) - ID of application
     + Attributes (object)
-        + promocode: `MALL1SAW3S0M3` (string, required) - promo code key
+        + key: `MALL1SAW3S0M3` (string, required) - promo code key
 
 + Response 200 (application/json; charset=utf-8)
     Existing application and valid applicable promo code
@@ -1046,7 +1112,7 @@ Customer can apply for discount price by submitting promo code.
     + Parameters
         + applicationId: `this_is_no_application` (string, required) - ID of application
     + Attributes (object)
-        + promocode: `MALL1SAW3S0M3` (string, required) - promo code key
+        + key: `MALL1SAW3S0M3` (string, required) - promo code key
 
 + Response 404 (application/json; charset=utf-8)
     Application not found.
@@ -1056,7 +1122,7 @@ Customer can apply for discount price by submitting promo code.
     + Parameters
         + applicationId: `a7718` (string, required) - ID of application
     + Attributes (object)
-        + promocode: `this_is_invalid_promocode_key` (string, required) - promo code key
+        + key: `this_is_invalid_key` (string, required) - promo code key
 
 + Response 422 (application/json; charset=utf-8)
     Promo code is invalid or expired.
@@ -2467,6 +2533,34 @@ Promocode offer purchased by a customer
 ### Properties
 + purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
 + offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
+
+## ReferralCodeStats
+Statistics of customer's referral promo code.
+
+### Properties
++ fullName (string, required) - name of customer
++ registeredWithKey (string, optional, nullable) - promo code key of referrer which was used during customer's registration
++ key (string, required) - key of customer's promo code
++ discount (Amount, required) - referee's discount of order total value after promo code application
++ maxUsage (number, required) - how many referees can use the referral promo code in total
++ used (number, required) - how many referees already used the referral promo code
++ remainingUsage (number, required) - how many referees can still apply the promo code from now
++ totalSaved (Amount, required) - how much money referees saved in total because of the application of the referral promo code to their orders
++ totalRewardsOutstanding (Amount, required) - how much money could referees save in total when they apply referral promo code to their orders
+
+## ReferralRewardCodesReceived
+Rewards the customer received from all the referees (new customers referred).
+
+### Properties
++ key (string, required) - key of referral promo code
++ state (enum, required) - state of referral promo code
+    + `USED` - referral promo code was already applied on order
+    + `ACTIVE` - referral promo code is applicable on order
+    + `EXPIRED` - referral promo code is expired and not applicable on order
++ discount (Amount, required) - discount of order total value after promo code application
++ fullName (string, required) - name of referee
++ receivedDate: `2014-02-10` (string, required) - the date when referee paid the order and the reward was received
++ expirationDate: `2014-04-10` (string, required) - to which date is the referral key applicable on order
 
 ## CoinBalance (object)
 Customer's coin account overview. Is based on CoinAmount object.
