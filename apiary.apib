@@ -1092,12 +1092,14 @@ Services on given application items
     Contract not found.
     + Attributes (Errors)
 
-## Purchasing services for application items [/my/contracts/{contractNumber}/application/item/service/{serviceId}/purchase]
+## Purchasing services for application items [/my/contracts/{contractNumber}/application/{applicationId}/services]
 Purchasing Services on given application items
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + serviceId: `service-adp` (string, required) - ID of service
+    + applicationId: `application_id` (string, required) - ID of application
++ Attributes
+    + serviceId: `service-adp` (string, required) - ID of the service
 
 ### Purchasing services for application items [POST]
 Allows ordering of the service based on previous offer
@@ -1106,14 +1108,18 @@ Allows ordering of the service based on previous offer
     Correct request.
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
-        + serviceId: `service-adp` (string, required) - ID of service
+        + applicationId: `application_id` (string, required) - ID of application
+    + Attributes
+        + serviceId: `service-adp`
     
 + Response 204 (application/json; charset=utf-8)
 
 + Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract` (string, required) - ID of contract
-        + serviceId: `service-adp` (string, required) - ID of service
+        + applicationId: `application_id` (string, required) - ID of application
+    + Attributes
+        + serviceId: `service-adp`
 
 + Response 404 (application/json; charset=utf-8)
     Contract not found.
@@ -1122,18 +1128,26 @@ Allows ordering of the service based on previous offer
 + Request Non-existing service (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
-        + serviceId: `this_is_no_service` (string, required) - ID of service
+        + applicationId: `application_id` (string, required) - ID of application        + serviceId: `this_is_no_service` (string, required) - ID of service
+    + Attributes
+        + serviceId: `this_service_does_not_exist`
 
 + Response 404 (application/json; charset=utf-8)
     Service not found.
     + Attributes (Errors)
 
-## Purchasing rewards for application items [/my/contracts/{contractNumber}/application/{applicationId}/item/rewards/purchase]
+## Purchasing rewards for application items [/my/contracts/{contractNumber}/application/{applicationId}/rewards]
 Purchasing Rewards on given application items
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
     + applicationId: `application_id` (string, required) - ID of application
++ Attributes
+    + type (enum, required)
+        + FREE_DELIVERY
+        + SERVICE_DISCOUNT
+    + itemId (string, optional, nullable) - required for type FREE_DELIVERY (TODO: business logic is currently not using this ID)
+    + serviceId (string, optional, nullable) - required for type SERVICE_DISCOUNT
 
 ### Purchasing rewards for application order items [POST]
 Allows purchasing/ordering of the reward based on info in an application
@@ -1142,9 +1156,11 @@ Allows purchasing/ordering of the reward based on info in an application
     Correct request.
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
-        + applicationId: `service-adp` (string, required) - ID of service
+        + applicationId: `application_id` (string, required) - ID of service
     + Attributes
         + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
+        + itemId (string, required) - (TODO: business logic is currently not using this ID)
+        + serviceId (string, optional, nullable)
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (Application)
@@ -1154,6 +1170,7 @@ Allows purchasing/ordering of the reward based on info in an application
         + applicationId: `this_is_no_application` (string, required) - ID of application
     + Attributes (object)
         + type: `FREE_DELIVERY` (enum, required) - reward type
+        + itemId (string, required)
 
 + Response 404 (application/json; charset=utf-8)
     Application not found.
@@ -1164,6 +1181,7 @@ Allows purchasing/ordering of the reward based on info in an application
         + applicationId: `a7718` (string, required) - ID of application
     + Attributes (object)
         + type: `this_is_invalid_reward_type` (enum, required) - invalid enum value
+        + itemId: `item-id` (string, required)
 
 + Response 404 (application/json; charset=utf-8)
     Reward not found.
@@ -1176,9 +1194,11 @@ Allows purchasing/ordering of the reward based on info in an application
         + applicationId: `service-adp` (string, required) - ID of service
     + Attributes
         + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
+        + itemId: `itemId` (string, required)
 
 + Response 422 (application/json; charset=utf-8)
     + Attributes (Errors)
+
 
 ## Installments [/my/contracts/{contractNumber}/installments{?selection}]
 Installments of given contract (installment schedule for CEL contract)
@@ -1919,6 +1939,7 @@ Financing application.
     + `currentDpd`: 2 (number, required) - current days past due
     + `completelyPaid`: `true` (boolean, optional, nullable) - information if this application is completely paid and there is no expected payment from client
     + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
+    + `rewardsInfo` (RewardsInfo, optional) - information in rewards
 + `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
 
 
@@ -2032,6 +2053,7 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 Order item information, needed to create an application.
 
 ### Properties
++ `id`: `item-id-string` (string, optional, nullable) - Item Id
 + `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
 + `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
 + `image` (File, optional) - Item image
@@ -2457,7 +2479,7 @@ Customer's personal document
 + `isRead`: `True` (boolean) - Flag indicating that user has seen the notification.
 + `isTriggered`: `True` (boolean) - Flag indicating that user has interacted with the notification (e.g. clicked/tapped on it)
 + `slug`: `order-cancelled` (string, optional) - Notification template slug.
-+ `relatedData`: (NotificationRelatedDataObject, optional) - Related objects.
++ `relatedData` (NotificationRelatedDataObject, optional) - Related objects.
 
 ## NotificationRelatedDataObject (object)
 + `application` (Application, optional) - Related application.
@@ -2538,7 +2560,16 @@ Reward description
 + `discount` (Amount, optional, nullable) - how much did the customer save in his currency
 + `type` (enum, required) - type of reward
     + `FREE_DELIVERY`
+    + `SERVICE_DISCOUNT`
 + `status` (enum, required) - status of the reward
     + `PURCHASED` - reward was purchased
     + `AVAILABLE` - reward is available for purchase
     + `NOT_ENOUGH_COINS` - customer does not have enough coins to purchase the reward
++ `relatedObjects` (enum)
+    + serviceId (string, optional, nullable)
+
+## RewardsInfo (object)
+
+### Properties
++ `coinsPromised` (CoinAmount, required) - how much coins will customer get after paying for his order
++ `coinsGained` (CoinAmount, required) - how much coins did customer gain after paying his order
