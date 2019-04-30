@@ -466,6 +466,15 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
 
 ## Register customer [/account/registration]
 
+### Register a new customer [POST]
+Use this resource to register a new customer. There are two ways of registration:
+
+#### Classic registration
+Provide `name`, `email` and `phone`.
+
+#### Facebook registration
+Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
+
 + Attributes (object)
     + name: `John Doe` (string) - Customer's full name (first and last name).
     + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
@@ -475,15 +484,6 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
         + `REGISTRATION` - Consent with service terms and conditions (required)
         + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
     + promoSource: `referral:JNOVAK586` (string) - Contains either promo source URL or referral code of referrer (if it starts with `referral:` prefix)
-
-### Register a new customer [POST]
-Use this resource to register a new customer. There are two ways of registration:
-
-#### Classic registration
-Provide `name`, `email` and `phone`.
-
-#### Facebook registration
-Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
 
 + Request classic registration with referral code (application/json)
     + Attributes (object)
@@ -515,6 +515,14 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
             + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
++ Request classic registration with user already registered before (application/json)
+    + Attributes (object)
+        + name: `John Doe`
+        + email: `john.doe@yahoo.com`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
+
 + Response 422 (application/json)
     Customer has not been registered. List of error codes special for this endpoint:
     - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
@@ -523,6 +531,13 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
     - `EMAILS_DIFFER` - Facebook e-mail address differs from matched MALL Pay account e-mail address.
     + Attributes (Errors)
+
++ Request Facebook registration with many consequent calls (application/json)
+    + Attributes (object)
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
 
 + Response 429 (application/json)
     Request throttling in effect.
