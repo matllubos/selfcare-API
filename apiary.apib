@@ -1417,8 +1417,7 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 
 + Request (application/json; charset=utf-8)
     + Attributes (object)
-        + `promocode`
-            + `id`: `10` (number, fixed-type, required) - pk of the offer the customer wishes to buy
+        + `promocodeId`: `10` (string, fixed-type, required) - pk of the offer the customer wishes to buy
 
 + Response 201 (application/json; charset=utf-8)
     + Attributes (PurchasedPartnerPromocodeOffer, required)
