@@ -545,31 +545,20 @@ Use this endpoing to query last account upgrade request's state.
     No account upgrade request exists.
     + Body
 
-## Mailing lists [/account/consents/subscribe]
-Mailing list subscription for given slug. This endpoint is deprecated and replaced by `/account/consents`.
-
-### Subscribe to mailing lists [POST]
-
-+ Request (application/json)
-    + Attributes (object)
-        + slugs (array, required) - List of consent slugs
-            + (enum)
-                + MARKETING_EXTENDED
-
-+ Response 204 (application/json; charset=utf-8)
-
 ## Consents [/account/consents]
 All consents user is able to subscribe and unsubscribe.
 
 ### Available consents [GET]
 Get all aconsents a can be subscribed to. Allowed subscriptions are `MARKETING` and `MARKETING_EXTENDED`.
 
++ Request (application/json; charset=utf-8)
+
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Consent], fixed-type, required)
 
 ### Change subscription of consents [PUT]
-Subscribe or unsubscribe user to filtered consents.
+Subscribe or unsubscribe user to filtered consents. Requires user authorization or providing valid verification token as attribute.
 
 feature                         | supported by resource
 ---                             | ---
@@ -582,13 +571,36 @@ filter name | possible operators | example
 slug        | eq                 | `consents?filter=slug|eq|MARKETING`  consent with slug `MARKETING`
 slug        | in                 | `consents?filter=slug|in|MARKETING,MARKETING_EXTENDED`  consent with slugs `MARKETING` and `MARKETING_EXTENDED`
 
-+ Request (application/json)
++ Attributes (object)
+    + isSubscribed: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+    + token: `s5as4d5a6s54d5sa6asd56` (string, optional, nullable) - valid verification token used instead of user authorization
+
++ Request with authorized user (application/json)
     + Attributes (object)
-        + subscribe: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+        + isSubscribed: `true`
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Consent], fixed-type, required)
+
++ Request with unauthorized user with valid token (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+        + token: `s5as4d5a6s54d5sa6asd56`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
++ Request with unauthorized user and invalid token (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+        + token: `invalid_token`
+
++ Response 422 (application/json)
+    Unauthorized user and invalid verification token. Following errors codes are possible:
+    * UNAUTHORIZED_AND_TOKEN_INVALID
+    + Attributes (Errors)
 
 + Request unknown consent in filter (application/json; charset=utf-8)
     + Parameters
@@ -2077,7 +2089,7 @@ Consent subscription object
 + `slug`: `MARKETING_EXTENDED` (enum, required) - slug of consents user is able to subscribe or unsubscribe
     + `MARKETING`
     + `MARKETING_EXTENDED`
-+ `subscribe`: `true` (boolean, required) - true if user is subscribed to consents with given slug
++ `isSubscribed`: `true` (boolean, required) - true if user is subscribed to consents with given slug
 
 ## Broker (object)
 Additional information about broker application
