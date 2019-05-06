@@ -1422,6 +1422,7 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
+        + pagingInfo (PagingInfo, optional)
 
 ## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
 
@@ -1433,6 +1434,11 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 
 + Response 201 (application/json; charset=utf-8)
     + Attributes (PurchasedPartnerPromocodeOffer, required)
+
++ Response 422 (application/json; charset=utf-8)
+Purchasing the key was not succesful
+    + Attributes (Errors)
+
 
 ### Customer purchased partner promocodes list [GET]
 
@@ -2415,10 +2421,8 @@ Customer's personal document
 + `isRead`: `True` (boolean) - Flag indicating that user has seen the notification.
 + `isTriggered`: `True` (boolean) - Flag indicating that user has interacted with the notification (e.g. clicked/tapped on it)
 + `slug`: `order-cancelled` (string, optional) - Notification template slug.
-+ `relatedData`: (NotificationRelatedDataObject, optional) - Related objects.
++ `relatedData`: (RelatedDataObject, optional) - Related objects.
 
-## NotificationRelatedDataObject (object)
-+ `application` (Application, optional) - Related application.
 
 ## PushNotificationDeviceToken (object)
 Customer's device for receiving push notifications.
@@ -2437,8 +2441,8 @@ Customer's device for receiving push notifications.
 Promocode offer - voucher offered to customer
 
 ### Properties
-+ id (number, required) - Id of offer
-+ title (string, required) - Offer title
++ id: `10` (string, required) - Id of offer
++ title: `promocode-title` (string, required) - Offer title
 + description (string, required) - Offer description
 + coinsRequired (CoinAmount, required) - Price of offer in MALL Coins
 + validFrom: `2019-01-18T10:34:44+01:00` (string, required) - The offer is valid from this datetime
@@ -2469,9 +2473,10 @@ Customer's coin account overview. Is based on CoinAmount object.
 ### Properties
 + `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
 
-## CoinRelatedData (object)
+## RelatedDataObject (object)
 ### Properties
-+ application (Application, optional, nullable) - Application containing order whose payment created transaction
++ application (Application, optional, nullable) - Related Application
++ purchasedPartnerPromocodeOffer (PurchasedPartnerPromocodeOffer, optional, nullable) - customer purchased external promocode key with offer info
 
 ## CoinTransaction (Transaction)
 Detail of customer's Mall Coin transaction
@@ -2485,4 +2490,4 @@ Detail of customer's Mall Coin transaction
     + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
     + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
     + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
-+ `relatedData` (CoinRelatedData, optional, nullable) - data and objects related to the MALL Coin transaction
++ `relatedData` (RelatedDataObject, optional, nullable) - data and objects related to the MALL Coin transaction
