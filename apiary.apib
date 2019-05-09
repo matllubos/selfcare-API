@@ -545,31 +545,20 @@ Use this endpoing to query last account upgrade request's state.
     No account upgrade request exists.
     + Body
 
-## Mailing lists [/account/consents/subscribe]
-Mailing list subscription for given slug. This endpoint is deprecated and replaced by `/account/consents`.
-
-### Subscribe to mailing lists [POST]
-
-+ Request (application/json)
-    + Attributes (object)
-        + slugs (array, required) - List of consent slugs
-            + (enum)
-                + MARKETING_EXTENDED
-
-+ Response 204 (application/json; charset=utf-8)
-
 ## Consents [/account/consents]
 All consents user is able to subscribe and unsubscribe.
 
 ### Available consents [GET]
 Get all aconsents a can be subscribed to. Allowed subscriptions are `MARKETING` and `MARKETING_EXTENDED`.
 
++ Request (application/json; charset=utf-8)
+
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Consent], fixed-type, required)
 
 ### Change subscription of consents [PUT]
-Subscribe or unsubscribe user to filtered consents.
+Subscribe or unsubscribe user to filtered consents. Requires user authorization or providing valid verification token as attribute.
 
 feature                         | supported by resource
 ---                             | ---
@@ -582,13 +571,36 @@ filter name | possible operators | example
 slug        | eq                 | `consents?filter=slug|eq|MARKETING`  consent with slug `MARKETING`
 slug        | in                 | `consents?filter=slug|in|MARKETING,MARKETING_EXTENDED`  consent with slugs `MARKETING` and `MARKETING_EXTENDED`
 
-+ Request (application/json)
++ Attributes (object)
+    + isSubscribed: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+    + token: `s5as4d5a6s54d5sa6asd56` (string, optional, nullable) - valid verification token used instead of user authorization
+
++ Request with authorized user (application/json)
     + Attributes (object)
-        + subscribe: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+        + isSubscribed: `true`
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Consent], fixed-type, required)
+
++ Request with unauthorized user with valid token (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+        + token: `s5as4d5a6s54d5sa6asd56`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
++ Request with unauthorized user and invalid token (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+        + token: `invalid_token`
+
++ Response 422 (application/json)
+    Unauthorized user and invalid verification token. Following errors codes are possible:
+    * UNAUTHORIZED_AND_TOKEN_INVALID
+    + Attributes (Errors)
 
 + Request unknown consent in filter (application/json; charset=utf-8)
     + Parameters
@@ -1476,6 +1488,7 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
+        + pagingInfo (PagingInfo, optional)
 
 ## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
 
@@ -1483,11 +1496,15 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 
 + Request (application/json; charset=utf-8)
     + Attributes (object)
-        + `promocode`
-            + `id`: `10` (number, fixed-type, required) - pk of the offer the customer wishes to buy
+        + `promocodeId`: `10` (string, fixed-type, required) - pk of the offer the customer wishes to buy
 
 + Response 201 (application/json; charset=utf-8)
     + Attributes (PurchasedPartnerPromocodeOffer, required)
+
++ Response 422 (application/json; charset=utf-8)
+Purchasing the key was not succesful
+    + Attributes (Errors)
+
 
 ### Customer purchased partner promocodes list [GET]
 
@@ -2147,7 +2164,7 @@ Consent subscription object
 + `slug`: `MARKETING_EXTENDED` (enum, required) - slug of consents user is able to subscribe or unsubscribe
     + `MARKETING`
     + `MARKETING_EXTENDED`
-+ `subscribe`: `true` (boolean, required) - true if user is subscribed to consents with given slug
++ `isSubscribed`: `true` (boolean, required) - true if user is subscribed to consents with given slug
 
 ## Broker (object)
 Additional information about broker application
@@ -2473,10 +2490,8 @@ Customer's personal document
 + `isRead`: `True` (boolean) - Flag indicating that user has seen the notification.
 + `isTriggered`: `True` (boolean) - Flag indicating that user has interacted with the notification (e.g. clicked/tapped on it)
 + `slug`: `order-cancelled` (string, optional) - Notification template slug.
-+ `relatedData` (NotificationRelatedDataObject, optional) - Related objects.
++ `relatedData`: (RelatedDataObject, optional) - Related objects.
 
-## NotificationRelatedDataObject (object)
-+ `application` (Application, optional) - Related application.
 
 ## PushNotificationDeviceToken (object)
 Customer's device for receiving push notifications.
@@ -2495,8 +2510,8 @@ Customer's device for receiving push notifications.
 Promocode offer - voucher offered to customer
 
 ### Properties
-+ id (number, required) - Id of offer
-+ title (string, required) - Offer title
++ id: `10` (string, required) - Id of offer
++ title: `promocode-title` (string, required) - Offer title
 + description (string, required) - Offer description
 + coinsRequired (CoinAmount, required) - Price of offer in MALL Coins
 + validFrom: `2019-01-18T10:34:44+01:00` (string, required) - The offer is valid from this datetime
@@ -2527,9 +2542,10 @@ Customer's coin account overview. Is based on CoinAmount object.
 ### Properties
 + `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
 
-## CoinRelatedData (object)
+## RelatedDataObject (object)
 ### Properties
-+ application (Application, optional, nullable) - Application containing order whose payment created transaction
++ application (Application, optional, nullable) - Related Application
++ purchasedPartnerPromocodeOffer (PurchasedPartnerPromocodeOffer, optional, nullable) - customer purchased external promocode key with offer info
 
 ## CoinTransaction (Transaction)
 Detail of customer's Mall Coin transaction
@@ -2543,7 +2559,7 @@ Detail of customer's Mall Coin transaction
     + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
     + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
     + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
-+ `relatedData` (CoinRelatedData, optional, nullable) - data and objects related to the MALL Coin transaction
++ `relatedData` (RelatedDataObject, optional, nullable) - data and objects related to the MALL Coin transaction
 
 ## Reward (object)
 Reward description
