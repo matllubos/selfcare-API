@@ -1142,12 +1142,6 @@ Purchasing Rewards on given application items
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
     + applicationId: `application_id` (string, required) - ID of application
-+ Attributes
-    + type (enum, required)
-        + FREE_DELIVERY
-        + SERVICE_DISCOUNT
-    + itemId (string, optional, nullable) - required for type FREE_DELIVERY (TODO: business logic is currently not using this ID)
-    + serviceId (string, optional, nullable) - required for type SERVICE_DISCOUNT
 
 ### Purchasing rewards for application order items [POST]
 Allows purchasing/ordering of the reward based on info in an application
