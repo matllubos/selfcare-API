@@ -298,6 +298,7 @@ Entry of mobile token with given `deviceUuid` will be removed. This combination 
 
 + Response 200
     Mobile token asociated with given `deviceUuid` was removed.
+    + Body
 
 ## Change password [/account/password]
 
@@ -474,16 +475,38 @@ Provide `name`, `email` and `phone`.
 #### Facebook registration
 Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
 
-+ Request (application/json)
++ Attributes (object)
+    + name: `John Doe` (string) - Customer's full name (first and last name).
+    + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
+    + phone: `+420777777777` (string) - Customer's phone in international format.
+    + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
+    + consents  (array, required) - List of consents given by customer
+        + `REGISTRATION` - Consent with service terms and conditions (required)
+        + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
+    + promoSource: `referral:JNOVAK586` (string) - Contains either promo source URL part or referral code of referrer (should start with `referral:` prefix)
+
++ Request classic registration with referral code (application/json)
     + Attributes (object)
-        + name: `John Doe` (string) - Customer's full name (first and last name).
-        + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
-        + phone: `+420777777777` (string) - Customer's phone in international format.
-        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
-        + consents  (array, required) - List of consents given by customer
-            + `REGISTRATION` - Consent with service terms and conditions (required)
-            + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
-        + promoSource (string) - Promo source from URL
+        + name: `John Doe`
+        + email: `john.doe@yahoo.com`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
+        + promoSource: `referral:JNOVAK586` (string) - referral code of referrer (customer who send registration link)
+
++ Response 200
+    Customer has been registered.
+    + Attributes (object)
+        + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
+            + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
+
++ Request Facebook registration with promo source URL (application/json)
+    + Attributes (object)
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
+        + promoSource: `advertisementYY` (string) - the tag of campaign which redirected the user here
 
 + Response 200
     Customer has been registered.
@@ -491,7 +514,15 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
             + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
-        
+
++ Request classic registration with user already registered before (application/json)
+    + Attributes (object)
+        + name: `John Doe`
+        + email: `john.doe@yahoo.com`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
+
 + Response 422 (application/json)
     Customer has not been registered. List of error codes special for this endpoint:
     - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
@@ -500,6 +531,13 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
     - `EMAILS_DIFFER` - Facebook e-mail address differs from matched MALL Pay account e-mail address.
     + Attributes (Errors)
+
++ Request Facebook registration with many consequent calls (application/json)
+    + Attributes (object)
+        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
+        + phone: `+420777777777`
+        + consents
+            + `REGISTRATION`
 
 + Response 429 (application/json)
     Request throttling in effect.
@@ -520,6 +558,7 @@ Use this endpoint to create a new account upgrade request for a logged in user. 
 
 + Response 201
     Account upgrade request has been created.
+    + Body
 
 + Response 422 (application/json)
     Account upgrade request has not been created.
@@ -631,6 +670,50 @@ Push notification devices for customer.
     * PUSH_NOTIFICATION_DEVICE_EXISTS
     + Attributes (Errors)
 
+## Referral promo code stats [/account/referral/stats]
+
+### Get referral code stats [GET]
+Get referral code information of the customer.
+
++ Request (application/json; charset=utf-8)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ReferralCodeStats, required)
+
+## Referral promo code stats by key [/account/referral/{key}/stats]
+Referral promo code information found by key of promo code from customer.
+
++ Parameters
+    + key: `JOEDOE123` (string, required) - referral promo code key
+
+### Get referral code stats by key [GET]
+Get referral code information by promo code key provided. No authorization is required.
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + key: `JOEDOE123`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ReferralCodeStats, required)
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + key: `INVALID_KEY`
+
++ Response 404 (application/json; charset=utf-8)
+
+        Promo code with given key not found.
+
+    + Attributes (Errors)
+
+## Referral reward codes [/account/referral/rewards]
+
+### Get referral reward codes received [GET]
+Get reward promo codes customer received for each new customer (referee).
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (array[ReferralRewardCodesReceived], required)
 
 # Group My profile
 Resources for accessing and modifying user personal data.
@@ -646,7 +729,7 @@ Use this resource to connect facebook account to a customer.
 
 + Response 204
     Facebook account was connected
-        + Body
+    + Body
 
 + Response 422 (application/json)
     Facebook account was not connected. List of error codes special for this endpoint:
@@ -660,7 +743,7 @@ Use this resource to disconnect facebook account from a customer.
 
 + Response 204
     Facebook account was disconnected
-        + Body
+    + Body
 
 + Response 422 (application/json)
     Facebook account was not connected. List of error codes special for this endpoint:
@@ -797,6 +880,7 @@ Use this enpoint to confirm personal request operation
     
 + Response 204
     GDPR request successfull, there is no space for error
+    + Body
     
 # Group My contracts
 Set of resources to access and modify client's contracts.
@@ -1036,7 +1120,7 @@ Customer can apply for discount price by submitting promo code.
     + Parameters
         + applicationId: `a7718` (string, required) - ID of application
     + Attributes (object)
-        + promocode: `MALL1SAW3S0M3` (string, required) - promo code key
+        + key: `MALL1SAW3S0M3` (string, required) - promo code key
 
 + Response 200 (application/json; charset=utf-8)
     Existing application and valid applicable promo code
@@ -1046,7 +1130,7 @@ Customer can apply for discount price by submitting promo code.
     + Parameters
         + applicationId: `this_is_no_application` (string, required) - ID of application
     + Attributes (object)
-        + promocode: `MALL1SAW3S0M3` (string, required) - promo code key
+        + key: `MALL1SAW3S0M3` (string, required) - promo code key
 
 + Response 404 (application/json; charset=utf-8)
     Application not found.
@@ -1056,7 +1140,7 @@ Customer can apply for discount price by submitting promo code.
     + Parameters
         + applicationId: `a7718` (string, required) - ID of application
     + Attributes (object)
-        + promocode: `this_is_invalid_promocode_key` (string, required) - promo code key
+        + key: `this_is_invalid_key` (string, required) - promo code key
 
 + Response 422 (application/json; charset=utf-8)
     Promo code is invalid or expired.
@@ -1473,49 +1557,49 @@ Purchasing the key was not succesful
 
 
 ## Amount (object)
-+ `amount`: 12590 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-+ `currency`: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ amount: 12590 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ currency: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 
 ## Promocode (object)
-+ `code`: `MALL1SAW3S0M3` (string, required) - Promo code key applied on order.
-+ `discountPrice` (Amount, required) - Promo code discount price of order
++ code: `MALL1SAW3S0M3` (string, required) - Promo code key applied on order.
++ discountPrice (Amount, required) - Promo code discount price of order
 
 
 ## HistoryAmount (object)
-+ `amount`: 12590 (number, optional, nullable) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-+ `currency`: `CZK` (string, optional, nullable) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ amount: 12590 (number, optional, nullable) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ currency: `CZK` (string, optional, nullable) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 
 ## VatAmount (Amount)
 Financial amount with VAT rate.
 
 ### Properties
-+ `vatRate`: 15 (number, required) - VAT rate as natural number (15 represents 15% rate)
++ vatRate: 15 (number, required) - VAT rate as natural number (15 represents 15% rate)
 
 
 ## HistoryVatAmount (HistoryAmount)
 Financial amount with VAT rate.
 
 ### Properties
-+ `vatRate`: 15 (number, optional, nullable) - VAT rate as natural number (15 represents 15% rate)
++ vatRate: 15 (number, optional, nullable) - VAT rate as natural number (15 represents 15% rate)
 
 
 ## TokenCodeRequest (object)
-+ `grant_type`: `authorization_code` (enum, required) - grant flow type, only `authorization_code` and `refresh_token` is supported
++ grant_type: `authorization_code` (enum, required) - grant flow type, only `authorization_code` and `refresh_token` is supported
     + `authorization_code` - use to exchange code for access token
     + `refresh_token` - can be used to get new access token instead of forcing user to login again
-+ `client_id`: `my_app_id` (string, required) - client_id parameter of your application, received at application registration    
-+ `client_secret`: `my_app_secret` (string, required) - client_secret parameter of your application, received at application registration    
++ client_id: `my_app_id` (string, required) - client_id parameter of your application, received at application registration    
++ client_secret: `my_app_secret` (string, required) - client_secret parameter of your application, received at application registration    
 + One Of
-    + `code`: `12254a1124` (string, required) - authorization code, received from authorization server
-    + `refresh_token`: `12254a1124` (string, required) - refresh token, received from authorization server
+    + code: `12254a1124` (string, required) - authorization code, received from authorization server
+    + refresh_token: `12254a1124` (string, required) - refresh token, received from authorization server
 
 ## TokenResponse (object)
-+ `refresh_token`: `7dbadd74c434439db4fc9b2bbf8cabb3` (string, optional) - refresh token, if supported
-+ `token_type`: `bearer` (string, required) - token type. Always "bearer".
-+ `access_token`: `ccafe62cbce645ce95b2acce839f4acc` (string, required) - access token, to be included in API request
-+ `expires_in`: 7200 (number, required) - access token validity, in seconds
++ refresh_token: `7dbadd74c434439db4fc9b2bbf8cabb3` (string, optional) - refresh token, if supported
++ token_type: `bearer` (string, required) - token type. Always "bearer".
++ access_token: `ccafe62cbce645ce95b2acce839f4acc` (string, required) - access token, to be included in API request
++ expires_in: 7200 (number, required) - access token validity, in seconds
 ## PhoneNumber (object)
 + phoneType: `PRIMARY` (enum, required) - type of phone
     + `PRIMARY` - primary (verified) mobile number (can be `CONTACT` at the same time)
@@ -1667,47 +1751,47 @@ Financial amount with VAT rate.
 + additionalInfoApplication (MoneyTransactionInfoApplication, optional) - transaction info related to application
 
 ## MoneyTransactionInfoDomestic (object)
-+ `constantSymbol`: `0558` (string, optional)
-+ `variableSymbol`: `9` (string, optional)
-+ `specificSymbol`: `100011` (string, optional)
++ constantSymbol: `0558` (string, optional)
++ variableSymbol: `9` (string, optional)
++ specificSymbol: `100011` (string, optional)
 
 ## MoneyTransactionInfoCard (object)
-+ `mcc`: `3081` (string, optional) - Merchant Category code
-+ `merchantName`: `SomeCompany, Ltd.` (string, optional)
-+ `cardNumber`: `34xx-xxxx-xxxx-6289` (string, required) - Masked card number used for transaction
-+ `cardName`: `äikovnŠ karta Home Credit` (string, optional) - Card name
++ mcc: `3081` (string, optional) - Merchant Category code
++ merchantName: `SomeCompany, Ltd.` (string, optional)
++ cardNumber: `34xx-xxxx-xxxx-6289` (string, required) - Masked card number used for transaction
++ cardName: `äikovnŠ karta Home Credit` (string, optional) - Card name
 
 ## MoneyTransactionInfoForeign (object)
-+ `originalValue` (Amount, optional) - amount & currency in which transaction was originated
-+ `exchangeRate`: 12.80 (number, optional) - exchange rate valid at the time of transfer
++ originalValue (Amount, optional) - amount & currency in which transaction was originated
++ exchangeRate: 12.80 (number, optional) - exchange rate valid at the time of transfer
 
 ## MoneyTransactionInfoApplication (object)
-+ `applicationId`: `11200a0ee1` (string, required) - identifier of application related to transaction
-+ `contractNumber`: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with MoneyTransaction.contractNumber)
-+ `applicationOrigin` (object, optional) - if related application was created based on other application
-    + `applicationId`: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
-    + `contractNumber`: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
++ applicationId: `11200a0ee1` (string, required) - identifier of application related to transaction
++ contractNumber: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with MoneyTransaction.contractNumber)
++ applicationOrigin (object, optional) - if related application was created based on other application
+    + applicationId: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
+    + contractNumber: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
 
 ## File (object)
-+ `filename`: `invoice.pdf` (string, optional) - File name.
-+ `url`: `https://www.partner.com/file?id=12345` (string, required) - File URL.
-+ `createdDate` : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
-+ `contentType` : `image/jpg` (string, optional) - content type of the file
-+ `size` : 48439 (number, optional) - file size in bytes
++ filename: `invoice.pdf` (string, optional) - File name.
++ url: `https://www.partner.com/file?id=12345` (string, required) - File URL.
++ createdDate : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
++ contentType : `image/jpg` (string, optional) - content type of the file
++ size : 48439 (number, optional) - file size in bytes
 
 ## HistoryFile (object)
-+ `filename`: `invoice.pdf` (string, optional) - File name.
-+ `url`: `https://www.partner.com/file?id=12345` (string, required) - File URL.
-+ `createdDate` : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
-+ `contentType` : `image/jpg` (string, optional, nullable) - content type of the file
-+ `size` : 48439 (number, optional) - file size in bytes
++ filename: `invoice.pdf` (string, optional) - File name.
++ url: `https://www.partner.com/file?id=12345` (string, required) - File URL.
++ createdDate : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
++ contentType : `image/jpg` (string, optional, nullable) - content type of the file
++ size : 48439 (number, optional) - file size in bytes
 
 ## Document (object)
 Attached document (document only for client, document for specific contract, document for specific order ...)
 
 ### Properties
-+ `name`: `ObchodnŪ podmŪnky` (string, required) - Human-readable localized document name
-+ `type`: `GEN_SMS_SIGN_AGREEMENT` (enum, required) - Type of the document
++ name: `ObchodnŪ podmŪnky` (string, required) - Human-readable localized document name
++ type: `GEN_SMS_SIGN_AGREEMENT` (enum, required) - Type of the document
     + `EKLIENT_AGREEMENT` - Smlouva o pouěŪvŠnŪ aplikace SprŠvce financŪ
     + `INSTALLMENTPROGRAM_AMENDMENT` - Dodatek smlouvy - SplŠtkovť programy
     + `NRKI_CONSENT` - Souhlas s NRKI
@@ -1737,14 +1821,14 @@ Attached document (document only for client, document for specific contract, doc
     + `CREDIT_NOTE` - Credit note
     + `OTHER` - OstatnŪ
     + `INVOICE_COPY` - Opis faktury
-+ `contractNumber`: `6707000642` (string, optional) - contractNumber if document is connected to specific contract
-+ `contractType`: `REL` (enum, optional) - contract type if document is connected to specific contract
++ contractNumber: `6707000642` (string, optional) - contractNumber if document is connected to specific contract
++ contractType: `REL` (enum, optional) - contract type if document is connected to specific contract
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ `file` (File, required) - Attached file
-+ `description`: `This is an invoice` (string, optional) - File description
-+ `additionalData` (object, optional)
++ file (File, required) - Attached file
++ description: `This is an invoice` (string, optional) - File description
++ additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
     + `statementYear`: 2017 (number, optional) - Year for document type MONTHLY_STATEMENT
@@ -1754,8 +1838,8 @@ Attached document (document only for client, document for specific contract, doc
 Attached document (document only for client, document for specific contract, document for specific order ...)
 
 ### Properties
-+ `name`: `Obchodní podmínky` (string, required) - Human-readable localized document name
-+ `type`: `GEN_SMS_SIGN_AGREEMENT` (enum, required) - Type of the document
++ name: `Obchodní podmínky` (string, required) - Human-readable localized document name
++ type: `GEN_SMS_SIGN_AGREEMENT` (enum, required) - Type of the document
     + `EKLIENT_AGREEMENT` - Smlouva o pouěŪvŠnŪ aplikace SprŠvce financŪ
     + `INSTALLMENTPROGRAM_AMENDMENT` - Dodatek smlouvy - SplŠtkovť programy
     + `NRKI_CONSENT` - Souhlas s NRKI
@@ -1784,14 +1868,14 @@ Attached document (document only for client, document for specific contract, doc
     + `PROFORMA_INVOICE` - Proforma invoice
     + `CREDIT_NOTE` - Credit note
     + `OTHER` - OstatnŪ
-+ `contractNumber`: `6707000642` (string, optional) - contractNumber if document is connected to specific contract
-+ `contractType`: `REL` (enum, optional) - contract type if document is connected to specific contract
++ contractNumber: `6707000642` (string, optional) - contractNumber if document is connected to specific contract
++ contractType: `REL` (enum, optional) - contract type if document is connected to specific contract
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ `file` (HistoryFile, required) - Attached file
-+ `description`: `This is an invoice` (string, optional) - File description
-+ `additionalData` (object, optional)
++ file (HistoryFile, required) - Attached file
++ description: `This is an invoice` (string, optional) - File description
++ additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
     + `statementYear`: 2017 (number, optional) - Year for document type MONTHLY_STATEMENT
@@ -1825,13 +1909,13 @@ Delivery carrier
 Financing application base information
 
 ### Properties
-+ `id`: `77d665d7-da44-402e-b7f7-6354d6076b32` (string, required) - Unique identifier in HCO
-+ `state`: `PROCESSING` (enum, required) - Application state.
++ id: `77d665d7-da44-402e-b7f7-6354d6076b32` (string, required) - Unique identifier in HCO
++ state: `PROCESSING` (enum, required) - Application state.
     + `PROCESSING` - Application is being processed by HC
     + `READY` - Application was approved and is ready for financing
     + `REJECTED` - Application was rejected
     + `CANCELLED` - Application was cancelled by client, either before approval or after delivery
-+ `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
++ stateReason: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
     + `PROCESSING_ADDITIONAL_DATA` - Additional data needed (redirect to HC or send Application additional data)
     + `PROCESSING_VERIFICATION` - Verification needed (redirect to HC or send Application verification)
     + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
@@ -1859,56 +1943,56 @@ Financing application base information
 Basic eshop info
 
 ### Properties
-+ `name`: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
-+ `logoUrl`: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
++ name: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
++ logoUrl: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
 
 
 ## Application (ApplicationBase)
 Financing application.
 
 ### Properties
-+ `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (Order, required) - Order data.
-+ `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
++ createdDate: `2017-06-15` (string, optional) - date the application was created
++ order (Order, required) - Order data.
++ type: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
-+ `contractNumber`: `01-6010027378` (string, required) - parent contract for this application
-+ `gatewayRedirectUrl`: `https://gateway.lymet.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
-+ `applicationOrigin` (object, optional) - if the application was created based on other application
++ contractNumber: `01-6010027378` (string, required) - parent contract for this application
++ gatewayRedirectUrl: `https://gateway.lymet.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
++ applicationOrigin (object, optional) - if the application was created based on other application
     + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
     + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
-+ `eshopAdditionalInfo` (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
-+ `defpayAdditionalInfo` (object, optional, nullable) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
++ eshopAdditionalInfo (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
++ defpayAdditionalInfo (object, optional, nullable) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
     + `currentDebt` (Amount, required) - Actual debt amount
     + `dueDate`: `2016-11-15` (string, optional, nullable) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
     + `dueDateClient`: `2016-11-14` (string, optional, nullable) - date due comunicated on the client for DEFERRED_PAYMENT and TRY_AND_PAY
     + `currentDpd`: 2 (number, required) - current days past due
     + `completelyPaid`: `true` (boolean, optional, nullable) - information if this application is completely paid and there is no expected payment from client
     + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
-+ `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
++ paymentDate: `2017-01-12` (string, optional, nullable) - Date when was order paid
 
 
 ## HistoryApplication (ApplicationBase)
 Financing application.
 
 ### Properties
-+ `createdDate`: `2017-06-15` (string, optional) - date the application was created
-+ `order` (HistoryOrder, required) - Order data.
-+ `type`: `DEFERRED_PAYMENT` (enum, optional) - Financing type
++ createdDate: `2017-06-15` (string, optional) - date the application was created
++ order (HistoryOrder, required) - Order data.
++ type: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
     + `TRY_AND_PAY` - Vyskoušej a zaplať
-+ `applicationOrigin` (object, optional) - if the application was created based on other application
++ applicationOrigin (object, optional) - if the application was created based on other application
     + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
     + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
-+ `eshopAdditionalInfo` (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
++ eshopAdditionalInfo (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
 
 ## PaymentAvailability (object)
 Information about possibility to pay application
 
 ### Properties
-+ `availability` (enum, required)
++ availability (enum, required)
     + `AVAILABLE`
     + `NOT_AVAILABLE`
-+ `reasons` (array[string], optional) - List of reasons.
++ reasons (array[string], optional) - List of reasons.
     Possible values in array: `ALREADY_PAID`, `BLOCKED`, `IN_REVOLVING_PAYMENT_PROCESS`.
 
 
@@ -1916,67 +2000,67 @@ Information about possibility to pay application
 Collection of URLs used for redirection of a customer back to a Self care
 
 ### Properties
-+ `approvedRedirect` (string, required) - return URL used for redirection of the customer back to self care after application approval.
-+ `rejectedRedirect` (string, required) - return URL used for redirection of the customer back to self care after application rejection.
-+ `discontinuationRedirect` (string, required) - return URL used for redirection of the customer back to self care in case client doesn't want to finish application process.
++ approvedRedirect (string, required) - return URL used for redirection of the customer back to self care after application approval.
++ rejectedRedirect (string, required) - return URL used for redirection of the customer back to self care after application rejection.
++ discontinuationRedirect (string, required) - return URL used for redirection of the customer back to self care in case client doesn't want to finish application process.
 
 
 ## FinancedSubject (object)
 Subject of financing
 
 ### Properties
-+ `createdDate`: `2016-11-15` (string, optional) - date the order was created
-+ `number`: `AA234` (string, required) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
-+ `totalPrice` (Amount, required) - Total order amount, including VAT
-+ `broker` (Broker, optional) - Additional information about broker application. Required for order types `LIABILITY` and `GOODS_BROKER`
++ createdDate: `2016-11-15` (string, optional) - date the order was created
++ number: `AA234` (string, required) - Order number (internal for e-shop)
++ variableSymbols (array[string], optional) - Variable symbols (internal for e-shop)
++ totalPrice (Amount, required) - Total order amount, including VAT
++ broker (Broker, optional) - Additional information about broker application. Required for order types `LIABILITY` and `GOODS_BROKER`
 
 
 ## HistoryFinancedSubject (object)
 Subject of financing
 
 ### Properties
-+ `createdDate`: `2016-11-15` (string, optional) - date the order was created
-+ `number`: `AA234` (string, required) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
-+ `totalPrice` (HistoryAmount, required) - Total order amount, including VAT
-+ `broker` (Broker, optional) - Additional information about broker application. Required for order types `LIABILITY` and `GOODS_BROKER`
++ createdDate: `2016-11-15` (string, optional) - date the order was created
++ number: `AA234` (string, required) - Order number (internal for e-shop)
++ variableSymbols (array[string], optional) - Variable symbols (internal for e-shop)
++ totalPrice (HistoryAmount, required) - Total order amount, including VAT
++ broker (Broker, optional) - Additional information about broker application. Required for order types `LIABILITY` and `GOODS_BROKER`
 
 
 ## Order (FinancedSubject)
 Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 
 ### Properties
-+ `type`: `GOODS` (enum, required) - Order type
++ type: `GOODS` (enum, required) - Order type
     + `GOODS` - Purchase of (physical) goods on eshop
     + `GOODS_BROKER` - Purchase of (physical) goods on eshop mediated by broker. "Deffered payment" or "Try and pay" are some examples of this type of order.
-+ `totalVat` (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
-+ `promocodeDiscounts` (array[Promocode], fixed-type, required) - Promo codes discounts applied on order
-+ `items` (array[Item], fixed-type, required) - Items in order
-+ `documents` (array[Document], fixed-type, optional) - Attached documents (invoices etc.)
-+ `state`: `PROCESSING` (enum, required) - Order state.
++ totalVat (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
++ promocodeDiscounts (array[Promocode], fixed-type, required) - Promo codes discounts applied on order
++ items (array[Item], fixed-type, required) - Items in order
++ documents (array[Document], fixed-type, optional) - Attached documents (invoices etc.)
++ state: `PROCESSING` (enum, required) - Order state.
     + `PROCESSING` - Order is being processed by merchant
     + `SENT` - All order items was sent to customer
     + `DELIVERED` - All order items was delivered to customer
     + `RETURNED` - All order items was returned to merchant
     + `CANCELLED` - Order was fully cancelled
-+ `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ `deliveryDate`: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of delivery
-+ `deliveryTrackingNumber`: `EX12221` (string, optional) - Delivery tracking number
-+ `sentDate`: `2017-01-12T10:34:44+01:00` (string, optional) - Date and time of order shipping
++ deliveryCarrier (DeliveryCarrier, optional) - Delivery carrier, when applicable.
++ deliveryDate: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of delivery
++ deliveryTrackingNumber: `EX12221` (string, optional) - Delivery tracking number
++ sentDate: `2017-01-12T10:34:44+01:00` (string, optional) - Date and time of order shipping
 
 
 ## HistoryOrder (HistoryFinancedSubject)
 Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 
 ### Properties
-+ `type`: `GOODS` (enum, required) - Order type
++ type: `GOODS` (enum, required) - Order type
     + `GOODS` - Purchase of (physical) goods on eshop
     + `GOODS_BROKER` - Purchase of (physical) goods on eshop mediated by broker. "Deffered payment" or "Try and pay" are some examples of this type of order.
-+ `totalVat` (array[HistoryVatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
-+ `items` (array[HistoryItem], fixed-type, required) - Items in order
-+ `documents` (array[HistoryDocument], fixed-type, optional) - Attached documents (invoices etc.)
-+ `state`: `APPROVING` (enum, required) - Order state.
++ totalVat (array[HistoryVatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
++ items (array[HistoryItem], fixed-type, required) - Items in order
++ documents (array[HistoryDocument], fixed-type, optional) - Attached documents (invoices etc.)
++ state: `APPROVING` (enum, required) - Order state.
     + `APPROVING`
     + `APPROVED_AND_CONFIRMED`
     + `ONLY_APPROVED`
@@ -1987,10 +2071,10 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
     + `SENT`
     + `RETURNED`
     + `DELIVERED`
-+ `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ `deliveryDate`: `2017-01-18T10:34:44+01:00` (string, optional, nullable) - Date and time of delivery
-+ `deliveryTrackingNumber`: `EX12221` (string, optional, nullable) - Delivery tracking number
-+ `sentDate`: `2017-01-12T10:34:44+01:00` (string, optional, nullable) - Date and time of order shipping
++ deliveryCarrier (DeliveryCarrier, optional) - Delivery carrier, when applicable.
++ deliveryDate: `2017-01-18T10:34:44+01:00` (string, optional, nullable) - Date and time of delivery
++ deliveryTrackingNumber: `EX12221` (string, optional, nullable) - Delivery tracking number
++ sentDate: `2017-01-12T10:34:44+01:00` (string, optional, nullable) - Date and time of order shipping
 
 
 ## Item (object)
@@ -2092,10 +2176,10 @@ MIA Service object
 Consent subscription object
 
 ### Properties
-+ `slug`: `MARKETING_EXTENDED` (enum, required) - slug of consents user is able to subscribe or unsubscribe
++ slug: `MARKETING_EXTENDED` (enum, required) - slug of consents user is able to subscribe or unsubscribe
     + `MARKETING`
     + `MARKETING_EXTENDED`
-+ `isSubscribed`: `true` (boolean, required) - true if user is subscribed to consents with given slug
++ isSubscribed: `true` (boolean, required) - true if user is subscribed to consents with given slug
 
 ## Broker (object)
 Additional information about broker application
@@ -2418,8 +2502,8 @@ Customer's personal document
 + `title`: `Order has been cancelled` (string) - Title of the notification
 + `text`: `Your order no.4566221 has been cancelled` (string, optional) - Text of the notification
 + `triggerActionUrl`: `http://someurl.com/` (string, optional) - URL user should be redirected to, when he triggers the notification (i.e. when he clicks/taps it).
-+ `isRead`: `True` (boolean) - Flag indicating that user has seen the notification.
-+ `isTriggered`: `True` (boolean) - Flag indicating that user has interacted with the notification (e.g. clicked/tapped on it)
++ `isRead`: `true` (boolean) - Flag indicating that user has seen the notification.
++ `isTriggered`: `true` (boolean) - Flag indicating that user has interacted with the notification (e.g. clicked/tapped on it)
 + `slug`: `order-cancelled` (string, optional) - Notification template slug.
 + `relatedData`: (RelatedDataObject, optional) - Related objects.
 
@@ -2468,10 +2552,38 @@ Promocode offer purchased by a customer
 + purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
 + offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
 
+## ReferralCodeStats
+Statistics of customer's referral promo code.
+
+### Properties
++ fullName (string, required) - name of customer
++ registeredWithKey (string, optional, nullable) - promo code key of referrer which was used during customer's registration
++ key (string, required) - key of customer's promo code
++ discount (Amount, required) - referee's discount of order total value after promo code application
++ maxUsage (number, required) - how many referees can use the referral promo code in total
++ used (number, required) - how many referees already used the referral promo code
++ remainingUsage (number, required) - how many referees can still apply the promo code from now
++ totalSaved (Amount, required) - how much money referees saved in total because of the application of the referral promo code to their orders
++ totalRewardsOutstanding (Amount, required) - how much money could referees save in total when they apply referral promo code to their orders
+
+## ReferralRewardCodesReceived
+Rewards the customer received from all the referees (new customers referred).
+
+### Properties
++ key (string, required) - key of referral promo code
++ state (enum, required) - state of referral promo code
+    + `USED` - referral promo code was already applied on order
+    + `ACTIVE` - referral promo code is applicable on order
+    + `EXPIRED` - referral promo code is expired and not applicable on order
++ discount (Amount, required) - discount of order total value after promo code application
++ fullName (string, required) - name of referee
++ receivedDate: `2014-02-10` (string, required) - the date when referee paid the order and the reward was received
++ expirationDate: `2014-04-10` (string, required) - to which date is the referral key applicable on order
+
 ## CoinBalance (object)
 Customer's coin account overview. Is based on CoinAmount object.
 ### Properties
-+ `coinBalance`: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
++ coinBalance: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
 
 ## RelatedDataObject (object)
 ### Properties
@@ -2482,8 +2594,8 @@ Customer's coin account overview. Is based on CoinAmount object.
 Detail of customer's Mall Coin transaction
 
 ### Properties
-+ `value` (CoinAmount, required) - amount of coins moved in the transaction
-+ `transactionReason` (enum, required) - reason for creating the transaction
++ value (CoinAmount, required) - amount of coins moved in the transaction
++ transactionReason (enum, required) - reason for creating the transaction
     + `OTHER` - Coins were received for other reason
     + `ORDER_PAID` - Coins were received for order payment
     + `SERVICES_DISCOUNT` - Coins were spent on services discount
