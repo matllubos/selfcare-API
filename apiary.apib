@@ -1136,7 +1136,7 @@ Allows ordering of the service based on previous offer
     Service not found.
     + Attributes (Errors)
 
-## Purchasing rewards for application items [/my/contracts/{contractNumber}/application/{applicationId}/rewards]
+## Purchasing rewards for application [/my/contracts/{contractNumber}/application/{applicationId}/rewards]
 Purchasing Rewards on given application items
 
 + Parameters
@@ -1153,8 +1153,10 @@ Allows purchasing/ordering of the reward based on info in an application
         + applicationId: `application_id` (string, required) - ID of service
     + Attributes
         + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
-        + itemId (string, required) - (TODO: business logic is currently not using this ID)
-        + serviceId (string, optional, nullable)
+            + FREE_DELIVERY
+            + SERVICE_DISCOUNT
+        + itemId (string, required) - (TODO: business logic is currently not using this ID (will be required for type FREE_DELIVERY in future).)
+        + serviceId (string, optional, nullable) - Id of service to purchase reward for
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (Application)
@@ -1177,7 +1179,7 @@ Allows purchasing/ordering of the reward based on info in an application
         + type: `this_is_invalid_reward_type` (enum, required) - invalid enum value
         + itemId: `item-id` (string, required)
 
-+ Response 404 (application/json; charset=utf-8)
++ Response 422 (application/json; charset=utf-8)
     Reward not found.
     + Attributes (Errors)
 
