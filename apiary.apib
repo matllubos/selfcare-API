@@ -296,9 +296,13 @@ Entry of mobile token with given `deviceUuid` will be removed. This combination 
     + Parameters
         + deviceUuid: `deviceuuid123456789` (string, required) - Device UUID
 
-+ Response 200
++ Response 204
     Mobile token asociated with given `deviceUuid` was removed.
     + Body
+    
++ Response 404 (application/json; charset=utf-8)
+    Device UUID not found.
+    + Attributes (Errors)
 
 ## Change password [/account/password]
 
