@@ -2629,6 +2629,7 @@ Statistics of customer's referral promo code.
 ### Properties
 + fullName (string, required) - name of customer
 + registeredWithKey (string, optional, nullable) - promo code key of referrer which was used during customer's registration
++ isKeyRegisteredWithApplicable (boolean, required) - `true` if `registeredWithKey` is still applicable as a discount on order, i.e. not expired or usage depleted. Otherwise it's `false`.
 + key (string, required) - key of customer's promo code
 + discount (Amount, required) - referee's discount of order total value after promo code application
 + maxUsage (number, required) - how many referees can use the referral promo code in total
