@@ -2686,10 +2686,7 @@ Reward description
 + `type` (enum, required) - type of reward
     + `FREE_DELIVERY`
     + `SERVICE_DISCOUNT`
-+ `status` (enum, required) - status of the reward
-    + `PURCHASED` - reward was purchased
-    + `AVAILABLE` - reward is available for purchase
-    + `NOT_ENOUGH_COINS` - customer does not have enough coins to purchase the reward
++ `isPurchased` (boolean, required) - flag for already purchased rewards
 + `relatedObjects` (enum)
     + serviceId (string, optional, nullable)
 
