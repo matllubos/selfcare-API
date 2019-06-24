@@ -1464,6 +1464,18 @@ Get prioritized list of possible installments that are available for repayment. 
     + Attributes (Errors)
 
 
+# Group My Settings
+
+## My settings [/my/settings]
+Information about settings
+
+### List of settings [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PromoBanner)
+
 # Group My Documents
 
 ## Documents for client [/my/documents]
@@ -2675,6 +2687,15 @@ Detail of customer's Mall Coin transaction
     + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
     + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
 + `relatedData` (RelatedDataObject, optional, nullable) - data and objects related to the MALL Coin transaction
+
+## PromoBanner (object)
+Promo banner description
+
+### Properties
++ promoBanner
+    + mobileImage (File, nullable) - banner image for mobile devices
+    + desktopImage (File, nullable) - banner image for desktop
+    + linkUrl: `https://link-example.com` (string, nullable) - if either `mobileImage` or `desktopImage` is not null, linkUrl is compulsory
 
 ## Reward (object)
 Reward description
