@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: https://api.platba.lymet.cz/customer/v1
+HOST: https://api.client.mallpay.cz/customer/v1
 
 # New SC API
 This is documentation of MALL Pay NEW Self-Care API
@@ -31,7 +31,7 @@ There are some rules that are valid throughout whole API.
 
 Example request:
 ```
-curl -X GET https://api.platba.lymet.cz/customer/v1/my/contracts?sort=category&limit=10&after=15
+curl -X GET https://api.client.mallpay.cz/customer/v1/my/contracts?sort=category&limit=10&after=15
 ```
 
 Example response pagingInfo:
@@ -127,7 +127,7 @@ Examples:
 - we support GZIP compression of responses. Client must specify header `Accept-Encoding: gzip` in request in order to use the compression.
 
 ## Versioning
-We use API version in URL (e.g. `https://api.platba.lymet.cz/customer/v1/my/profile`). Minor changes (see below) that don't break backwards compatibility do NOT increase API version, e.g. they may happen without prior notice and your application should be ready to handle them.
+We use API version in URL (e.g. `https://api.client.mallpay.cz/customer/v1/my/profile`). Minor changes (see below) that don't break backwards compatibility do NOT increase API version, e.g. they may happen without prior notice and your application should be ready to handle them.
 
 Minor changes include:
 - adding new resource
@@ -2036,7 +2036,7 @@ Financing application.
 + type: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + contractNumber: `01-6010027378` (string, required) - parent contract for this application
-+ gatewayRedirectUrl: `https://gateway.lymet.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
++ gatewayRedirectUrl: `https://mallpay.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
 + applicationOrigin (object, optional) - if the application was created based on other application
     + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
     + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
@@ -2523,7 +2523,7 @@ Collection of URLs used for redirection of a customer back to a partner website 
 + `returnUri`: `https://www.partner.com/file?id=12345` (string, required)
 
 ## CredentialChangeResponse (object)
-+ `redirectUrl`: `https://api.platba.lymet.cz?applicationId=123` (string, required) - URL where the client should be redirected after successfull creation of application.
++ `redirectUrl`: `https://mallpay.cz/change-complete` (string, required) - URL where the client should be redirected after successfull creation of application.
 
 ## CustomerLogin (object)
 ### Properties
