@@ -601,6 +601,7 @@ The request will modify the most recent application in progress.
         + slug: `CUSTOMER_INFORMATION_ADDRESS`
         + firstName: `John`
         + lastName: `Doe`
+
 + Request Not providing all required attributes of the bound fields (application/json)
     maternityLeavePaidMonths value is missing in request
     + Attributes (AccountUpgradeApplication)
@@ -609,6 +610,20 @@ The request will modify the most recent application in progress.
 + Response 422
     Attribute maternityLeavePaidMonths must be specified with this source of income type.
     + Attributes (Errors)
+
++ Request Bank business card indentification method
+    + Attributes (AccountUpgradeApplication)
+        + kycIdentificationMethod: `BANK_BUSINESS_CARD`
+
++ Response 200
+    Bank business card API is called from the backend. Returns back to client information about supported banks (BIC) and redirect ID which are used to render login page to bank account.
+    + Attributes (AccountUpgradeApplication)
+        + bankBusinessCardBankIdentifierCodes
+            + airaczpp
+            + gibaczpx
+            + eqbkczpp
+            + agbaczpp
+        + bankBusinessCardRedirectId: `9ad54307-a746-4274-36be-c820fc88c6cc`
 
 ### State of account upgrade application request [GET]
 Get information about current active revolving loan application .
@@ -1821,6 +1836,16 @@ Financial amount with VAT rate.
 + maternityLeavePaidMonths (number, optional) - required in case of maternity leave source of income
 + deliverToHomeAddress (boolean, optional) - true if the card will be delivered to home address else to delivery address
 + smsCode (string, optional)
+kycIdentificationMethod (enum, optional) - how the client's identity will be verified
+    + BANK_BUSINESS_CARD
+    + COURIER
+    + OFFICE
+bankBusinessCardBankIdentifierCodes (array, optional) - List of BICs of supported banks in Business Card API. This is needed to render bank login form.
+    + airaczpp
+    + gibaczpx
+    + eqbkczpp
+    + agbaczpp
+bankBusinessCardRedirectId  (string, optional) - unique ID used to render bank login form
 
 ## AccountUpgradeApplicationSlug (enum)
 + CUSTOMER_INFORMATION_CONTACT
