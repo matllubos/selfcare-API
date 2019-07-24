@@ -549,33 +549,32 @@ Use this resource to manage customer's requests for upgrading his account type.
 ### Create account upgrade request [POST]
 Use this endpoint to create a new account upgrade request for a logged-in user. The revolving loan application will be created for given type. There should be no existing application.
 
-+ Request Start application process for LITE account type (application/json)
-    + Attributes (AccountUpgradeApplication)
-        + type: `LITE`
++ Request Start application process for BASIC account type (application/json)
+    + Attributes (AccountUpgradeApplicationRequest)
+        + type: `BASIC`
 
 + Response 201
     Revolving loan application in progress.
-    + Attributes (AccountUpgradeApplication)
-        + type: `LITE`
+    + Attributes (AccountUpgradeApplicationResponse)
+        + type: `BASIC`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
 + Request Start application process without specifying account type (application/json)
-    + Attributes (AccountUpgradeApplication)
+    + Attributes (AccountUpgradeApplicationRequest)
 
 + Response 422
     Contract type must be specified.
     + Attributes (Errors)
 
 + Request Start another new application while another one already exists (application/json)
-    + Attributes (AccountUpgradeApplication)
-        + type: `LITE`
+    + Attributes (AccountUpgradeApplicationRequest)
+        + type: `BASIC`
 
 + Response 409
     There could be just one application in progress.
-    + Attributes (AccountUpgradeApplication)
-        + type: `LITE`
+    + Attributes (AccountUpgradeApplicationResponse)
+        + type: `BASIC`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
-
 
 
 ### Update application of account upgrade request [PATCH]
@@ -590,21 +589,21 @@ The request will modify the most recent application in progress.
     + Attributes (Errors)
 
 + Request Providing new data for the next step (application/json)
-    + Attributes (AccountUpgradeApplication)
+    + Attributes (AccountUpgradeApplicationRequest)
         + firstName: `John`
         + lastName: `Doe`
 
 + Response 200
     Revolving loan application in progress. Next slug `CUSTOMER_INFORMATION_ADDRESS` returned inside body.
-    + Attributes (AccountUpgradeApplication)
-        + type: `LITE`
+    + Attributes (AccountUpgradeApplicationResponse)
+        + type: `BASIC`
         + slug: `CUSTOMER_INFORMATION_ADDRESS`
         + firstName: `John`
         + lastName: `Doe`
 
 + Request Not providing all required attributes of the bound fields (application/json)
     maternityLeavePaidMonths value is missing in request
-    + Attributes (AccountUpgradeApplication)
+    + Attributes (AccountUpgradeApplicationRequest)
         + sourceOfIncome: `MATERNITY_LEAVE`
 
 + Response 422
@@ -612,12 +611,12 @@ The request will modify the most recent application in progress.
     + Attributes (Errors)
 
 + Request Bank business card indentification method
-    + Attributes (AccountUpgradeApplication)
+    + Attributes (AccountUpgradeApplicationRequest)
         + kycIdentificationMethod: `BANK_BUSINESS_CARD`
 
 + Response 200
     Bank business card API is called from the backend. Returns back to client information about supported banks (BIC) and redirect ID which are used to render login page to bank account.
-    + Attributes (AccountUpgradeApplication)
+    + Attributes (AccountUpgradeApplicationResponse)
         + bankBusinessCardBankIdentifierCodes
             + airaczpp
             + gibaczpx
@@ -626,13 +625,12 @@ The request will modify the most recent application in progress.
         + bankBusinessCardRedirectId: `9ad54307-a746-4274-36be-c820fc88c6cc`
 
 ### State of account upgrade application request [GET]
-Get information about current active revolving loan application .
+Get information about current active revolving loan application.
 
 + Request (application/json)
 
 + Response 200
-    + Attributes (object)
-        + application (AccountUpgradeApplication, required)
+    + Attributes (AccountUpgradeApplicationResponse)
         + slug: `COMPLETED`
 
 ## Consents [/account/consents]
@@ -1782,24 +1780,22 @@ Financial amount with VAT rate.
     + `BIRTH_CERTIFICATE`
 + countryIssuedId: `CZ` (string, optional) - country that issued the document, ISO 3166 alpha 2 country code
 
-## AccountUpgradeApplication (object)
-+ slug (AccountUpgradeApplicationSlug, optional)
+## AccountUpgradeApplicationRequest (object)
 + type (RevolvingLoanContractType, optional)
 + firstName: `John` (string, optional) - user first (given) name
 + lastName: `Doe` (string, optional) - user family name
 + permanentAddress (Address, optional) - client home address
 + deliveryAddress (Address, optional) - client delivery address
-+ email (Email, optional) - client e-mail address
-+ phoneNumber (PhoneNumber, optional) - client phone number
 + identityDocument (IdentityDocument, optional) - client identity document
 + personalId: `8808308234` (string, optional) - birth number
++ residencePermit (boolean, optional) - residence permit in case of non-Czech citizens
++ gender (enum, required)
+    + `MALE`
+    + `FEMALE`
++ dateOfBirth: `1994-02-10` (string, optional) - date of birth in case of non-Czech citizens
 + placeOfBirth: `CZ` (string, optional) - ISO 3166 alpha 2 country code
 + nationality: `CZ` (string, optional) - ISO 3166 alpha 2 country code
 + consents (array) - List of consents given by customer
-    + THIRD_PARTY_TELCO
-    + THIRD_PARTY_CSOB
-    + ACCOUNT_UPGRADE_PREMIUM_FUTURE_AGREEMENT
-    + ACCOUNT_UPGRADE_PREMIUM_AGREEMENT
 + typeOfHousing (enum, optional) - type of accommodation
     + OWN
     + RENT
@@ -1820,13 +1816,13 @@ Financial amount with VAT rate.
     + OTHER
 + trialPeriod (boolean, optional) - trial period in case of employment source of income
 + companyRegistrationNumber (string, optional) - ICO in case of self-employed source of income
-+ netMonthlyIncome (Amount, optional) - net income amount per month (for all income sources but self-employed)
-+ grossMonthlyIncome (Amount, optional) - gross income amount per month (for self-employed income source)
++ monthlyNetIncome (Amount, optional) - net income amount per month (for all income sources but self-employed)
++ monthlyGrossIncome (Amount, optional) - gross income amount per month (for self-employed income source)
 + monthlyLoanExpenses (Amount, optional) - loan expenses per month
 + monthlyRegularExpenses (Amount, optional) - regular expenses per month (food, accommodation, etc.)
-+ bankStatement (File, optional)
-+ maxAllowedCardLimit (Amount, optional) - card limit allowed
-+ selectedCardLimit (Amount, optional) - card limit chosen by customer
++ bankStatements (array[File], optional)
++ cardLimitMaxAllowed (Amount, optional) - card limit allowed
++ cardLimitSelected (Amount, optional) - card limit chosen by customer
 + accountingSystem (enum, optional) - required in case of self-employed source of income
     + TAX_RECORD
     + DOUBLE_ENTRY
@@ -1835,17 +1831,17 @@ Financial amount with VAT rate.
 + startOfBusiness: `1994-02-10` (string, optional) - since when is the business running, required in case of self-employed source of income
 + maternityLeavePaidMonths (number, optional) - required in case of maternity leave source of income
 + deliverToHomeAddress (boolean, optional) - true if the card will be delivered to home address else to delivery address
-+ smsCode (string, optional)
-kycIdentificationMethod (enum, optional) - how the client's identity will be verified
++ smsCode (string, optional) - SMS code received on phone
++ kycIdentificationMethod (enum, optional) - how the client's identity will be verified
     + BANK_BUSINESS_CARD
     + COURIER
     + OFFICE
-bankBusinessCardBankIdentifierCodes (array, optional) - List of BICs of supported banks in Business Card API. This is needed to render bank login form.
++ bankBusinessCardBankIdentifierCodes (array, optional) - List of BICs of supported banks in Business Card API. This is needed to render bank login form.
     + airaczpp
     + gibaczpx
     + eqbkczpp
     + agbaczpp
-bankBusinessCardRedirectId  (string, optional) - unique ID used to render bank login form
++ bankBusinessCardRedirectId (string, optional) - unique ID used to render bank login form
 
 ## AccountUpgradeApplicationSlug (enum)
 + CUSTOMER_INFORMATION_CONTACT
@@ -1866,9 +1862,14 @@ bankBusinessCardRedirectId  (string, optional) - unique ID used to render bank l
 + COMPLETED
 + CANCELLED
 
+## AccountUpgradeApplicationResponse (AccountUpgradeApplicationRequest)
++ email (string, optional) - client e-mail address
++ phoneNumber (string, optional) - client phone number
++ slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
+
 ## RevolvingLoanContractType (enum)
-+ LITE
-+ LITE_WITH_CARD
++ BASIC
++ BASIC_WITH_CARD
 + PREMIUM
 
 ## Client (object)
@@ -2827,7 +2828,7 @@ Customer's coin account overview. Is based on CoinAmount object.
 + purchasedPartnerPromocodeOffer (PurchasedPartnerPromocodeOffer, optional, nullable) - customer purchased external promocode key with offer info
 
 ## RevolvingLoan (object)
-Data related to active revolving loan or the loan with application in progress.
+Data related to current revolving loan or the loan with application in progress.
 
 ### Properties
 + type (RevolvingLoanContractType, required)
