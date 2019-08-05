@@ -1783,8 +1783,7 @@ Financial amount with VAT rate.
 + type (RevolvingLoanContractType, optional)
 + firstName: `John` (string, optional) - user first (given) name
 + lastName: `Doe` (string, optional) - user family name
-+ permanentAddress (Address, optional) - client home address
-+ deliveryAddress (Address, optional) - client delivery address
++ addresses (array[Address], fixed-type, optional) - client addresses (permanent and delivery)
 + identityDocument (IdentityDocument, optional) - client identity document
 + personalId: `8808308234` (string, optional) - birth number
 + residencePermit (boolean, optional) - residence permit in case of non-Czech citizens
