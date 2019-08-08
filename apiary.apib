@@ -254,10 +254,10 @@ Provide `mobileToken`.
     - `INVALID_MOBILE_LOGIN` - Mobile login token is invalid.
     + Attributes (Errors)
 
-## Customer logout - TBD [/account/logout]  
+## Customer logout - TBD [/account/logout]
 Use this resource to invalidate existing token, which in effect logs out the customer.
 
-### Invalidate existing token [POST]           
+### Invalidate existing token [POST]
 + Request (application/json; charset=utf-8)
 
 + Response 204 (application/json; charset=utf-8)
@@ -362,7 +362,7 @@ Use this endpoint to set a new password for:
             + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
 
 + Response 204
-    Password set successful. 
+    Password set successful.
     + Body
 
 + Request Wrong data (application/json; charset=utf-8)
@@ -382,7 +382,7 @@ Use this endpoint to set a new password for:
 + Response 422(application/json; charset=utf-8)
     Password set was not successful.
     + Attributes (Errors)
-    
+
 ## Request password reset [/account/password/reset]
 
 ### Request password reset [POST]
@@ -438,7 +438,7 @@ Use this resource to remind the customer of his e-mail address (which is needed 
 + Response 400 (application/json)
     Invalid input data.
     + Attributes (Errors)
-    
+
 + Response 422 (application/json)
     SMS with e-mail address was not sent. Following errors codes are possible:
     * CUSTOMER_DOES_NOT_EXIST
@@ -455,7 +455,7 @@ Use this resource to resend a registration e-mail to the customer. E-mail can be
 + Response 204
     Registration e-mail was requested to be resent.
     + Body
-    
+
 + Response 422 (application/json)
     Invalid input data.
     + Attributes (Errors)
@@ -623,6 +623,101 @@ The request will modify the most recent application in progress.
             + eqbkczpp
             + agbaczpp
         + bankBusinessCardRedirectId: `9ad54307-a746-4274-36be-c820fc88c6cc`
+
++ Request Invalid proof of income file content (application/json)
+    + Attributes (object)
+        + bankStatements (array)
+            + file (BankStatementDocument)
+
+
++ Response 422
+    File content was evaluated as not supported file type
+    + Body
+
+            {
+                "errors": [{
+                    "message": "Obsah souboru musí být formátu base64",
+                    "severity": "ERROR",
+                    "attribute": "file.content",
+                    "code": "INVALID"
+                }]
+            }
+
++ Request Self-employed customer uploads only one proof of income document (application/json)
+    + Attributes (object)
+        + sourceOfIcome: `SELF_EMPLOYED`
+        + companyRegistrationNumber: `ABCDE12345`
+        + bankStatements (array, BankStatementDocument)
+            + file (BankStatementDocument)
+
+    + Body
+
+            {
+                "sourceOfIncome: "SELF_EMPLOYED",
+                "companyRegistrationNumber": "ABCDE12345,
+                "bankStatements": [{
+                    "file": {
+                        "filename": "doklad1.pdf",
+                        "content": "RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw=="
+                    }
+                }]
+            }
+
++ Response 422
+    Self-employed customer should provide exactly three proof of income documents.
+    + Attributes (Errors)
+
+    + Body
+
+            {
+                "errors": [
+                    {
+                        "message": "OSVČ musí poskytnout právě tři doklady o příjmu.",
+                        "severity": "ERROR",
+                        "attribute": "bankStatements",
+                        "code": "INVALID"
+                    }
+                ]
+            }
+
++ Request Non self-employed customer uploads more than one proof of income documents (application/json)
+    + Attributes (object)
+        + sourceOfIcome: `EMPLOYMENT`
+        + trialPeriod: `False`
+        + bankStatements (array, BankStatementDocument)
+            + file (BankStatementDocument)
+
+    + Body
+
+            {
+                "sourceOfIncome": "EMPLOYMENT",
+                "trialPeriod": "False,
+                "bankStatements": [{
+                    "file": {
+                        "filename": "doklad1.pdf",
+                        "content": "RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw=="
+                    }
+                },
+                {
+                    "file": {
+                        "filename": "doklad2.pdf",
+                        "content": "RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw=="
+                    }
+                }
+                ]
+            }
++ Response 422
+    Non self-employed customer should provide exactly one proof of income document.
+    + Body
+
+            {
+                "errors": [{
+                    "message": "Osoba, která není OSVČ, musí poskytnout právě jeden doklad o příjmu.",
+                    "severity": "ERROR",
+                    "attribute": "bankStatements",
+                    "code": "INVALID"
+                }]
+            }
 
 ### State of account upgrade application request [GET]
 Get information about current active revolving loan application.
@@ -835,7 +930,7 @@ Get questions (data) for questionnaire construction
 + Request (application/json; charset=utf-8)
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + questions (array[Question], fixed-type, required) 
+        + questions (array[Question], fixed-type, required)
 
 + Response 400 (application/json; charset=utf-8)
 
@@ -867,7 +962,7 @@ filter name        | possible operators | example
 ---                | ---                | ---
 id                 |eq,in               | `notifications?filter=id|in|1,3` means notifications that have id 1 or 3
 
-### Get list of notifications [GET]    
+### Get list of notifications [GET]
 Use this endpoint to get list of notifications. This endpoint supports pagination.
 
 + Request (application/json)
@@ -875,7 +970,7 @@ Use this endpoint to get list of notifications. This endpoint supports paginatio
     + Attributes (object)
         + data (array[Notification], fixed-type, required)
         + pagingInfo (PagingInfo, optional)
-        
+
 ### Mark notification as read/triggered [PATCH]
 Use this endpoint to indicate, that user has seen the notification(s) and/or interacted with it/them (e.g. he clicked or tapped it).
 
@@ -889,7 +984,7 @@ Use filter (by ID) to limit set of affected notifications.
 
 ## Number of unread notifications [/notifications/unread]
 
-### Get number of unread notifications [GET]    
+### Get number of unread notifications [GET]
 Use this endpoint to get number of unread notifications.
 
 + Request (application/json)
@@ -902,7 +997,7 @@ Resource group for managing customer's personal data
 
 ## Personal data request [/personalData/request/]
 
-### Personal data request [POST]    
+### Personal data request [POST]
 Use this endpoint to request personal data operation
 
 + Request (application/json)
@@ -912,38 +1007,38 @@ Use this endpoint to request personal data operation
         + email (string, required) - email of person whom wants to process gdpr request
         + subject (string, required) - GDPR request type
         + message (string) - Additional user message for GDPR request
-        
+
 + Response 200 (application/json)
     GDPR request successfully added, show message about email confirmation
     + Attributes
         + status: `ACCEPTED` (enum, required) - personal data request status
             + `ACCEPTED` - request is accepted
             + `UNCONFIRMED` - request needs to be confirmed via email
-    
+
 + Response 400 (application/json)
     There was an error processing request
     + Attributes (Errors)
-    
+
 + Response 422 (application/json)
     Invalid input data.
     + Attributes (Errors)
-    
+
 
 ## Personal request confirm [/personalData/request/{token}/confirm]
 
 Specific customer contract.
 
 
-### Personal request confirm [POST]    
+### Personal request confirm [POST]
 Use this enpoint to confirm personal request operation
 
 + Attributes (object)
     + token (string, required): `s5as4d5a6s54d5sa6asd56` - GDPR token
-    
+
 + Response 204
     GDPR request successfull, there is no space for error
     + Body
-    
+
 # Group My contracts
 Set of resources to access and modify client's contracts.
 
@@ -986,7 +1081,7 @@ Get details about one customer contract.
 
 + Response 404 (application/json; charset=utf-8)
     + Attributes (Errors)
-    
+
 ## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
 Transactions of given contract.
 
@@ -1017,8 +1112,8 @@ This resource supports [paging](#header-paging). The attribute `id` will be used
 *Example response pagingInfo:*
 
 ```
-"pagingInfo": {     
-    "nextPage": "transactions?limit=10&after=1222",     
+"pagingInfo": {
+    "nextPage": "transactions?limit=10&after=1222",
     "itemsPerPage": 10
 }
 ```
@@ -1269,7 +1364,7 @@ Allows ordering of the service based on previous offer
         + applicationId: `application_id` (string, required) - ID of application
     + Attributes
         + serviceId: `service-adp`
-    
+
 + Response 204 (application/json; charset=utf-8)
 
 + Request Non-existing contract (application/json; charset=utf-8)
@@ -1392,7 +1487,7 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[Document], fixed-type, required)
+        + data (array[ContractDocument], fixed-type, required)
 
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
@@ -1491,7 +1586,7 @@ Prepare payment order data for specified repayments. TODO: add payment method.
 
 + Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json; charset=utf-8)
     + Attributes (PaymentRequest)
-    
+
 + Response 200(application/json; charset=utf-8)
 
         Payment order method CARD/PLATBA24/MOJE_PLATBA/EKONTO was prepared and can be paid.
@@ -1562,7 +1657,7 @@ type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_A
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[Document], fixed-type, required)
+        + data (array[ContractDocument], fixed-type, required)
 
 # Group MALL Coin
 
@@ -1683,7 +1778,7 @@ Purchasing the key was not succesful
     + ERROR - critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code
     + WARN - non-critical error, execution can continue but further user interaction is advisable. This MIGHT be indicated also by appropriate HTTP status code
     + INFO - information only, execution can continue without user interaction
-+ attribute: `personalBirthNumber` (string, optional) - json path of request attribute that caused the error (if applicable)    
++ attribute: `personalBirthNumber` (string, optional) - json path of request attribute that caused the error (if applicable)
 + ticketId: `UAT1:AMS:20160516-091658.450:45e4` (string, optional) - internal ticket ID, used for error backtracking
 
 ## Errors (object)
@@ -1731,8 +1826,8 @@ Financial amount with VAT rate.
 + grant_type: `authorization_code` (enum, required) - grant flow type, only `authorization_code` and `refresh_token` is supported
     + `authorization_code` - use to exchange code for access token
     + `refresh_token` - can be used to get new access token instead of forcing user to login again
-+ client_id: `my_app_id` (string, required) - client_id parameter of your application, received at application registration    
-+ client_secret: `my_app_secret` (string, required) - client_secret parameter of your application, received at application registration    
++ client_id: `my_app_id` (string, required) - client_id parameter of your application, received at application registration
++ client_secret: `my_app_secret` (string, required) - client_secret parameter of your application, received at application registration
 + One Of
     + code: `12254a1124` (string, required) - authorization code, received from authorization server
     + refresh_token: `12254a1124` (string, required) - refresh token, received from authorization server
@@ -1820,7 +1915,7 @@ Financial amount with VAT rate.
 + monthlyGrossIncome (Amount, optional) - gross income amount per month (for self-employed income source)
 + monthlyLoanExpenses (Amount, optional) - loan expenses per month
 + monthlyRegularExpenses (Amount, optional) - regular expenses per month (food, accommodation, etc.)
-+ bankStatements (array[File], optional)
++ bankStatements (array[BankStatementDocument], optional)
 + cardLimitMaxAllowed (Amount, optional) - card limit allowed
 + cardLimitSelected (Amount, optional) - card limit chosen by customer
 + accountingSystem (enum, optional) - required in case of self-employed source of income
@@ -1914,7 +2009,7 @@ Financial amount with VAT rate.
 + One Of
    + DEFPAYAdditionalInfo (object, required)
         + availableCreditBalance (Amount, required) - available credit balance of an account
-        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account   
+        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account
 
 
 ## HistoryContract (object)
@@ -2005,62 +2100,58 @@ Financial amount with VAT rate.
     + applicationId: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
     + contractNumber: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
 
-## File (object)
+## SimpleFile (object)
 + filename: `invoice.pdf` (string, optional) - File name.
 + url: `https://www.partner.com/file?id=12345` (string, required) - File URL.
 + createdDate : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
 + contentType : `image/jpg` (string, optional) - content type of the file
 + size : 48439 (number, optional) - file size in bytes
 
-## HistoryFile (object)
-+ filename: `invoice.pdf` (string, optional) - File name.
-+ url: `https://www.partner.com/file?id=12345` (string, required) - File URL.
-+ createdDate : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
+## HistoryFile (SimpleFile)
 + contentType : `image/jpg` (string, optional, nullable) - content type of the file
-+ size : 48439 (number, optional) - file size in bytes
 
-## Document (object)
+## File (object)
++ `filename`: `bank_statement.pdf` (string, required) - File name
++ One Of
+    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content for upload file (Base64 encoded, maximum size of encoded string is 500kB)
+    + Properties
+          + `url`: `https://www.partner.com/media/documents/bank_statement_file.pdf` (string, required) - URL to download file from
+          + `contentType`: `application/pdf` (string, required) - content type of the file
+
+
+## BaseDocument (object)
+Attached document
+
+### Properties
++ type: `CONTRACT` (enum, required) - Type of the document
+    + `INVOICE` - Faktura
+    + `PROFORMA_INVOICE` - Proforma faktura
+    + `CREDIT_NOTE` - Dobropis
+    + `OTHER` - Ostatní
+    + `SANCTION` - Sankce
+    + `ID_CARD_FRONT` - Občanský průkaz - přední strana
+    + `ID_CARD_BACK` - Občanský průkaz - zadní strana
+    + `PASSPORT_FRONT` - Pas - přední strana
+    + `PASSPORT_BACK` - Pas - zadní strana
+    + `DRIVING_LICENSE_FRONT` - Řidičský průkaz - přední strana
+    + `DRIVING_LICENSE_BACK` - Řidičský průkaz - zadní strana
+    + `CONTRACT` - Smlouva
+    + `IPID` - IPID
+    + `PRESUIT_DEMAND` - Předžalobní výzva
+    + `BANK_STATEMENT` - Výpis účtu
++ description: `This is an document` (string, optional) - File description
+
+## ContractDocument (BaseDocument)
 Attached document (document only for client, document for specific contract, document for specific order ...)
 
 ### Properties
-+ name: `ObchodnŪ podmŪnky` (string, required) - Human-readable localized document name
-+ type: `GEN_SMS_SIGN_AGREEMENT` (enum, required) - Type of the document
-    + `EKLIENT_AGREEMENT` - Smlouva o pouěŪvŠnŪ aplikace SprŠvce financŪ
-    + `INSTALLMENTPROGRAM_AMENDMENT` - Dodatek smlouvy - SplŠtkovť programy
-    + `NRKI_CONSENT` - Souhlas s NRKI
-    + `SOLUS_CONSENT` - Souhlas se SOLUS
-    + `ATTACHMENT` - VyěŠdanż dokument
-    + `CONTRACT` - ŕvžrovŠ smlouva
-    + `CREDIT_CONDITIONS` - ŕvžrovť podmŪnky
-    + `FLIP_SUPPLEMENT` - Dodatek smlouvy - FLIP
-    + `BONUS_ACTION` - BonusovŠ akce
-    + `PERSONAL_DATA_CONSENT` - Souhlas se zpracovŠnŪm osobnŪch ķdajý
-    + `PREAGREEMENT` - PÝedsmluvnŪ formulŠÝ
-    + `CARD_HANDOVER` - PÝedŠvacŪ protokol ke kartž
-    + `SUPPLEMENT_CLIP` - Dodatek pro navżöenŪ ķvžrovťho rŠmce
-    + `REGISTRY_SHEET` - MatriŤnŪ list
-    + `ATTACHMENT_NO1` - PÝŪloha Ť.1
-    + `ACCEPT_PROT_VEH` - Protokol o pÝevzetŪ vozidla
-    + `ORIG_VINCULATION` - OriginŠl VINKULACE (ind. HAV)
-    + `INSURANCE_CONTRACT_COPY` - Kopie pojistnť smlouvy
-    + `INFO_INSURANCE_COMPANY` - Informace pro klienta-poj. KOOPERATIVA UNIQA
-    + `ATTACHMENT_CLIENT` - Dokument k osobž
-    + `INSTALMENT_CALENDAR` - SplŠtkovż kalendŠÝ
-    + `MONTHLY_STATEMENT` - MžsŪŤnŪ vżpis
-    + `GEN_SMS_SIGN_AGREEMENT` - Smlouva o pouěŪvŠnŪ online aplikacŪ
-    + `ARBITRATION` - RozhodŤŪ smlouva
-    + `INVOICE` - Invoice
-    + `PROFORMA_INVOICE` - Proforma invoice
-    + `CREDIT_NOTE` - Credit note
-    + `OTHER` - OstatnŪ
-    + `INVOICE_COPY` - Opis faktury
++ name: `Obchodní podmínky` (string, required) - Human-readable localized document name
 + contractNumber: `6707000642` (string, optional) - contractNumber if document is connected to specific contract
 + contractType: `REL` (enum, optional) - contract type if document is connected to specific contract
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ file (File, required) - Attached file
-+ description: `This is an invoice` (string, optional) - File description
++ file (SimpleFile, required) - Attached file
 + additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
@@ -2113,6 +2204,10 @@ Attached document (document only for client, document for specific contract, doc
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
     + `statementYear`: 2017 (number, optional) - Year for document type MONTHLY_STATEMENT
 
+## BankStatementDocument (BaseDocument)
++ type: `BANK_STATEMENT` (enum, optional) - Type of the document
+    + `BANK_STATEMENT` - Výpis účtu
++ file: (File, required) - File in pdf format
 
 
 ## DeliveryCarrier (object)
@@ -2271,7 +2366,7 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + totalVat (array[VatAmount], fixed-type, optional) - Total VAT amounts split by their VAT rates
 + promocodeDiscounts (array[Promocode], fixed-type, required) - Promo codes discounts applied on order
 + items (array[Item], fixed-type, required) - Items in order
-+ documents (array[Document], fixed-type, optional) - Attached documents (invoices etc.)
++ documents (array[ContractDocument], fixed-type, optional) - Attached documents (invoices etc.)
 + state: `PROCESSING` (enum, required) - Order state.
     + `PROCESSING` - Order is being processed by merchant
     + `SENT` - All order items was sent to customer
@@ -2318,7 +2413,7 @@ Order item information, needed to create an application.
 + `id`: `item-id-string` (string, required) - Item Id
 + `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
 + `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (File, optional) - Item image
++ `image` (SimpleFile, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -2438,7 +2533,7 @@ Additional information about broker application
     + CREDIT - credit card
     + STICKER - contactless sticker
     + VIRTUAL - virtual card
-+ cardVisual (File, optional) - Card visualisation image
++ cardVisual (SimpleFile, optional) - Card visualisation image
 + contractNumber: `123` (string, required) - contract number of contract that card belongs to
 + holderName: `John Doe` (string, optional) - card holder name
 + validFrom: `2016-02` (string, optional) - card valid from date
@@ -2769,10 +2864,10 @@ Promocode offer - voucher offered to customer
 + validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetimr
 + priority: 100 (number, required) - Priority of offer in a list of offers
 + createdAt: `2017-01-18T10:34:44+01:00` (string, required) - When was the offer created
-+ productImages (array[File], required) - Images for the offer
++ productImages (array[SimpleFile], required) - Images for the offer
 + productPriceNonDiscounted (Amount, optional, nullable) - Display original non-discounted price
 + productPriceDiscounted (Amount, optional, nullable) - Display discounted price
-+ productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information 
++ productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information
 + voucherValidFrom: `2019-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - starting datetime
 + voucherValidUntil: `2020-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - ending info
 + descriptionShort: `Sleva 55%` (string, optional, nullable) - Display short info about a value of the voucher
@@ -2864,8 +2959,8 @@ Promo banner description
 
 ### Properties
 + promoBanner
-    + mobileImage (File, nullable) - banner image for mobile devices
-    + desktopImage (File, nullable) - banner image for desktop
+    + mobileImage (SimpleFile, nullable) - banner image for mobile devices
+    + desktopImage (SimpleFile, nullable) - banner image for desktop
     + linkUrl: `https://link-example.com` (string, nullable) - if either `mobileImage` or `desktopImage` is not null, linkUrl is compulsory
 
 ## Reward (object)
