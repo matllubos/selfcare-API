@@ -269,7 +269,7 @@ Use this resource to invalidate existing token, which in effect logs out the cus
     + Attributes (Errors)
 
 ## Mobile login token management [/account/mobileToken]
-Use this endpoint to generate new `mobileToken` for specified device, used for login in biometric login services.
+Use this endpoint to generate new `mobileToken` for specified device, used for login in biometric login services. `deviceUuuid` can have variable length (of maximum length 32 characters) with combination of alphanum letters.
 
 ### Generate new token [POST]
 Use this endpoint to get new mobile login token:
@@ -296,9 +296,22 @@ Entry of mobile token with given `deviceUuid` will be removed. This combination 
     + Parameters
         + deviceUuid: `deviceuuid123456789` (string, required) - Device UUID
 
-+ Response 200
++ Response 204
     Mobile token asociated with given `deviceUuid` was removed.
     + Body
+
++ Response 404 (application/json; charset=utf-8)
+	Token with given UUID does not exist.
+    + Attributes (Errors)
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + deviceUuid: `bad$device&uuid*format` (string, required) - Bad format of Device UUID
+
++ Response 422 (application/json; charset=utf-8)
+    Unable to find token:
+    - `UUID_NOT_VALID` - UUID provided is not in valid format.
+    + Attributes (Errors)
 
 ## Change password [/account/password]
 
