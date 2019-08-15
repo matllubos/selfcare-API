@@ -1929,12 +1929,6 @@ Financial amount with VAT rate.
     + BANK_BUSINESS_CARD
     + COURIER
     + OFFICE
-+ bankBusinessCardBankIdentifierCodes (array, optional) - List of BICs of supported banks in Business Card API. This is needed to render bank login form.
-    + airaczpp
-    + gibaczpx
-    + eqbkczpp
-    + agbaczpp
-+ bankBusinessCardRedirectId (string, optional) - unique ID used to render bank login form
 
 ## AccountUpgradeApplicationSlug (enum)
 + CUSTOMER_INFORMATION_CONTACT
@@ -1955,10 +1949,19 @@ Financial amount with VAT rate.
 + COMPLETED
 + CANCELLED
 
+## BankBusinessCard (object)
++ BankIdentifierCodes (array, optional) - List of BICs of supported banks in Business Card API. This is needed to render bank login form.
+    + airaczpp
+    + gibaczpx
+    + eqbkczpp
+    + agbaczpp
++ RedirectId (string, optional) - unique ID used to render bank login form
+
 ## AccountUpgradeApplicationResponse (AccountUpgradeApplicationRequest)
 + email (string, optional) - client e-mail address
 + phoneNumber (string, optional) - client phone number
 + bankStatementMonth: `4` (number, optional) - number between 0 and 11 (0 - January, 11 - December), represents the month for which non self-employed customer must provide bank statement
++ bankBusinessCard (BankBusinessCard, optional)
 + slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
 
 ## RevolvingLoanContractType (enum)
