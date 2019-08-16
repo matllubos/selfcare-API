@@ -549,14 +549,14 @@ Use this resource to manage customer's requests for upgrading his account type.
 ### Create account upgrade request [POST]
 Use this endpoint to create a new account upgrade request for a logged-in user. The revolving loan application will be created for given type. There should be no existing application.
 
-+ Request Start application process for BASIC account type (application/json)
++ Request Start application process for PLUS account type (application/json)
     + Attributes (AccountUpgradeApplicationRequest)
-        + type: `BASIC`
+        + type: `PLUS`
 
 + Response 201
     Revolving loan application in progress.
     + Attributes (AccountUpgradeApplicationResponse)
-        + type: `BASIC`
+        + type: `PLUS`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
 + Request Start application process without specifying account type (application/json)
@@ -568,12 +568,12 @@ Use this endpoint to create a new account upgrade request for a logged-in user. 
 
 + Request Start another new application while another one already exists (application/json)
     + Attributes (AccountUpgradeApplicationRequest)
-        + type: `BASIC`
+        + type: `PLUS`
 
 + Response 409
     There could be just one application in progress.
     + Attributes (AccountUpgradeApplicationResponse)
-        + type: `BASIC`
+        + type: `PLUS`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
 
@@ -596,7 +596,7 @@ The request will modify the most recent application in progress.
 + Response 200
     Revolving loan application in progress. Next slug `CUSTOMER_INFORMATION_ADDRESS` returned inside body.
     + Attributes (AccountUpgradeApplicationResponse)
-        + type: `BASIC`
+        + type: `PLUS`
         + slug: `CUSTOMER_INFORMATION_ADDRESS`
         + firstName: `John`
         + lastName: `Doe`
@@ -1865,12 +1865,13 @@ Financial amount with VAT rate.
 ## AccountUpgradeApplicationResponse (AccountUpgradeApplicationRequest)
 + email (string, optional) - client e-mail address
 + phoneNumber (string, optional) - client phone number
++ bankStatementMonth: `4` (number, optional) - number between 0 and 11 (0 - January, 11 - December), represents the month for which non self-employed customer must provide bank statement
 + slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
 
 ## RevolvingLoanContractType (enum)
-+ BASIC
-+ BASIC_WITH_CARD
-+ PREMIUM
++ PLUS
++ PLUS_WITH_CARD
++ COMPLETE
 
 ## Client (object)
 + name (object, required)
@@ -2713,23 +2714,6 @@ Collection of URLs used for redirection of a customer back to a partner website 
 + `label`: `Proč jste hodnotil/a právě touto známkou?` (string) - question text
 + `choices`: `1, 2, 3` (array[string]) - choices for example for radioselect
 + `fields` (array[Subfield]) - question subfields
-
-## PersonalDocumentFile (object)
-### Properties
-+ `filename`: `driving_license_scan.jpg` (string, optional) - File name
-+ `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content (Base64 encoded)
-
-## PersonalDocument (object)
-Customer's personal document
-### Properties
-+ `type` (enum, required) - Type of the document
-    + `ID_CARD_FRONT` - ID Card (front side)
-    + `ID_CARD_BACK` - ID Card (back side)
-    + `PASSPORT_FRONT` - Passport (front side)
-    + `PASSPORT_BACK` - Passport (back side)
-    + `DRIVING_LICENSE_FRONT` - Driving license (front side)
-    + `DRIVING_LICENSE_BACK` - Driving license (back side)
-+ `file` (PersonalDocumentFile, required) - Attached file
 
 
 ## Notification (object)
