@@ -615,14 +615,15 @@ The request will modify the most recent application in progress.
         + kycIdentificationMethod: `BANK_BUSINESS_CARD`
 
 + Response 200
-    Bank business card API is called from the backend. Returns back to client information about supported banks (BIC) and redirect ID which are used to render login page to bank account.
+    Bank business card API is called from the backend. Returns back to client information about supported banks (BIC) and URL which are used to render login page to bank account.
     + Attributes (AccountUpgradeApplicationResponse)
-        + bankBusinessCardBankIdentifierCodes
-            + airaczpp
-            + gibaczpx
-            + eqbkczpp
-            + agbaczpp
-        + bankBusinessCardRedirectId: `9ad54307-a746-4274-36be-c820fc88c6cc`
+        + bankBusinessCard (array, optional)
+            + (object)
+                + bic: `EQBKCZPP`
+                + url: `http://example.com/redirect/connect?redirectId=f277a779-58cf-446c-a163-3ba1c77134ef&bic=eqbkczpp`
+            + (object)
+                + bic: `AIRACZPP`
+                + url: `http://example.com/redirect/connect?redirectId=f277a779-58cf-446c-a163-3ba1c77134ef&bic=airaczpp`
 
 + Request Invalid proof of income file content (application/json)
     + Attributes (object)
@@ -1914,7 +1915,6 @@ Financial amount with VAT rate.
 + monthlyLoanExpenses (Amount, optional) - loan expenses per month
 + monthlyRegularExpenses (Amount, optional) - regular expenses per month (food, accommodation, etc.)
 + bankStatements (array[BankStatementDocument], optional)
-+ cardLimitMaxAllowed (Amount, optional) - card limit allowed
 + cardLimitSelected (Amount, optional) - card limit chosen by customer
 + accountingSystem (enum, optional) - required in case of self-employed source of income
     + TAX_RECORD
@@ -1949,19 +1949,20 @@ Financial amount with VAT rate.
 + COMPLETED
 + CANCELLED
 
-## BankBusinessCard (object)
-+ BankIdentifierCodes (array, optional) - List of BICs of supported banks in Business Card API. This is needed to render bank login form.
-    + airaczpp
-    + gibaczpx
-    + eqbkczpp
-    + agbaczpp
-+ RedirectId (string, optional) - unique ID used to render bank login form
+## BankBusinessCardRedirectionLogin (object)
++ bic (enum, required) - BIC of bank
+    + AIRACZPP
+    + GIBACZPX
+    + EQBKCZPP
+    + AGBACZPP
++ url (string, required) - URL where is the user redirected to log-in and authenticate to the bank
 
 ## AccountUpgradeApplicationResponse (AccountUpgradeApplicationRequest)
 + email (string, optional) - client e-mail address
 + phoneNumber (string, optional) - client phone number
 + bankStatementMonth: `4` (number, optional) - number between 0 and 11 (0 - January, 11 - December), represents the month for which non self-employed customer must provide bank statement
-+ bankBusinessCard (BankBusinessCard, optional)
++ cardLimitMaxAllowed (Amount, optional) - card limit allowed
++ bankBusinessCard (array[BankBusinessCardRedirectionLogin], optional)
 + slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
 
 ## RevolvingLoanContractType (enum)
@@ -1972,11 +1973,11 @@ Financial amount with VAT rate.
 ## Client (object)
 + id: `12345` (number, required) - internal customer ID
 + name (object, required)
-  + titleBefore: Ing. (string, optional) - academical degree before name
-  + titleAfter: PhD. (string, optional) - academical degree behind name
-  + firstName: John (string, required) - user first (given) name
-  + middleNames: Peter, Frank (array[string], optional) - middle names
-  + lastName: Doe (string, required) - user family name
+    + titleBefore: Ing. (string, optional) - academical degree before name
+    + titleAfter: PhD. (string, optional) - academical degree behind name
+    + firstName: John (string, required) - user first (given) name
+    + middleNames: Peter, Frank (array[string], optional) - middle names
+    + lastName: Doe (string, required) - user family name
 + fullName: `Ing. John Petetr Frank Doe, PhD.` (string, optional) - client full name
 + salutation: Mr. (string, optional, nullable) - salutation, e.g. Mr. or Mrs.
 + gender: `MALE` (enum, required)
