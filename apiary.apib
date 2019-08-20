@@ -631,7 +631,6 @@ Get information about current active revolving loan application.
 
 + Response 200
     + Attributes (AccountUpgradeApplicationResponse)
-        + slug: `COMPLETED`
 
 ## Consents [/account/consents]
 All consents user is able to subscribe and unsubscribe.
@@ -1784,8 +1783,7 @@ Financial amount with VAT rate.
 + type (RevolvingLoanContractType, optional)
 + firstName: `John` (string, optional) - user first (given) name
 + lastName: `Doe` (string, optional) - user family name
-+ permanentAddress (Address, optional) - client home address
-+ deliveryAddress (Address, optional) - client delivery address
++ addresses (array[Address], fixed-type, optional) - client addresses (permanent and delivery)
 + identityDocument (IdentityDocument, optional) - client identity document
 + personalId: `8808308234` (string, optional) - birth number
 + residencePermit (boolean, optional) - residence permit in case of non-Czech citizens
@@ -1809,7 +1807,7 @@ Financial amount with VAT rate.
     + THREE
     + FOUR_AND_MORE
 + sourceOfIncome (enum, optional) - primary source of income
-    + EMPLOYEE
+    + EMPLOYMENT
     + MATERNITY_LEAVE
     + SELF_EMPLOYED
     + RETIREMENT
