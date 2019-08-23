@@ -1868,13 +1868,11 @@ Financial amount with VAT rate.
 ## IdentityDocument (object)
 + number: `123456748` (string, required) - identity document number
 + issueDate: `2014-02-10` (string, optional) - identity document issue date
-+ validity: `2024-02-10` (string, optional) - identity document valid to date
++ validity: `2024-02-10` (string, required) - identity document valid to date
 + type (enum, required) - identity document type
     + `ID_CARD`
-    + `DRIVERS_LICENSE`
     + `PASSPORT`
-    + `BIRTH_CERTIFICATE`
-+ countryIssuedId: `CZ` (string, optional) - country that issued the document, ISO 3166 alpha 2 country code
++ countryIssuedId: `CZ` (string, required) - country that issued the document, ISO 3166 alpha 2 country code
 
 ## AccountUpgradeApplicationRequest (object)
 + type (RevolvingLoanContractType, optional)
@@ -1884,7 +1882,7 @@ Financial amount with VAT rate.
 + identityDocument (IdentityDocument, optional) - client identity document
 + personalId: `8808308234` (string, optional) - birth number
 + residencePermit (boolean, optional) - residence permit in case of non-Czech citizens
-+ gender (enum, required)
++ gender (enum, optional)
     + `MALE`
     + `FEMALE`
 + dateOfBirth: `1994-02-10` (string, optional) - date of birth in case of non-Czech citizens
@@ -1924,7 +1922,7 @@ Financial amount with VAT rate.
 + scopeOfBusiness (enum, optional) - required in case of self-employed source of income
 + startOfBusiness: `1994-02-10` (string, optional) - since when is the business running, required in case of self-employed source of income
 + maternityLeavePaidMonths (number, optional) - required in case of maternity leave source of income
-+ deliverToHomeAddress (boolean, optional) - true if the card will be delivered to home address else to delivery address
++ deliverToDeliveryAddress (boolean, optional) - true if the card will be delivered to delivery address
 + smsCode (string, optional) - SMS code received on phone
 + kycIdentificationMethod (enum, optional) - how the client's identity will be verified
     + BANK_BUSINESS_CARD
