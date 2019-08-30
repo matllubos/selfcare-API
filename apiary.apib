@@ -740,6 +740,17 @@ Get information about current active revolving loan application.
 
 + Response 200
     + Attributes (AccountUpgradeApplicationResponse)
++ Response 404
+    User not yet created account upgrade request.
+    + Body
+
+            {
+                "errors": [{
+                    "message": "Nenalezeno",
+                    "severity": "ERROR",
+                    "code": "OBJECT_NOT_FOUND"
+                }]
+            }
 
 ## Consents [/account/consents]
 All consents user is able to subscribe and unsubscribe.
