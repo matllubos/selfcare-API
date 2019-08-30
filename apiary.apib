@@ -301,7 +301,7 @@ Entry of mobile token with given `deviceUuid` will be removed. This combination 
     + Body
 
 + Response 404 (application/json; charset=utf-8)
-	Token with given UUID does not exist.
+    Token with given UUID does not exist.
     + Attributes (Errors)
 
 + Request (application/json; charset=utf-8)
@@ -740,6 +740,17 @@ Get information about current active revolving loan application.
 
 + Response 200
     + Attributes (AccountUpgradeApplicationResponse)
++ Response 404
+    User not yet created account upgrade request.
+    + Body
+
+            {
+                "errors": [{
+                    "message": "Nenalezeno",
+                    "severity": "ERROR",
+                    "code": "OBJECT_NOT_FOUND"
+                }]
+            }
 
 ## Consents [/account/consents]
 All consents user is able to subscribe and unsubscribe.
@@ -1897,7 +1908,7 @@ Financial amount with VAT rate.
 + identityDocument (IdentityDocument, optional) - client identity document
 + personalId: `8808308234` (string, optional) - birth number
 + residencePermit (boolean, optional) - residence permit in case of non-Czech citizens
-+ gender (enum, required)
++ gender (enum, optional)
     + `MALE`
     + `FEMALE`
 + dateOfBirth: `1994-02-10` (string, optional) - date of birth in case of non-Czech citizens
