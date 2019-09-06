@@ -2130,22 +2130,12 @@ Financial amount with VAT rate.
 
 ## SimpleFile (object)
 + filename: `invoice.pdf` (string, optional) - File name.
-+ url: `https://www.partner.com/file?id=12345` (string, required) - File URL.
 + createdDate : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
 + contentType : `image/jpg` (string, optional) - content type of the file
 + size : 48439 (number, optional) - file size in bytes
-
-## HistoryFile (SimpleFile)
-+ contentType : `image/jpg` (string, optional, nullable) - content type of the file
-
-## File (object)
-+ `filename`: `bank_statement.pdf` (string, required) - File name
 + One Of
-    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content for upload file (Base64 encoded, maximum size of encoded string is 500kB)
-    + Properties
-          + `url`: `https://www.partner.com/media/documents/bank_statement_file.pdf` (string, required) - URL to download file from
-          + `contentType`: `application/pdf` (string, required) - content type of the file
-
+    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - Content of File when uploaded (Base64 encoded, maximum size of encoded string is 500kB)
+    + `url`: `https://www.partner.com/file?id=12345` (string, required) - Url to already stored File.
 
 ## BaseDocument (object)
 Attached document
@@ -2225,7 +2215,7 @@ Attached document (document only for client, document for specific contract, doc
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ file (HistoryFile, required) - Attached file
++ file (SimpleFile, required) - Attached file
 + description: `This is an invoice` (string, optional) - File description
 + additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
@@ -2235,7 +2225,7 @@ Attached document (document only for client, document for specific contract, doc
 ## BankStatementDocument (BaseDocument)
 + type: `BANK_STATEMENT` (enum, optional) - Type of the document
     + `BANK_STATEMENT` - Výpis účtu
-+ file: (File, required) - File in pdf format
++ file: (SimpleFile, required) - File in pdf format
 
 
 ## DeliveryCarrier (object)
@@ -2481,7 +2471,7 @@ Order item information, needed to create an application.
 ### Properties
 + `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
 + `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (HistoryFile, optional) - Item image
++ `image` (SimpleFile, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
