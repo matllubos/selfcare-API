@@ -615,12 +615,12 @@ The request will modify the most recent application in progress.
         + lastName: `Doe`
 
 + Request Not providing all required attributes of the bound fields (application/json)
-    maternityLeavePaidMonths value is missing in request
+    lengthOfMaternityLeave value is missing in request
     + Attributes (AccountUpgradeApplicationRequest)
         + sourceOfIncome: `MATERNITY_LEAVE`
 
 + Response 422
-    Attribute maternityLeavePaidMonths must be specified with this source of income type.
+    Attribute lengthOfMaternityLeave must be specified with this source of income type.
     + Attributes (Errors)
 
 + Request Bank business card indentification method
@@ -1945,7 +1945,11 @@ Financial amount with VAT rate.
     + PERCENT_FROM_INCOME
 + scopeOfBusiness (enum, optional) - required in case of self-employed source of income
 + startOfBusiness: `1994-02-10` (string, optional) - since when is the business running, required in case of self-employed source of income
-+ maternityLeavePaidMonths (number, optional) - required in case of maternity leave source of income
++ lengthOfMaternityLeave (enum, optional) - required in case of maternity leave source of income
+    + LESS_THAN_ONE_YEAR
+    + ONE_TO_TWO_YEARS
+    + TWO_TO_THREE_YEARS
+    + THREE_AND_MORE_YEARS
 + deliverToDeliveryAddress (boolean, optional) - true if the card will be delivered to delivery address
 + smsCode (string, optional) - SMS code received on phone
 + kycIdentificationMethod (enum, optional) - how the client's identity will be verified
