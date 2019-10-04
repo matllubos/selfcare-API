@@ -2128,14 +2128,14 @@ Financial amount with VAT rate.
     + applicationId: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
     + contractNumber: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
 
-## SimpleFile (object)
+## File (object)
 + filename: `invoice.pdf` (string, optional) - File name.
 + createdDate : `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of file creation
 + contentType : `image/jpg` (string, optional) - content type of the file
 + size : 48439 (number, optional) - file size in bytes
 + One Of
-    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - Content of File when uploaded (Base64 encoded, maximum size of encoded string is 500kB)
-    + `url`: `https://www.partner.com/file?id=12345` (string, required) - Url to already stored File.
+    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - In case of uploading file, its content as Base64 encoded (maximum size of encoded string is 500kB)
+    + `url`: `https://www.partner.com/file?id=12345` (string, required) - In case of retrieving file, its URL.
 
 ## BaseDocument (object)
 Attached document
@@ -2169,7 +2169,7 @@ Attached document (document only for client, document for specific contract, doc
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ file (SimpleFile, required) - Attached file
++ file (File, required) - Attached file
 + additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
@@ -2215,7 +2215,7 @@ Attached document (document only for client, document for specific contract, doc
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ file (SimpleFile, required) - Attached file
++ file (File, required) - Attached file
 + description: `This is an invoice` (string, optional) - File description
 + additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
@@ -2225,7 +2225,7 @@ Attached document (document only for client, document for specific contract, doc
 ## BankStatementDocument (BaseDocument)
 + type: `BANK_STATEMENT` (enum, optional) - Type of the document
     + `BANK_STATEMENT` - Výpis účtu
-+ file: (SimpleFile, required) - File in pdf format
++ file: (File, required) - File in pdf format
 
 
 ## DeliveryCarrier (object)
@@ -2431,7 +2431,7 @@ Order item information, needed to create an application.
 + `id`: `item-id-string` (string, required) - Item Id
 + `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
 + `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (SimpleFile, optional) - Item image
++ `image` (File, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -2471,7 +2471,7 @@ Order item information, needed to create an application.
 ### Properties
 + `name`: `iPhone 6s 32GB SpaceGray` (string, required) - Item name
 + `totalPrice` (HistoryAmount, required) - Total price for all pieces, VAT inclusive (if applicable)
-+ `image` (SimpleFile, optional) - Item image
++ `image` (File, optional) - Item image
 + `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
 + `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
 + `type` (enum, optional) - Item type
@@ -2551,7 +2551,7 @@ Additional information about broker application
     + CREDIT - credit card
     + STICKER - contactless sticker
     + VIRTUAL - virtual card
-+ cardVisual (SimpleFile, optional) - Card visualisation image
++ cardVisual (File, optional) - Card visualisation image
 + contractNumber: `123` (string, required) - contract number of contract that card belongs to
 + holderName: `John Doe` (string, optional) - card holder name
 + validFrom: `2016-02` (string, optional) - card valid from date
@@ -2865,7 +2865,7 @@ Promocode offer - voucher offered to customer
 + validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetimr
 + priority: 100 (number, required) - Priority of offer in a list of offers
 + createdAt: `2017-01-18T10:34:44+01:00` (string, required) - When was the offer created
-+ productImages (array[SimpleFile], required) - Images for the offer
++ productImages (array[File], required) - Images for the offer
 + productPriceNonDiscounted (Amount, optional, nullable) - Display original non-discounted price
 + productPriceDiscounted (Amount, optional, nullable) - Display discounted price
 + productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information
@@ -2960,8 +2960,8 @@ Promo banner description
 
 ### Properties
 + promoBanner
-    + mobileImage (SimpleFile, nullable) - banner image for mobile devices
-    + desktopImage (SimpleFile, nullable) - banner image for desktop
+    + mobileImage (File, nullable) - banner image for mobile devices
+    + desktopImage (File, nullable) - banner image for desktop
     + linkUrl: `https://link-example.com` (string, nullable) - if either `mobileImage` or `desktopImage` is not null, linkUrl is compulsory
 
 ## Reward (object)
