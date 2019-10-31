@@ -844,6 +844,19 @@ Push notification devices for customer.
     * PUSH_NOTIFICATION_DEVICE_EXISTS
     + Attributes (Errors)
 
+## Push notification devices detail [/account/push-notification-devices/{deviceType}/{deviceToken}]
+Customer push notification device detail.
+
+### Unregister a device [DELETE]
+
++ Request (application/json)
+
++ Response 204 (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+	Push notification device does not exist.
+	+ Attributes (Errors)
+
 ## Referral promo code stats [/account/referral/stats]
 
 ### Get referral code stats [GET]
