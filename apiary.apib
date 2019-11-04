@@ -739,6 +739,71 @@ The request will modify the most recent application in progress.
                 }]
             }
 
++ Request Signing contract - request to send OTP (application/json)
+    The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
+    + Body
+
+            {}
+
++ Response 480
+    OTP has been sent
+    + Body
+
+            {
+                "errors": [
+                    {
+                        "message': "Zadejte ověřovací SMS kód.",
+                        "code": "INVALID"
+                    }
+                ],
+                "otpValidTo": "2019-11-02T21:37:16.548+01:00"
+            }
+
++ Request Signing contract - request to resend OTP (application/json)
+    The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
+    + Body
+
+            {"otpResend": true}
+
++ Response 480
+    OTP has been sent
+    + Body
+
+            {
+                "errors": [
+                    {
+                        "message': "Zadejte ověřovací SMS kód.",
+                        "code": "INVALID"
+                    }
+                ],
+                "otpValidTo": "2019-11-02T21:46:16.548+01:00"
+            }
+
++ Request Signing contract - send OTP (application/json)
+    The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
+    + Body
+
+            {"otpCode": "abc123"}
+
++ Response 200
+    OTP code is valid
+    + Attributes (AccountUpgradeApplicationResponse)
+
++ Response 422 (application/json)
+    Invalid OTP code
+    + Body
+
+            {
+                "errors": [
+                    {
+                        "message": "Kód není platný",
+                        "severity": "ERROR",
+                        "attribute": "otpCode",
+                        "code": "INVALID"
+                    }
+                ]
+            }
+
 ### State of account upgrade application request [GET]
 Get information about current active revolving loan application.
 
@@ -854,8 +919,8 @@ Customer push notification device detail.
 + Response 204 (application/json; charset=utf-8)
 
 + Response 404 (application/json; charset=utf-8)
-	Push notification device does not exist.
-	+ Attributes (Errors)
+    Push notification device does not exist.
+    + Attributes (Errors)
 
 ## Referral promo code stats [/account/referral/stats]
 
@@ -1982,7 +2047,6 @@ Financial amount with VAT rate.
     + ONE_TO_TWO_YEARS
     + TWO_TO_THREE_YEARS
     + THREE_AND_MORE_YEARS
-+ smsCode (string, optional) - SMS code received on phone
 + kycIdentificationMethod (enum, optional) - how the client's identity will be verified
     + BANK_BUSINESS_CARD
     + COURIER
