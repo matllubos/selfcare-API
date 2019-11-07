@@ -304,6 +304,10 @@ Entry of mobile token with given `deviceUuid` will be removed. This combination 
 + Response 204
     Mobile token asociated with given `deviceUuid` was removed.
     + Body
+    
++ Response 404 (application/json; charset=utf-8)
+    Device UUID not found.
+    + Attributes (Errors)
 
 + Response 404 (application/json; charset=utf-8)
     Token with given UUID does not exist.
