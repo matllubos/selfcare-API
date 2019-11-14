@@ -913,8 +913,14 @@ Push notification devices for customer.
     * PUSH_NOTIFICATION_DEVICE_EXISTS
     + Attributes (Errors)
 
-## Push notification devices detail [/account/push-notification-devices/{deviceType}/{deviceToken}]
+## Push notification devices detail [/account/push-notification-devices/{type}/{token}]
 Customer push notification device detail.
+
++ Parameters
+    + token (string, required) - Actual token of the device
+    + type (enum, required) - Type of the device
+        + `ANDROID`
+        + `IOS`
 
 ### Unregister a device [DELETE]
 
