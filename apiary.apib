@@ -2102,6 +2102,7 @@ Financial amount with VAT rate.
 + slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
 + isCourierFinished (required) - boolean indicating whether the identification by courier is already finished. In combination with type and isContractActive fields this field determines, which screen should be displayed in case COMPLETED slug is returned.
 + isContractActive (required) - boolean indication whether the account was successfully upgraded and related contract activated. In combination with type and isCourierFinished fields this field determines, which screen should be displayed in case COMPLETED slug is returned.
++ unsignedContractHtml (string, optional) - unsigned contract in escaped HTML
 
 ## RevolvingLoanContractType (enum)
 + PLUS
