@@ -508,7 +508,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     + promoSource: `referral:JNOVAK586` (string) - Contains either promo source URL part or referral code of referrer (should start with `referral:` prefix)
     + cjToken: `1234abcd` (string, optional) - CJEVENT affiliate token. It's obtained from URL parameters - ie. https://mallpay.cz/?cjevent=some-cute-code
 
-+ Request classic registration with referral code (application/json)
++ Request classic registration with referral code (application/json; charset=utf-8)
     + Attributes (object)
         + name: `John Doe`
         + email: `john.doe@yahoo.com`
@@ -517,13 +517,13 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
             + `REGISTRATION`
         + promoSource: `referral:JNOVAK586` (string) - referral code of referrer (customer who send registration link)
 
-+ Response 200
++ Response 200 (application/json; charset=utf-8)
     Customer has been registered.
     + Attributes (object)
         + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
-+ Request Facebook registration with promo source URL (application/json)
++ Request Facebook registration with promo source URL (application/json; charset=utf-8)
     + Attributes (object)
         + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
         + phone: `+420777777777`
@@ -531,14 +531,14 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
             + `REGISTRATION`
         + promoSource: `advertisementYY` (string) - the tag of campaign which redirected the user here
 
-+ Response 200
++ Response 200 (application/json; charset=utf-8)
     Customer has been registered.
     + Attributes (object)
         + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
             + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
-+ Request classic registration with user already registered before (application/json)
++ Request classic registration with user already registered before (application/json; charset=utf-8)
     + Attributes (object)
         + name: `John Doe`
         + email: `john.doe@yahoo.com`
@@ -546,7 +546,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         + consents
             + `REGISTRATION`
 
-+ Response 422 (application/json)
++ Response 422 (application/json; charset=utf-8)
     Customer has not been registered. List of error codes special for this endpoint:
     - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
     - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
@@ -555,14 +555,14 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     - `EMAILS_DIFFER` - Facebook e-mail address differs from matched MALL Pay account e-mail address.
     + Attributes (Errors)
 
-+ Request Facebook registration with many consequent calls (application/json)
++ Request Facebook registration with many consequent calls (application/json; charset=utf-8)
     + Attributes (object)
         + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
         + phone: `+420777777777`
         + consents
             + `REGISTRATION`
 
-+ Response 429 (application/json)
++ Response 429 (application/json; charset=utf-8)
     Request throttling in effect.
     + Attributes (Errors)
 
@@ -572,28 +572,28 @@ Use this resource to manage customer's requests for upgrading his account type.
 ### Create account upgrade request [POST]
 Use this endpoint to create a new account upgrade request for a logged-in user. The revolving loan application will be created for given type. There should be no existing application.
 
-+ Request Start application process for PLUS account type (application/json)
++ Request Start application process for PLUS account type (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + type: `PLUS`
 
-+ Response 201
++ Response 201 (application/json; charset=utf-8)
     Revolving loan application in progress.
     + Attributes (AccountUpgradeApplicationResponse)
         + type: `PLUS`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
-+ Request Start application process without specifying account type (application/json)
++ Request Start application process without specifying account type (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
 
-+ Response 422
++ Response 422 (application/json; charset=utf-8)
     Contract type must be specified.
     + Attributes (Errors)
 
-+ Request Start another new application while another one already exists (application/json)
++ Request Start another new application while another one already exists (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + type: `PLUS`
 
-+ Response 409
++ Response 409 (application/json; charset=utf-8)
     There could be just one application in progress.
     + Attributes (AccountUpgradeApplicationResponse)
         + type: `PLUS`
@@ -603,20 +603,20 @@ Use this endpoint to create a new account upgrade request for a logged-in user. 
 ### Update application of account upgrade request [PATCH]
 The request will modify the most recent application in progress.
 
-+ Request Updating application which does not exist (application/json)
++ Request Updating application which does not exist (application/json; charset=utf-8)
     + Attributes (object)
         + firstName: `John`
 
-+ Response 404
++ Response 404 (application/json; charset=utf-8)
     No application in progress for account upgrade exists.
     + Attributes (Errors)
 
-+ Request Providing new data for the next step (application/json)
++ Request Providing new data for the next step (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + firstName: `John`
         + lastName: `Doe`
 
-+ Response 200
++ Response 200 (application/json; charset=utf-8)
     Revolving loan application in progress. Next slug `CUSTOMER_INFORMATION_ADDRESS` returned inside body.
     + Attributes (AccountUpgradeApplicationResponse)
         + type: `PLUS`
@@ -624,20 +624,20 @@ The request will modify the most recent application in progress.
         + firstName: `John`
         + lastName: `Doe`
 
-+ Request Not providing all required attributes of the bound fields (application/json)
++ Request Not providing all required attributes of the bound fields (application/json; charset=utf-8)
     lengthOfMaternityLeave value is missing in request
     + Attributes (AccountUpgradeApplicationRequest)
         + sourceOfIncome: `MATERNITY_LEAVE`
 
-+ Response 422
++ Response 422 (application/json; charset=utf-8)
     Attribute lengthOfMaternityLeave must be specified with this source of income type.
     + Attributes (Errors)
 
-+ Request Bank business card indentification method
++ Request Bank business card indentification method (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + kycIdentificationMethod: `BANK_BUSINESS_CARD`
 
-+ Response 200
++ Response 200 (application/json; charset=utf-8)
     Bank business card API is called from the backend. Returns back to client information about supported banks (BIC) and URL which are used to render login page to bank account.
     + Attributes (AccountUpgradeApplicationResponse)
         + bankBusinessCard (array, optional)
@@ -648,14 +648,13 @@ The request will modify the most recent application in progress.
                 + bic: `AIRACZPP`
                 + url: `http://example.com/redirect/connect?redirectId=f277a779-58cf-446c-a163-3ba1c77134ef&bic=airaczpp`
 
-+ Request Invalid proof of income file content (application/json)
++ Request Invalid proof of income file content (application/json; charset=utf-8)
     + Attributes (object)
-        + bankStatements (array)
-            + file (BankStatementDocument)
+        + bankStatements (array[BankStatementDocument])
 
-
-+ Response 422
++ Response 422 (application/json; charset=utf-8)
     File content was evaluated as not supported file type
+
     + Body
 
             {
@@ -667,7 +666,8 @@ The request will modify the most recent application in progress.
                 }]
             }
 
-+ Request Self-employed customer uploads only one proof of income document (application/json)
+
++ Request Self-employed customer uploads only one proof of income document (application/json; charset=utf-8)
     + Attributes (object)
         + sourceOfIcome: `SELF_EMPLOYED`
         + companyRegistrationNumber: `ABCDE12345`
@@ -687,7 +687,7 @@ The request will modify the most recent application in progress.
                 }]
             }
 
-+ Response 422
++ Response 422 (application/json; charset=utf-8)
     Self-employed customer should provide exactly three proof of income documents.
     + Attributes (Errors)
 
@@ -743,58 +743,50 @@ The request will modify the most recent application in progress.
                 }]
             }
 
-+ Request Signing contract - request to send OTP (application/json)
++ Request Signing contract - request to send OTP (application/json; charset=utf-8)
     The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
-    + Body
 
+    + Body
             {}
 
-+ Response 480
++ Response 480 (application/json; charset=utf-8)
     OTP has been sent
+    + Attributes
+        + OTPErrors
+
+
++ Request Signing contract (application/json; charset=utf-8)
+    Request to resend OTP. The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
+
     + Body
 
             {
-                "errors": [
-                    {
-                        "message': "Zadejte ověřovací SMS kód.",
-                        "code": "INVALID"
-                    }
-                ],
-                "otpValidTo": "2019-11-02T21:37:16.548+01:00"
+                "otpResend": true
             }
 
-+ Request Signing contract - request to resend OTP (application/json)
-    The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
-    + Body
-
-            {"otpResend": true}
-
-+ Response 480
++ Response 480 (application/json; charset=utf-8)
     OTP has been sent
+    + Attributes
+        + OTPErrors
+
+
++ Request Signing contract send OTP (application/json; charset=utf-8)
+    The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
+
     + Body
 
             {
-                "errors": [
-                    {
-                        "message': "Zadejte ověřovací SMS kód.",
-                        "code": "INVALID"
-                    }
-                ],
-                "otpValidTo": "2019-11-02T21:46:16.548+01:00"
+                "otpCode": "abc123"
             }
-
-+ Request Signing contract - send OTP (application/json)
-    The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
-    + Body
-
-            {"otpCode": "abc123"}
 
 + Response 200
     OTP code is valid
-    + Attributes (AccountUpgradeApplicationResponse)
+    + Attributes
+        + AccountUpgradeApplicationResponse (required)
 
 + Response 422 (application/json)
     Invalid OTP code
+
     + Body
 
             {
@@ -811,12 +803,13 @@ The request will modify the most recent application in progress.
 ### State of account upgrade application request [GET]
 Get information about current active revolving loan application.
 
-+ Request (application/json)
++ Request (application/json; charset=utf-8)
 
 + Response 200
     + Attributes (AccountUpgradeApplicationResponse)
 + Response 404
     User not yet created account upgrade request.
+
     + Body
 
             {
@@ -1607,6 +1600,177 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
     + Attributes (object)
         + data (array[ContractDocument], fixed-type, required)
 
+# Group Payment cards for contract
+
+## Payment Cards for contract [/my/contract/card]
+List of payment cards for the given customer contract
+
+### Cards for contract [GET]
+Get a list of payment cards associated with the given contract.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PaymentCard], fixed-type, required)
+
+## Detail and modification of payment card for contract [/my/contract/card/{cardId}]
+Detail of given payment card
+
+### Card for contract [GET]
+Get detail of given payment card
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+### Activate card [PATCH]
+Activate the given card.
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVE` (enum, required)
+        + `otpCode`: `123` (string, required)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVE` (enum, required)
+        + `otpCode`: `123` (string, required)
+
++ Response 401 (application/json; charset=utf-8)
+    Returned when the `optCode` authorization does not match.
+    + Attributes (Errors)
+
++ Request (application/json; charset=utf-8)
+
++ Response 403 (application/json; charset=utf-8)
+    Returned in cases, where the card cannot be activated - ie. it has already been activated and now it is permanently blocked, for example.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+    Request to send optCode to a customer. Returns validity of code sent.
+    + Attributes
+        + `state`: `ACTIVE` (enum, required)
+        + `optCode`: null (string, required, nullable)
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
+### Changing card limits [PATCH]
+Change (enable/disable) limits on the card
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `onlinePaymentEnabled`: true (boolean, optional, nullable) - Enable/disable online payment with the card. Null value does not change setting and keeps value previously set.
+        + `atmWithdrawalEnabled`: true (boolean, optional, nullable) - Enable/disable cash withdrawal from ATMs. Null value does not change setting and keeps value previously set.
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+
+## Card blocking [/my/contract/card/{cardId}/blocking]
+Block a card. Two versions are available - permanent and temporary.
+
+### Permanently block a card [POST]
+Permanently blocks the card.
+
+__NOTE__: This step cannot be undone.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (PaymentCardPermanentBlocking)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+### Temporarily block a card [POST]
+Allows to temporarily block a card, for example when you are not going to use it for a long time or you cannot find it but are not yet sure if it really is lost or stolen (ie when searching for it). Unblocking the card is done by the same method used for activation.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (PaymentCardTemporaryBlocking)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+## Showing a card's PIN number [/my/contract/card/{cardId}/pinView]
+Return an image with card's PIN number.
+
+### Show card PIN [POST]
+Display pin of the card. The returned image will be object of image data.
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `optCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes
+        + `pinData` (string, required) - Base64 encoded image of PIN. Returned data type may change.
+
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `otpCode`: `123` (string, required, nullable)
+
++ Response 401 (application/json; charset=utf-8)
+    Returned when the `optCode` authorization does not match.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+    Request to send optCode to a customer. Returns validity of code sent.
+    + Attributes
+        + `optCode`: null (string, required, nullable)
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
 
@@ -1903,7 +2067,7 @@ Purchasing the key was not succesful
 + errors (array[Error], fixed-type, required)
 
 ## OTPErrors (Errors)
-+ blockedUntil: `2017-01-18T10:34:44+01:00` (string, optional) - requested operation is blocked until specified time
++ otpValidTo: `2017-01-18T10:34:44+01:00` (string, required) - datetime of token validity
 
 ## PagingInfo (object)
 + itemsPerPage: 10 (number, required) - number of items per page
@@ -2349,7 +2513,7 @@ Attached document (document only for client, document for specific contract, doc
 ## BankStatementDocument (BaseDocument)
 + type: `BANK_STATEMENT` (enum, optional) - Type of the document
     + `BANK_STATEMENT` - Výpis účtu
-+ file: (File, required) - File in pdf format
++ file (File, required) - File in pdf format
 
 
 ## DeliveryCarrier (object)
@@ -3111,3 +3275,43 @@ Reward description
 ### Properties
 + `coinsPromised` (CoinAmount, required) - how much coins will customer get after paying for his order
 + `coinsGained` (CoinAmount, required) - how much coins did customer gain after paying his order
+
+## PaymentCard (object)
+Contract Payment Card (virtual or physical)
+
+### Properties
++ `id`: `10` (string, required) - unique id of the card in the system
++ `maskedPan`: `123456******1234` (string, required, nullable) - masked PAN of the card. Will be set to `null` if we don't know the card's number.
++ `firstName`: `Franta` (string, required) - first name of the cardholder
++ `lastName`: `Tester` (string, required) - last name of the cardholder
++ `validThru`: `05/36` (string, required) - card expiration in standard card format (dd/yy).
++ `state`: `ACTIVATED` (enum, required) - status of the card
+    + `ASSIGNED` - card has been assigned to contract but has not yet been activated
+    + `ACTIVATED` - card has been assigned and activated by cardholder
+    + `BLOCKED_TEMPORARILY` - the card has been temporarily blocked. This state is reversible.
+    + `BLOCKED_PERMANENTLY` - the card has been permanently blocked. This state is irreversible and requires corresponding `stateReason`.
++ `stateReason`: `LOSS` (enum, nullable) - reason of the status, for example reason for blocking the card. Some states (not activated etc.) don't require explicit reason. Permanent blocking always requires the reason.
+    + `LOSS` - card was lost
+    + `THEFT` - card was stolen
++ `onlinePaymentsEnabled`: true (boolean, required) - Are online payments enabled? Note that if this is enabled it also implies a fixed preset single transaction amount limit.
++ `atmWithdrawalEnabled`: true (boolean, required) - Are cash withdrawals from ATMs enabled? Note that if this is enabled it also implies a fixed preset maximum withdrawal amount limit.
+
+## PaymentCardTemporaryBlocking (object)
+Data required to temporary block a card.
+
+### Properties
++ `state`: `BLOCKED_TEMPORARILY` (enum, required)
+    + `BLOCKED_TEMPORARILY`
+
+## PaymentCardPermanentBlocking (PaymentCardTemporaryBlocking)
+Data required to permanently block a card.
+
+### Properties
++ `state`: `BLOCKED_PERMANENTLY` (enum, required)
+    + `BLOCKED_PERMANENTLY`
++ `stateReason`: `STOLEN` (enum, required) - reason for blocking the card
+    + `LOST` - card was lost
+    + `STOLEN` - card was stolen
++ `deliveryAddress` (Address, nullable) - Address where the new card should be delivered. It is assumed (and checked) that the addressType will be of type `DELIVERY`.
+    + `addressType`: `DELIVERY` (enum, optional)
+        + `DELIVERY`
