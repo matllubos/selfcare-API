@@ -926,9 +926,9 @@ Customer push notification device detail.
     + Attributes (Errors)
 
 + Response 422 (application/json; charset=utf-8)
-	Supplied type of device is invalid. Following errors codes are possible:
-	* INVALID
-	+ Attributes (Errors)
+    Supplied type of device is invalid. Following errors codes are possible:
+    * INVALID
+    + Attributes (Errors)
 
 ## Referral promo code stats [/account/referral/stats]
 
@@ -1604,6 +1604,24 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[ContractDocument], fixed-type, required)
+
+## Support request [/my/contracts/supportRequest]
+Request support by phone.
+
+### Support request [POST]
+Request Account Upgrade request support by phone.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (SupportRequest)
+
++ Response 201 (application/json; charset=utf-8)
+
+
++ Request (application/json; charset=utf-8)
+    Request when customer is not logged in
+    + Attributes (SupportRequest)
+
++ Response 401 (application/json; charset=utf-8)
 
 # Group Payment cards for contract
 
@@ -3313,3 +3331,11 @@ Data required to permanently block a card.
 + `deliveryAddress` (Address, nullable) - Address where the new card should be delivered. It is assumed (and checked) that the addressType will be of type `DELIVERY`.
     + `addressType`: `DELIVERY` (enum, optional)
         + `DELIVERY`
+
+## SupportRequest (object)
+Request support by phone object
+
+### Properties
++ phoneNumber: `604 644 989` (string, required) - phone number we should call with the support
++ type: `REVOLVING_LOAN` (enum, required) - type of support required
+    + REVOLVING_LOAN
