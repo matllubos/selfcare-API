@@ -2069,7 +2069,7 @@ Financial amount with VAT rate.
     + COURIER
     + OFFICE
 + courierArrivalDate: `2019-01-01` (string, optional) - date when courier should arrive to verify the customer
-+ bankBusinessCardReturnUrl: `https://www.mallpay.cz/application` (string, required) - Callback URL after redirection from Bank Business Card.
++ bankBusinessCardReturnUrl: `https://www.mallpay.cz/application` (string, optional) - Callback URL after redirection from Bank Business Card.
 
 ## AccountUpgradeApplicationSlug (enum)
 + CUSTOMER_INFORMATION_CONTACT
@@ -2107,8 +2107,8 @@ Financial amount with VAT rate.
 + cardLimitMaxAllowed (Amount, optional) - card limit allowed
 + bankBusinessCard (array[BankBusinessCardRedirectionLogin], optional)
 + slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
-+ isCourierFinished (required) - boolean indicating whether the identification by courier is already finished. In combination with type and isContractActive fields this field determines, which screen should be displayed in case COMPLETED slug is returned.
-+ isContractActive (required) - boolean indication whether the account was successfully upgraded and related contract activated. In combination with type and isCourierFinished fields this field determines, which screen should be displayed in case COMPLETED slug is returned.
++ isCourierFinished (boolean, optional) - information, whether the identification by courier is already finished. In combination with type and isContractActive fields this field determines, which screen should be displayed in case COMPLETED slug is returned.
++ isContractActive (boolean, optional) - information, whether the account was successfully upgraded and related contract activated. In combination with type and isCourierFinished fields this field determines, which screen should be displayed in case COMPLETED slug is returned.
 + unsignedContractHtml (string, optional) - unsigned contract in escaped HTML
 
 ## RevolvingLoanContractType (enum)
