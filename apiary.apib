@@ -977,18 +977,122 @@ Get reward promo codes customer received for each new customer (referee).
 + Response 200 (application/json; charset=utf-8)
     + Attributes (array[ReferralRewardCodesReceived], required)
 
-# Group Revolving loan management
+# Group Revolving loan
 Management of cards and listing the transactions from revolving loan.
 
-## Revolving loan data [/revolvingLoan]
-Data of current active revolving loan.
+## Revolving loan contract [/my/contract]
+Data of current active revolving loan contract.
 
-### Display revolving loan data [GET]
-Returns data of current active revolving loan or loan with application in progress.
+### Display revolving loan contract data [GET]
+Returns data of current revolving loan contract of logged-in user.
 
 + Request (application/json; charset=utf-8)
+
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (RevolvingLoan, required)
+    + Attributes (RevolvingLoanContract, required)
+
++ Request of not-existing contract (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
+## Monthly billings [/my/contract/billing]
+Monthly billings of logged-in user.
+
+### Monthly billings for contract [GET]
+Get list of monthly billings for revolving contract of logged-in user
+
+### Filtering
+This resource supports filtering.
+
+filter name             | possible operators    | example
+---                     | ---                   | ---
+isPaid                  | eq                    | `billing?filter=ispaid|eq|False` billings, which were not paid yet (eg. closed last month and open actual month billing)
+paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|AVAILABLE` billings, which are ready to be paid (eg. last month billing)
+
+### Sorting
+This resource supports sorting according `year` and `month`. Default sorting is according year and month in descending order.
+Example: `billing?sort=-year,-month`
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Billing], required) - List of monthly billings for contract of logged-in user
+
++ Request monthly billings for non-existing contract (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
+## Monthly billing detail [/my/contract/billing/{billingId}]
+Detail of monthly billing for revolving contract of logged-in user
+
+### Monthly billing detail for contract [GET]
+Get detail of monthly billing
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (Billing)
+
++ Request for non-existing billing (application/json; charset=utf-8)
+    Billing not found
+    + Attributes (Error)
+
+## Transactions [/my/contract/transaction]
+Transactions for revolving contract of logged-in user.
+
+### Transactions for revolving contract [GET]
+Get list of transactions for revolving contract of logged-in user.
+
+#### Filtering
+This resource supports following filtering.
+
+filter name     | possible operators    | example
+---             | ---                   | ---
+billingId       | eq, in                | `transaction?filter=billingId|in|1,2` all transactions from billings with id 1 and 2
+type            | eq, in                | `transaction?filter=type|in|CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD` transactions, whose type is from the list CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD
+date            | lte, gte              | `transaction?filter=date|gte=20-05-18&lte=2020-05-20` all transactions created or posted between 18th and 20th May 2020
+amount          | lte, gte              | `transaction?filter=amount|gte=150000&lte=200000` transactions, which have amount greater or equal to 1500,- CZK and less or equal to 2000,- CZK
+
+
+Fulltext search can be used in transaction endpoint. The system will search for `query_string` in the fields
+`merchantName`, `merchantCity` and `description`.
+
+fulltext search  | query string     | example
+---              | ---              | ---
+fulltext         | `Palladium`      | `transaction?filter=fulltext|Palladium` transactions, which contain string `Palladium` in `merchantName` or `merchantCity` or `description`
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[RevolvingTransaction], fixed-type, required) - List of transactions for contract of logged-in user
+
++ Request transactions for non-existing contract (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    Contract not found.
+    + Attributes (Errors)
+
+## Transaction detail [/my/contract/transaction/{transactionId}]
+Detail of transaction for revolving contract of logged-in user.
+
+### Transaction detail for revolving contract [GET]
+Get detail of transaction
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (RevolvingTransaction)
+
++ Request for non-existing transaction (application/json; charset=utf-8)
+   Transaction not found
+   + Attributes (Error)
 
 # Group My profile
 Resources for accessing and modifying user personal data.
@@ -1199,65 +1303,6 @@ Get details about one customer contract.
 
 + Response 404 (application/json; charset=utf-8)
     + Attributes (Errors)
-
-## Transactions [/my/contracts/{contractNumber}/transactions{?include}]
-Transactions of given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + include: `HOLD` (enum, optional) - which trasactions to include. Possible values:
-        + `HOLD` - only authorization holds, e.g. non-processed transactions
-        + `PROCESSED` - only processed transactions
-        + `BOTH` - include both processed transactions and authorization holds
-
-
-### Transactions on contract [GET]
-Get a list of transactions on contract
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | yes
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | yes
-
-#### Paging
-This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
-
-*Example request:*
-
-`GET /my/contracts/{contractNumber}/transactions?limit=10`
-
-*Example response pagingInfo:*
-
-```
-"pagingInfo": {
-    "nextPage": "transactions?limit=10&after=1222",
-    "itemsPerPage": 10
-}
-```
-
-#### Sorting
-Transactions are sorted by default according to bookingDate.
-TBD.
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name      | possible operators | example
----              | ---                | ---
-bookingDate      | lt,lteq,gt,gteq,eq | `transactions?filter=bookingDate|gt|2015-01-10;bookingDate|lteq|2015-01-20`  transactions with 2015-01-10 <= bookingDate < 2015-01-20
-value.amount     | lteq,gteq,eq       | `transactions?filter=value.amount|gteq|100;value.amount|lteq|1000`  transactions with 100 <= value.amount <= 1000, in account's currency
-transactionType  | eq, in             | `transactions?filter=transactionType|in|INSTALLMENT,CARD` transactions of type `INSTALLMENT` and `CARD`
-
-
-+ Request Existing contract
-    + Parameters
-        + contractNumber: `54307275`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[MoneyTransaction], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
 
 ## Applications [/my/contracts/{contractNumber}/applications]
 Applications of given contract.
@@ -1915,7 +1960,6 @@ Purchasing the key was not succesful
 + amount: 12590 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 + currency: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
-
 ## Promocode (object)
 + code: `MALL1SAW3S0M3` (string, required) - Promo code key applied on order.
 + discountPrice (Amount, required) - Promo code discount price of order
@@ -2109,6 +2153,92 @@ Financial amount with VAT rate.
 + PLUS_WITH_CARD
 + COMPLETE
 
+## RevolvingLoanContract (object)
++ type (RevolvingLoanContractType, required)
++ state: `ACTIVE` (enum, required) - state of loan or application
+    + `PROCESSING`
+    + `WAITING_FOR_SIGNATURE`
+    + `CANCELLED_BEFORE_SIGNING`
+    + `SIGNED`
+    + `ACTIVE`
+    + `RESIGNED`
++ cancellationReason (enum, optional, nullable)
+    + `BACKOFFICE`
+    + `CUSTOMER`
++ availableAmount (Amount, required) - available amount of revolving loan
++ totalLimit (Amount, required) - total limit amount of revolving loan
+
+## Billing (object)
++ id: `378` (string, required) - billing id
++ balance (Amount, required) - billing balance
++ dueDate: `2020-05-20` (string, required) - billing due date
++ month: `4` (number, required) - month of the billing, 0 represents January, 1 - February
++ year: `2020` (number, required) - year of the billing
++ isPaid (boolean, required) - information, whether the billing was paid or not
++ coinReward (CoinAmount, required) - Amount of coins, which customer get for paying the billing
++ paymentAvailability (PaymentAvailability, required) - information about possibility to pay for the billing
++ defermentInfo (DefermentInfo, required) - information about possibilities for defer the billing payment
+
+## DefermentInfo (object)
++ state: `AVAILABLE` (enum, required) - state of deferment
+    + `AVAILABLE`
+    + `UNAVAILABLE`
+    + `WAITING_FOR_PAYMENT`
+    + `SUCCESS`
++ mininum (Amount, required) - minimal amount, which must be paid in the monthly billing
++ maximum (Amount, required) - maximal amount, which can be paid in the monthly billing
+
+## RevolvingTransaction (object)
++ id: `2070` (string, required) - transaction id
++ amount (Amount, required) - transaction amount in the currency of the card account
++ type: `CARD_TRANSACTION_DOMESTIC` (enum, required) - transaction type
+    + `CARD_TRANSACTION_DOMESTIC` - domestic card transaction
+    + `CARD_TRANSACTION_ABROAD` - card transaction from abroad
+    + `CARD_ATM_WITHDRAWAL_DOMESTIC` - domestic withdrawal from ATM
+    + `CARD_ATM_WITHDRAWAL_ABROAD` - withdrawal from ATM abroad
+    + `CARD_ONLINE_TRANSACTION` - online transaction
+    + `DEFERRED_PAYMENT` - deffered payment
+    + `DEFERRED_BILLING_PAYMENT` - deffered payment for billing
+    + `FEE` - fee
++ createdDate: `2020-05-20` (string, required) - date, on which transaction was created
++ postingDate: `2020-05-21` (string, optional) - date, on which transaction was posted
++ referenceNumber (string, optional) - transaction reference number
++ billingId: `189` (string, required) - billing id transaction belongs to
++ description (string, optional) - transaction description
++ fees (array[TransactionFee], optional) - array of fees related to the transaction
++ additionalInfoCard (RevolvingTransactionInfoCard, optional) - card payment additional info (card number, mcc and merchant name)
++ additionalInfoForeign (RevolvingTransactionInfoForeign, optional) - foreign payment additional info (original amount and exchange rate)
++ additionalInfoApplication (RevolvingTransactionInfoApplication, optional) - application additional information for transaction related to deffered payment
+
+## TransactionFee (object)
++ amount (Amount, required) - fee amount
++ code: `0` (number, optional) - fee transaction code
++ type: `CARD_ATM_WITHDRAWAL` (enum, required) - fee type
+    + `CARD_ATM_WITHDRAWAL` - fee for ATM withdrawal
+    + `OTHER` - other fee type
++ description (string, optional) - fee description
+
+## RevolvingTransactionInfoCard (object)
++ maskedPan:`123456******1234` (string, required) - masked PAN of the card
++ mcc: `3081` (string, optional) - merchant category code
++ merchantName: `A3 Sport Palladium` (string, optional) - merchant name
++ merchantCity: `Praha1` (string, optional) - merchant city
++ merchantCountry: `CZ` (string, optional) - merchant country
+
+## RevolvingTransactionInfoForeign (object)
++ sourceAmount (Amount, required) - transaction amount in the original currency
++ exchangeRate: `26.5` (string, required)- exchange rate, which is calculated as amount / sourceAmount, the number can have 8 decimal places
+
+## RevolvingTransactionInfoApplication (object)
++ applicationId (string, required) - application id
++ orderState: `REJECTED` (enum, required) - order state
+    + `RETURNED` - returned order
+    + `REJECTED` - rejected order
+    + `CANCELLED` - cancelled order
+    + `OTHER` - other order states not relevant for customer (eg. approved, sent or delivered)
++ partnerName (string, required) - partner name
++ partnerLogo (File, optional) - partner logo
+
 ## Client (object)
 + id: `12345` (number, required) - internal customer ID
 + name (object, required)
@@ -2184,64 +2314,10 @@ Financial amount with VAT rate.
     + `CREDIT` - credit transaction (+)
     + `DEBIT` - debit transaction (-)
 
-
-## MoneyTransaction (Transaction)
-+ contractNumber: `01-123456789` (string, required) - contract to that transaction belongs (to which it is accounted)
-+ status: `PROCESSED` (enum, required) - transaction status
-    + `UNPROCESSED` - unprocessed transaction
-    + `PROCESSED` - processed transaction
-+ description: `Purchase from SuperShop - 12.12.2017` (string, required) - transaction description
-+ partyAccount (AccountNumber, optional) - party account number
-+ partyDescription: `John Doe` (string, optional) - party description
-+ transactionType (enum[string], required) - transaction type
-    + `ATM_WITHDRAWAL`
-    + `INSTALLMENT`
-    + `BONUS`
-    + `DEFERRED_PAYMENT`
-    + `CASH_TRANSFER` - cash transfer
-    + `INST_PROGRAM` - installment program
-    + `INST_PROGRAM_STORNO` - cancelled installment program
-    + `FIRST_DRAW`
-    + `DIRECT_DEBIT`
-    + `CARD`
-    + `FEE`
-    + `TAX`
-    + `INTEREST`
-    + `INSURANCE`
-    + `SAZKA`
-    + `OTHER`
-    + `BLOCKING`
-+ valueDate: `2016-02-10T10:00Z` (string, required) - transaction value date, e.g. the day transaction "happened"
-+ bookingDate: `2016-02-09T10:00Z` (string, optional) - transaction booking date, e.g. the day transaction was bookkeeped
-+ payerMessage: `need to pay this` (string, optional) - message for payer. Empty for incoming transactions.
-+ payeeMessage: `info` (string, optional) - message for payee (e.g. for client receiving transaction)
-+ transactionFeeCanceled: `false` (boolean, optional) - set to true if transaction fee is canceled.
-+ additionalInfoDomestic (MoneyTransactionInfoDomestic, optional) - domestic payments additional info (symbols for fomestic payments)
-+ additionalInfoForeign (MoneyTransactionInfoForeign, optional) - foreign payments additional info (original value and exchange rate)
-+ additionalInfoCard (MoneyTransactionInfoCard, optional) - card payemnts additional info (card number, mcc and merchant name)
-+ additionalInfoApplication (MoneyTransactionInfoApplication, optional) - transaction info related to application
-
 ## MoneyTransactionInfoDomestic (object)
 + constantSymbol: `0558` (string, optional)
 + variableSymbol: `9` (string, optional)
 + specificSymbol: `100011` (string, optional)
-
-## MoneyTransactionInfoCard (object)
-+ mcc: `3081` (string, optional) - Merchant Category code
-+ merchantName: `SomeCompany, Ltd.` (string, optional)
-+ cardNumber: `34xx-xxxx-xxxx-6289` (string, required) - Masked card number used for transaction
-+ cardName: `äikovnŠ karta Home Credit` (string, optional) - Card name
-
-## MoneyTransactionInfoForeign (object)
-+ originalValue (Amount, optional) - amount & currency in which transaction was originated
-+ exchangeRate: 12.80 (number, optional) - exchange rate valid at the time of transfer
-
-## MoneyTransactionInfoApplication (object)
-+ applicationId: `11200a0ee1` (string, required) - identifier of application related to transaction
-+ contractNumber: `01-9855665` (string, required) - related contract number (TODO: consider removing - duplicates with MoneyTransaction.contractNumber)
-+ applicationOrigin (object, optional) - if related application was created based on other application
-    + applicationId: `2345623`(string, required) - application which led to creation of related application (not-Homer ID)
-    + contractNumber: `02-1` (string, required) - contract for the application which led to creation of related application (not-Homer contract number)
 
 ## File (object)
 + filename: `invoice.pdf` (string, optional) - File name.
@@ -2448,7 +2524,7 @@ Financing application.
 + eshopAdditionalInfo (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
 
 ## PaymentAvailability (object)
-Information about possibility to pay application
+Information about possibility to pay application or billing
 
 ### Properties
 + availability (enum, required)
@@ -3038,24 +3114,6 @@ Customer's coin account overview. Is based on CoinAmount object.
 ### Properties
 + application (Application, optional, nullable) - Related Application
 + purchasedPartnerPromocodeOffer (PurchasedPartnerPromocodeOffer, optional, nullable) - customer purchased external promocode key with offer info
-
-## RevolvingLoan (object)
-Data related to current revolving loan or the loan with application in progress.
-
-### Properties
-+ type (RevolvingLoanContractType, required)
-+ state (enum, required) - state of loan or application
-    + `WAITING_FOR_SIGNATURE`
-    + `CANCELLED_BEFORE_SIGNING`
-    + `SIGNED`
-    + `RESIGNED`
-    + `ACTIVE`
-    + `PROCESSING`
-+ availableAmount (Amount, required) - total available amount on revolving loan
-+ totalLimit (Amount, required) - sum of maximum limits amount on revolving loan
-+ cancellationReason (enum, optional, nullable)
-    + `BACKOFFICE`
-    + `CUSTOMER`
 
 ## CoinTransaction (Transaction)
 Detail of customer's Mall Coin transaction
