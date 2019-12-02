@@ -926,9 +926,9 @@ Customer push notification device detail.
     + Attributes (Errors)
 
 + Response 422 (application/json; charset=utf-8)
-	Supplied type of device is invalid. Following errors codes are possible:
-	* INVALID
-	+ Attributes (Errors)
+    Supplied type of device is invalid. Following errors codes are possible:
+    * INVALID
+    + Attributes (Errors)
 
 ## Referral promo code stats [/account/referral/stats]
 
@@ -1638,12 +1638,12 @@ Get detail of given payment card
     + Attributes (Errors)
 
 ### Activate card [PATCH]
-Activate the given card.
+Activate the given card. When activating the card for the first time, OTP code is required. Can also be used to activate the card after it has been temporarily blocked.
 
 + Request (application/json; charset=utf-8)
     + Attributes
         + `state`: `ACTIVE` (enum, required)
-        + `otpCode`: `123` (string, required)
+        + `otpCode`: `123` (string, optional) - Please note that `otpCode` is required when activating the card for the first time. It is not required when the card is activated from `BLOCKED_TEMPORARILY` state.
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (PaymentCard)
