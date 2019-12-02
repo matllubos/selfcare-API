@@ -1053,8 +1053,8 @@ filter name     | possible operators    | example
 ---             | ---                   | ---
 billingId       | eq, in                | `transaction?filter=billingId|in|1,2` all transactions from billings with id 1 and 2
 type            | eq, in                | `transaction?filter=type|in|CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD` transactions, whose type is from the list CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD
-date            | lte, gte              | `transaction?filter=date|gte=20-05-18&lte=2020-05-20` all transactions created or posted between 18th and 20th May 2020
-amount          | lte, gte              | `transaction?filter=amount|gte=150000&lte=200000` transactions, which have amount greater or equal to 1500,- CZK and less or equal to 2000,- CZK
+date            | lteq, gteq            | `transaction?filter=date|gteq|2020-05-18;date|lteq|2020-05-20` all transactions created or posted between 18th and 20th May 2020
+amount          | lteq, gteq            | `transaction?filter=amount|gteq|150000;amount|lteq|200000` transactions, which have amount greater or equal to 1500,- CZK and less or equal to 2000,- CZK
 
 
 Fulltext search can be used in transaction endpoint. The system will search for `query_string` in the fields
@@ -2356,7 +2356,7 @@ Financial amount with VAT rate.
     + `UNAVAILABLE`
     + `WAITING_FOR_PAYMENT`
     + `SUCCESS`
-+ mininum (Amount, required) - minimal amount, which must be paid in the monthly billing
++ minimum (Amount, required) - minimal amount, which must be paid in the monthly billing
 + maximum (Amount, required) - maximal amount, which can be paid in the monthly billing
 
 ## RevolvingTransaction (object)
@@ -2402,11 +2402,7 @@ Financial amount with VAT rate.
 
 ## RevolvingTransactionInfoApplication (object)
 + applicationId (string, required) - application id
-+ orderState: `REJECTED` (enum, required) - order state
-    + `RETURNED` - returned order
-    + `REJECTED` - rejected order
-    + `CANCELLED` - cancelled order
-    + `OTHER` - other order states not relevant for customer (eg. approved, sent or delivered)
++ orderState: `REJECTED` (OrderState, required) - order state
 + partnerName (string, required) - partner name
 + partnerLogo (File, optional) - partner logo
 
@@ -2430,6 +2426,11 @@ Financial amount with VAT rate.
 + facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
++ accountType (enum, required) - client's account type
+    + FREE - basic account with maximum limit of 5000 CZK
+    + PLUS - revolving loan account (no card is provided) with limit up to 50 000 CZK
+    + PLUS_WITH_CARD - basic revolving loan with card and limit up to 50 000 CZK
+    + COMPLETE - revolving loan account with card, limit up to 50 000 CZK and bonuses eg. free delivery,...
 
 
 ## Contract (object)
@@ -2736,6 +2737,13 @@ Subject of financing
 + broker (Broker, optional) - Additional information about broker application. Required for order types `LIABILITY` and `GOODS_BROKER`
 
 
+## OrderState (enum)
++ `PROCESSING` - Order is being processed by merchant
++ `SENT` - All order items was sent to customer
++ `DELIVERED` - All order items was delivered to customer
++ `RETURNED` - All order items was returned to merchant
++ `CANCELLED` - Order was fully cancelled
+
 ## Order (FinancedSubject)
 Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 
@@ -2747,12 +2755,7 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + promocodeDiscounts (array[Promocode], fixed-type, required) - Promo codes discounts applied on order
 + items (array[Item], fixed-type, required) - Items in order
 + documents (array[ContractDocument], fixed-type, optional) - Attached documents (invoices etc.)
-+ state: `PROCESSING` (enum, required) - Order state.
-    + `PROCESSING` - Order is being processed by merchant
-    + `SENT` - All order items was sent to customer
-    + `DELIVERED` - All order items was delivered to customer
-    + `RETURNED` - All order items was returned to merchant
-    + `CANCELLED` - Order was fully cancelled
++ state: `PROCESSING` (OrderState, required) - Order state.
 + deliveryCarrier (DeliveryCarrier, optional) - Delivery carrier, when applicable.
 + deliveryDate: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of delivery
 + deliveryTrackingNumber: `EX12221` (string, optional) - Delivery tracking number
@@ -2898,26 +2901,6 @@ Additional information about broker application
 ### Properties
 + `applicationId`: `02-a1345` (string, required) - Broker application ID (`KNJapplicationId`)
 + `receivableDueDate`: `2017-01-10` (string, optional) - Expected due date. Required for order type `GOODS_BROKER`
-
-## Card (object)
-+ id: 12 (number, required) - internal card ID
-+ cardNumber: `516822******1234` (string, required) - masked card number
-+ cardStatus (enum, required) - card status
-    + INACTIVE - card has yet to be activated
-    + ACTIVE - card is active
-    + BLOCKED - card is blocked
-    + LOST - card is reported lost
-    + STOLEN - card is reported stolen
-    + CANCELLED - card is cancelled
-+ cardType (enum, required)
-    + CREDIT - credit card
-    + STICKER - contactless sticker
-    + VIRTUAL - virtual card
-+ cardVisual (File, optional) - Card visualisation image
-+ contractNumber: `123` (string, required) - contract number of contract that card belongs to
-+ holderName: `John Doe` (string, optional) - card holder name
-+ validFrom: `2016-02` (string, optional) - card valid from date
-+ validTo: `2022-02` (string, optional) - card valid to date
 
 
 ## Insurance (object)
