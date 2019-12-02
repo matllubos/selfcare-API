@@ -3346,6 +3346,7 @@ Contract Payment Card (virtual or physical)
     + `ACTIVATED` - card has been assigned and activated by cardholder
     + `BLOCKED_TEMPORARILY` - the card has been temporarily blocked. This state is reversible.
     + `BLOCKED_PERMANENTLY` - the card has been permanently blocked. This state is irreversible and requires corresponding `stateReason`.
+    + `OTHER` - the card is in an unexpected or other state
 + `stateReason`: `LOST` (enum, nullable) - reason of the status, for example reason for blocking the card. Some states (not activated etc.) don't require explicit reason. Permanent blocking always requires the reason.
     + `LOST` - card was lost
     + `STOLEN` - card was stolen
