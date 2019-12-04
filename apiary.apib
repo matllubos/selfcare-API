@@ -1651,6 +1651,24 @@ type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEM
     + Attributes (object)
         + data (array[ContractDocument], fixed-type, required)
 
+## Support request [/my/contract/supportRequest]
+Request support by phone.
+
+### Support request [POST]
+Request Account Upgrade request support by phone.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (SupportRequest)
+
++ Response 201 (application/json; charset=utf-8)
+
+
++ Request (application/json; charset=utf-8)
+    Request when customer is not logged in
+    + Attributes (SupportRequest)
+
++ Response 401 (application/json; charset=utf-8)
+
 # Group Payment cards for contract
 
 ## Payment Cards for contract [/my/contract/card]
@@ -3373,3 +3391,11 @@ Data required to permanently block a card.
 + `deliveryAddress` (Address, nullable) - Address where the new card should be delivered. It is assumed (and checked) that the addressType will be of type `DELIVERY`.
     + `addressType`: `DELIVERY` (enum, optional)
         + `DELIVERY`
+
+## SupportRequest (object)
+Request support by phone object
+
+### Properties
++ phoneNumber: `604 644 989` (string, required) - phone number we should call with the support
++ type: `REVOLVING_LOAN` (enum, required) - type of support required
+    + REVOLVING_LOAN
