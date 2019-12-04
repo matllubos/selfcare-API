@@ -1688,7 +1688,7 @@ Activate the given card. When activating the card for the first time, OTP code i
 
 + Request (application/json; charset=utf-8)
     + Attributes
-        + `state`: `ACTIVE` (enum, required)
+        + `state`: `ACTIVATED` (enum, required)
         + `otpCode`: `123` (string, optional) - Please note that `otpCode` is required when activating the card for the first time. It is not required when the card is activated from `BLOCKED_TEMPORARILY` state.
 
 + Response 200 (application/json; charset=utf-8)
@@ -1697,7 +1697,7 @@ Activate the given card. When activating the card for the first time, OTP code i
 
 + Request (application/json; charset=utf-8)
     + Attributes
-        + `state`: `ACTIVE` (enum, required)
+        + `state`: `ACTIVATED` (enum, required)
         + `otpCode`: `123` (string, required)
 
 + Response 401 (application/json; charset=utf-8)
@@ -1721,7 +1721,7 @@ Activate the given card. When activating the card for the first time, OTP code i
 + Request (application/json; charset=utf-8)
     Request to send optCode to a customer. Returns validity of code sent.
     + Attributes
-        + `state`: `ACTIVE` (enum, required)
+        + `state`: `ACTIVATED` (enum, required)
         + `optCode`: null (string, required, nullable)
 
 + Response 480 (application/json; charset=utf-8)
