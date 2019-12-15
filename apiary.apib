@@ -1719,7 +1719,7 @@ Activate the given card. When activating the card for the first time, OTP code i
         + `otpCode`: `123` (string, required)
 
 + Response 401 (application/json; charset=utf-8)
-    Returned when the `optCode` authorization does not match.
+    Returned when the `otpCode` authorization does not match.
     + Attributes (Errors)
 
 + Request (application/json; charset=utf-8)
@@ -1737,10 +1737,10 @@ Activate the given card. When activating the card for the first time, OTP code i
 
 
 + Request (application/json; charset=utf-8)
-    Request to send optCode to a customer. Returns validity of code sent.
+    Request to send otpCode to a customer. Returns validity of code sent.
     + Attributes
         + `state`: `ACTIVATED` (enum, required)
-        + `optCode`: null (string, required, nullable)
+        + `otpCode`: null (string, required, nullable)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
@@ -1809,7 +1809,7 @@ Display pin of the card. The returned image will be object of image data.
 
 + Request (application/json; charset=utf-8)
     + Attributes
-        + `optCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
+        + `otpCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes
@@ -1821,7 +1821,7 @@ Display pin of the card. The returned image will be object of image data.
         + `otpCode`: `123` (string, required, nullable)
 
 + Response 401 (application/json; charset=utf-8)
-    Returned when the `optCode` authorization does not match.
+    Returned when the `otpCode` authorization does not match.
     + Attributes (Errors)
 
 
@@ -1833,9 +1833,9 @@ Display pin of the card. The returned image will be object of image data.
 
 
 + Request (application/json; charset=utf-8)
-    Request to send optCode to a customer. Returns validity of code sent.
+    Request to send otpCode to a customer. Returns validity of code sent.
     + Attributes
-        + `optCode`: null (string, required, nullable)
+        + `otpCode`: null (string, required, nullable)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
