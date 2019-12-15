@@ -1817,6 +1817,14 @@ Display pin of the card. The returned image will be object of image data.
 
 
 + Request (application/json; charset=utf-8)
+    Request with an empty body to send otpCode to a customer. Returns validity of code sent.
+    + Attributes
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
+
++ Request (application/json; charset=utf-8)
     + Attributes
         + `otpCode`: `123` (string, required, nullable)
 
@@ -1831,14 +1839,6 @@ Display pin of the card. The returned image will be object of image data.
     The card with `cardId` was not found etc.
     + Attributes (Errors)
 
-
-+ Request (application/json; charset=utf-8)
-    Request to send otpCode to a customer. Returns validity of code sent.
-    + Attributes
-        + `otpCode`: null (string, required, nullable)
-
-+ Response 480 (application/json; charset=utf-8)
-    + Attributes (OTPErrors)
 
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
