@@ -746,9 +746,8 @@ The request will modify the most recent application in progress.
 + Request Signing contract - request to send OTP (application/json; charset=utf-8)
     The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
 
-    + Body
-
-            {}
+    + Attributes
+        {}
 
 + Response 480 (application/json; charset=utf-8)
     OTP has been sent
@@ -1740,7 +1739,7 @@ Activate the given card. When activating the card for the first time, OTP code i
     Request to send otpCode to a customer. Returns validity of code sent.
     + Attributes
         + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: null (string, required, nullable)
+        + `otpCode`: `1234` (string, required)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
@@ -1819,6 +1818,7 @@ Display pin of the card. The returned image will be object of image data.
 + Request (application/json; charset=utf-8)
     Request with an empty body to send otpCode to a customer. Returns validity of code sent.
     + Attributes
+        {}
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
