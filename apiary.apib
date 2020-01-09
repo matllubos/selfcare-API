@@ -104,6 +104,7 @@ GET /general/transactions?filter=value.amount|gt|100
 | gteq       | greater than or equals    |
 | gt       | greater than |
 | in       | value in list |
+| icontains     | contains case-insensitive and accent-insensitive value |
 
 ## API calls limits
 When limit is reached, you receive HTTP error 429. To inform you about limits we use following headers:
@@ -1007,8 +1008,10 @@ This resource supports filtering.
 
 filter name             | possible operators    | example
 ---                     | ---                   | ---
-isPaid                  | eq                    | `billing?filter=ispaid|eq|False` billings, which were not paid yet (eg. closed last month and open actual month billing)
-paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|AVAILABLE` billings, which are ready to be paid (eg. last month billing)
+isPaid                  | eq                    | `billing?filter=ispaid|eq|True` filters billings, where the balance is equal to zero (eg. open billing with zero balance)
+isPaid                  | eq                    | `billing?filter=ispaid|eq|False` filters billings, which were not paid yet (eg. closed last month and open actual month billing)
+paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|AVAILABLE` billings, which are ready to be paid (eg. last month billing, whose balance is not equal to zero)
+paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|NOT_AVAILABLE` billings, which cannot be paid (eg. open billing or billing with zero balance)
 
 ### Sorting
 This resource supports sorting according `year` and `month`. Default sorting is according year and month in descending order.
@@ -1059,11 +1062,13 @@ amount          | lteq, gteq            | `transaction?filter=amount|gteq|150000
 
 
 Fulltext search can be used in transaction endpoint. The system will search for `query_string` in the fields
-`merchantName`, `merchantCity` and `description`.
+`merchantName`, `merchantCity`, `description`, `amount`, `partnerName` and `item name`. The search is case insensitive
+and does not reflect the accents.
 
 fulltext search  | query string     | example
 ---              | ---              | ---
-fulltext         | `Palladium`      | `transaction?filter=fulltext|Palladium` transactions, which contain string `Palladium` in `merchantName` or `merchantCity` or `description`
+fulltext         | `Palladium`      | `transaction?filter=fulltext|icontains|Palladium` transactions, which contain string `Palladium` in fields mentioned above
+fulltext         | `550`            | `transaction?filter=fulltext|icontains|550` transactions, which contain string `550` in fields mentioned above, or transactions, which amount is exactly 500,- CZK
 
 
 + Request (application/json; charset=utf-8)
