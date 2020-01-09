@@ -747,9 +747,8 @@ The request will modify the most recent application in progress.
 + Request Signing contract - request to send OTP (application/json; charset=utf-8)
     The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
 
-    + Body
-
-            {}
+    + Attributes
+        {}
 
 + Response 480 (application/json; charset=utf-8)
     OTP has been sent
@@ -1724,7 +1723,7 @@ Activate the given card. When activating the card for the first time, OTP code i
         + `otpCode`: `123` (string, required)
 
 + Response 401 (application/json; charset=utf-8)
-    Returned when the `optCode` authorization does not match.
+    Returned when the `otpCode` authorization does not match.
     + Attributes (Errors)
 
 + Request (application/json; charset=utf-8)
@@ -1742,10 +1741,9 @@ Activate the given card. When activating the card for the first time, OTP code i
 
 
 + Request (application/json; charset=utf-8)
-    Request to send optCode to a customer. Returns validity of code sent.
     + Attributes
         + `state`: `ACTIVATED` (enum, required)
-        + `optCode`: null (string, required, nullable)
+        + `otpCode`: `1234` (string, required)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
@@ -1814,7 +1812,7 @@ Display pin of the card. The returned image will be object of image data.
 
 + Request (application/json; charset=utf-8)
     + Attributes
-        + `optCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
+        + `otpCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes
@@ -1822,11 +1820,20 @@ Display pin of the card. The returned image will be object of image data.
 
 
 + Request (application/json; charset=utf-8)
+    Request with an empty body to send otpCode to a customer. Returns validity of code sent.
+    + Attributes
+        {}
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
+
++ Request (application/json; charset=utf-8)
     + Attributes
         + `otpCode`: `123` (string, required, nullable)
 
-+ Response 401 (application/json; charset=utf-8)
-    Returned when the `optCode` authorization does not match.
++ Response 422 (application/json; charset=utf-8)
+    Returned when the `otpCode` authorization does not match.
     + Attributes (Errors)
 
 
@@ -1836,14 +1843,6 @@ Display pin of the card. The returned image will be object of image data.
     The card with `cardId` was not found etc.
     + Attributes (Errors)
 
-
-+ Request (application/json; charset=utf-8)
-    Request to send optCode to a customer. Returns validity of code sent.
-    + Attributes
-        + `optCode`: null (string, required, nullable)
-
-+ Response 480 (application/json; charset=utf-8)
-    + Attributes (OTPErrors)
 
 # Group My history data contracts
 Set of resources to access and modify client's contracts.
