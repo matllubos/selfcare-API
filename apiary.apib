@@ -1098,59 +1098,28 @@ Get detail of transaction
    Transaction not found
    + Attributes (Error)
 
-## TransactionComplaint [/my/contract/transaction/{transactionId}/complaint]
+## Transaction complaint [/my/contract/transaction/{transactionId}/complaint]
 
 ### Generate complaint for a transaction [POST]
 Use this resource to generate new complaint for a transaction
 
-+ Request (application/json)
++ Request (application/json; charset=utf-8)
     + Attributes (RevolvingTransactionComplaintRequest)
 
 + Response 200
     Complaint has been created
     + Attributes (RevolvingTransactionComplaint)
 
++ Response 422 (application/json; charset=utf-8)
+    Invalid input data
+    + Attributes (Errors)
+
 + Request Duplicated transaction ID (application/json; charset=utf-8)
+    + Attributes (RevolvingTransactionComplaintRequest)
 
 + Response 422 (application/json; charset=utf-8)
     Complaint for this transaction has been already created    
-    + Body
-
-+ Request Invalid attachments file content (application/json; charset=utf-8)
-    + Attributes (object)
-        + attachments (array[File])
-
-+ Response 422 (application/json; charset=utf-8)
-    File content was evaluated as not supported file type
-
-    + Body
-
-            {
-                "errors": [{
-                    "message": "Formát souboru není podporován",
-                    "severity": "ERROR",
-                    "attribute": "attachments",
-                    "code": "INVALID"
-                }]
-            }  
-
-+ Request Long text provided for reason description field (application/json; charset=utf-8)
-    + Attributes (object)
-        + reasonDescription (string)
-
-+ Response 422 (application/json; charset=utf-8)
-    Field text is too long
-
-    + Body
-
-            {
-                "errors": [{
-                    "message": "Text je příliš dlouhý"
-                    "severity": "ERROR",
-                    "attribute": "reasonDescription",
-                    "code": "INVALID"
-                }]
-            }               
+    + Attributes (Errors)       
 
 # Group My profile
 Resources for accessing and modifying user personal data.
