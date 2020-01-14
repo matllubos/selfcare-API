@@ -2455,10 +2455,10 @@ Financial amount with VAT rate.
 
 ## RevolvingTransactionComplaintRequest (object)
 + reason: `Zneužití platební karty` (string, required) - complaint main reason
-+ reasonDescription: `Karta mi byla odcizena nebo ztracena. Prohlašuji, že jsem výše uvedenou transakci neuskutečnil/a a ani k ní nedal/a souhlas` (string, optional) - detail description of complaint reason
++ reasonDescription: `Karta mi byla odcizena nebo ztracena. Prohlašuji, že jsem výše uvedenou transakci neuskutečnil/a a ani k ní nedal/a souhlas` (string, required) - detail description of complaint reason
 + reasonAdditionalInfo: `Kartu jsem natrvalo uzamknul/a` (string, optional) - additional info to complaint reason
 + attachments (array[File], optional) - complaint attachments
-+ comment: `Complaint` (string, required) - user comment
++ comment: `Complaint` (string, optional) - user comment
 
 ## RevolvingTransactionComplaint (RevolvingTransactionComplaintRequest)
 + id:`1020` (string, required) - complaint id
