@@ -3379,17 +3379,17 @@ Contract Payment Card (virtual or physical)
 
 ### Properties
 + `id`: `10` (string, required) - unique id of the card in the system
-+ `maskedPan`: `123456******1234` (string, required, nullable) - masked PAN of the card. Will be set to `null` if we don't know the card's number.
++ `maskedPan`: `123456******1234` (string, optional) - masked PAN of the card. Will be set to `null` if we don't know the card's number.
 + `firstName`: `Franta` (string, required) - first name of the cardholder
 + `lastName`: `Tester` (string, required) - last name of the cardholder
-+ `validThru`: `05/36` (string, required) - card expiration in standard card format (dd/yy).
++ `validThru`: `05/36` (string, optional) - card expiration in standard card format (dd/yy).
 + `state`: `ACTIVATED` (enum, required) - status of the card
     + `ASSIGNED` - card has been assigned to contract but has not yet been activated
     + `ACTIVATED` - card has been assigned and activated by cardholder
     + `BLOCKED_TEMPORARILY` - the card has been temporarily blocked. This state is reversible.
     + `BLOCKED_PERMANENTLY` - the card has been permanently blocked. This state is irreversible and requires corresponding `stateReason`.
     + `OTHER` - the card is in an unexpected or other state
-+ `stateReason`: `LOST` (enum, nullable) - reason of the status, for example reason for blocking the card. Some states (not activated etc.) don't require explicit reason. Permanent blocking always requires the reason.
++ `stateReason`: `LOST` (enum, optional) - reason of the status, for example reason for blocking the card. Some states (not activated etc.) don't require explicit reason. Permanent blocking always requires the reason.
     + `LOST` - card was lost
     + `STOLEN` - card was stolen
 + `onlinePaymentsEnabled`: true (boolean, required) - Are online payments enabled? Note that if this is enabled it also implies a fixed preset single transaction amount limit.
