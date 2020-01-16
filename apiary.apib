@@ -1058,6 +1058,7 @@ billingId       | eq, in                | `transaction?filter=billingId|in|1,2` 
 type            | eq, in                | `transaction?filter=type|in|CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD` transactions, whose type is from the list CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD
 date            | lteq, gteq            | `transaction?filter=date|gteq|2020-05-18;date|lteq|2020-05-20` all transactions created or posted between 18th and 20th May 2020
 amount          | lteq, gteq            | `transaction?filter=amount|gteq|150000;amount|lteq|200000` transactions, which have amount greater or equal to 1500,- CZK and less or equal to 2000,- CZK
+referenceNumber | eq                    | `transaction?filter=referenceNumber|eq|123456789` transactions, which have reference number equal to 123456789
 
 
 Fulltext search can be used in transaction endpoint. The system will search for `query_string` in the fields
@@ -1096,6 +1097,29 @@ Get detail of transaction
 + Request for non-existing transaction (application/json; charset=utf-8)
    Transaction not found
    + Attributes (Error)
+
+## Transaction complaint [/my/contract/transaction/{transactionId}/complaint]
+
+### Generate complaint for a transaction [POST]
+Use this resource to generate new complaint for a transaction
+
++ Request (application/json; charset=utf-8)
+    + Attributes (RevolvingTransactionComplaintRequest)
+
++ Response 200
+    Complaint has been created
+    + Attributes (RevolvingTransactionComplaint)
+
++ Response 422 (application/json; charset=utf-8)
+    Invalid input data
+    + Attributes (Errors)
+
++ Request Duplicated transaction ID (application/json; charset=utf-8)
+    + Attributes (RevolvingTransactionComplaintRequest)
+
++ Response 422 (application/json; charset=utf-8)
+    Complaint for this transaction has been already created    
+    + Attributes (Errors)       
 
 # Group My profile
 Resources for accessing and modifying user personal data.
@@ -2428,6 +2452,18 @@ Financial amount with VAT rate.
 + orderState: `REJECTED` (OrderState, required) - order state
 + partnerName (string, required) - partner name
 + partnerLogo (File, optional) - partner logo
+
+## RevolvingTransactionComplaintRequest (object)
++ reason: `Zneužití platební karty` (string, required) - complaint main reason
++ reasonDescription: `Karta mi byla odcizena nebo ztracena. Prohlašuji, že jsem výše uvedenou transakci neuskutečnil/a a ani k ní nedal/a souhlas` (string, required) - detail description of complaint reason
++ reasonAdditionalInfo: `Kartu jsem natrvalo uzamknul/a` (string, optional) - additional info to complaint reason
++ attachments (array[File], optional) - complaint attachments
++ comment: `Complaint` (string, optional) - user comment
+
+## RevolvingTransactionComplaint (RevolvingTransactionComplaintRequest)
++ id:`1020` (string, required) - complaint id
++ transactionId:`2020` (string, required) - id of related transaction
++ createdDate: `2020-05-20` (string, required) - date, on which complaint was created
 
 ## Client (object)
 + id: `12345` (number, required) - internal customer ID
