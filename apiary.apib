@@ -573,14 +573,14 @@ Use this resource to manage customer's requests for upgrading his account type.
 ### Create account upgrade request [POST]
 Use this endpoint to create a new account upgrade request for a logged-in user. The revolving loan application will be created for given type. There should be no existing application.
 
-+ Request Start application process for PLUS account type (application/json; charset=utf-8)
++ Request Start application process for START account type (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
-        + type: `PLUS`
+        + type: `START`
 
 + Response 201 (application/json; charset=utf-8)
     Revolving loan application in progress.
     + Attributes (AccountUpgradeApplicationResponse)
-        + type: `PLUS`
+        + type: `START`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
 + Request Start application process without specifying account type (application/json; charset=utf-8)
@@ -592,12 +592,12 @@ Use this endpoint to create a new account upgrade request for a logged-in user. 
 
 + Request Start another new application while another one already exists (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
-        + type: `PLUS`
+        + type: `START`
 
 + Response 409 (application/json; charset=utf-8)
     There could be just one application in progress.
     + Attributes (AccountUpgradeApplicationResponse)
-        + type: `PLUS`
+        + type: `START`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
 
@@ -620,7 +620,7 @@ The request will modify the most recent application in progress.
 + Response 200 (application/json; charset=utf-8)
     Revolving loan application in progress. Next slug `CUSTOMER_INFORMATION_ADDRESS` returned inside body.
     + Attributes (AccountUpgradeApplicationResponse)
-        + type: `PLUS`
+        + type: `START`
         + slug: `CUSTOMER_INFORMATION_ADDRESS`
         + firstName: `John`
         + lastName: `Doe`
@@ -2367,8 +2367,8 @@ Financial amount with VAT rate.
 + unsignedContractHtml (string, optional) - unsigned contract in escaped HTML
 
 ## RevolvingLoanContractType (enum)
++ START
 + PLUS
-+ PLUS_WITH_CARD
 + COMPLETE
 
 ## RevolvingLoanContract (object)
@@ -2486,9 +2486,9 @@ Financial amount with VAT rate.
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
 + accountType (enum, required) - client's account type
-    + FREE - basic account with maximum limit of 5000 CZK
-    + PLUS - revolving loan account (no card is provided) with limit up to 50 000 CZK
-    + PLUS_WITH_CARD - basic revolving loan with card and limit up to 50 000 CZK
+    + TRY_IT - basic account with maximum limit of 5000 CZK
+    + START - revolving loan account (no card is provided) with limit up to 50 000 CZK
+    + PLUS - basic revolving loan with card and limit up to 50 000 CZK
     + COMPLETE - revolving loan account with card, limit up to 50 000 CZK and bonuses eg. free delivery,...
 
 
