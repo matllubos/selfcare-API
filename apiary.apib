@@ -1020,7 +1020,7 @@ Example: `billing?sort=-year,-month`
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[Billing], required) - List of monthly billings for contract of logged-in user
+        + data (array[BillingResponse], required) - List of monthly billings for contract of logged-in user
 
 + Request monthly billings for non-existing contract (application/json; charset=utf-8)
 
@@ -1037,12 +1037,55 @@ Get detail of monthly billing
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (Billing)
+    + Attributes (BillingResponse)
 
 + Request for non-existing billing (application/json; charset=utf-8)
     Billing not found
     + Attributes (Error)
 
+## Billing deferment [/my/contract/billing/{billingId}/deferment]
+Resource used to defer the billing
+
+### Billing deferment [POST]
+Apply for billing deferment
+
++ Request (application/json)
+    Creating new deferment by sending amount to pay in current billing
+    + Attributes (Amount)
+
++ Response 200
+    New billing deferment successfully created
+    + Attributes (BillingDefermentResponse)
+
++ Response 422 (application/json)
+    Unable to defer the billing
+    + Attributes (Errors)
+
+## Billing deferment option [/my/contract/billing/{billingId}/deferment/option]
+Billing deferment options
+
+### Billing deferment option [GET]
+Get possible deferment for specific amount user want to pay
+
++ Parameters
+    + amount: `125000` (string, required) - Amount user want to pay in current billing
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + amount: `125000`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (BillingDefermentResponse)
+
++ Request Providing amount value out of min/max boundary (application/json; charset=utf-8)
+    amount parameter is outside allowed boundary
+    + Parameters
+        + amount: `9000`
+
++ Response 422 (application/json; charset=utf-8)
+    Attribute amount must be between min and max values.
+    + Attributes (Errors)
+    
 ## Transactions [/my/contract/transaction]
 Transactions for revolving contract of logged-in user.
 
@@ -2362,25 +2405,38 @@ Financial amount with VAT rate.
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
 
-## Billing (object)
-+ id: `378` (string, required) - billing id
+## BillingResponse (object)
++ additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
 + balance (Amount, required) - billing balance
-+ dueDate: `2020-05-20` (string, required) - billing due date
-+ month: `4` (number, required) - month of the billing, 0 represents January, 1 - February
-+ year: `2020` (number, required) - year of the billing
-+ isPaid (boolean, required) - information, whether the billing was paid or not
 + coinReward (CoinAmount, required) - Amount of coins, which customer get for paying the billing
++ dueDate: `2020-05-20` (string, required) - billing due date
++ id: `378` (string, required) - billing id
++ isPaid (boolean, required) - information, whether the billing was paid or not
++ month: `4` (number, required) - month of the billing, 0 represents January, 1 - February
 + paymentAvailability (PaymentAvailability, required) - information about possibility to pay for the billing
-+ defermentInfo (DefermentInfo, required) - information about possibilities for defer the billing payment
++ year: `2020` (number, required) - year of the billing
 
-## DefermentInfo (object)
+## BillingDefermentResponse (object)
++ billingBalance (Amount, required) - Amount user want to pay in current billing
++ billingDefermentCount (number, required) - Number of billing deferments user already applied for
++ coinReward (Amount, required) - Amount of MALL coins user will gain paying amountToPay
++ fee (Amount, required) - Fee for deferring the billing
++ feeDiscount (Amount, optional) - Fee discount
++ totalValue (Amount, required) - Amount added to following billing (ie. deferred amount including the fee)
++ value (Amount, required) - Portion of current billing deferred into following billing
+
+## BillingDefermentInfoResponse (object)
++ deferment (BillingDefermentResponse, optional) - deferment values (WAITING_FOR_PAYMENT or SUCCESS state)
++ maximum (Amount, optional) - maximal amount, which can be deferred in the monthly billing
++ minimum (Amount, optional) - minimal amount, which can be deferred in the monthly billing
 + state: `AVAILABLE` (enum, required) - state of deferment
-    + `AVAILABLE`
-    + `UNAVAILABLE`
-    + `WAITING_FOR_PAYMENT`
-    + `SUCCESS`
-+ minimum (Amount, required) - minimal amount, which must be paid in the monthly billing
-+ maximum (Amount, required) - maximal amount, which can be paid in the monthly billing
+    + `AVAILABLE` - deferment is available
+    + `NOT_AVAILABLE` - deferment os not available, more info about why is in stateReason
+    + `WAITING_FOR_PAYMENT` - deferment has been created, but the billing is not yet paid
+    + `SUCCESS` - deferment has been created and the billing is paid
++ stateReason: `AMOUNT_TO_PAY_TOO_LOW` (enum, optional) - reasons for UNAVAILABLE state
+    + `AMOUNT_TO_PAY_TOO_LOW` - unable to defer because amount to pay is lower than minimal payable amount
+    + `BILLING_PAYMENT_OVERDUE` - unable to defer because it is past due date and the billing is still unpaid
 
 ## RevolvingTransaction (object)
 + id: `2070` (string, required) - transaction id
