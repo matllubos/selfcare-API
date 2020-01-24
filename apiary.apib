@@ -567,7 +567,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     Request throttling in effect.
     + Attributes (Errors)
 
-## Request account upgrade [/account/upgrade]
+## Request account upgrade [/my/contract/revolvingApplication]
 Use this resource to manage customer's requests for upgrading his account type.
 
 ### Create account upgrade request [POST]
@@ -995,6 +995,25 @@ Returns data of current revolving loan contract of logged-in user.
 + Response 404 (application/json; charset=utf-8)
     Contract not found.
     + Attributes (Errors)
+
+### Change revolving loan contract type  [PATCH]    
+Use this request to change current revolving contract type (upgrade/downgrade)
+
++ Request (application/json; charset=utf-8)
+    Creating a new request for revolving contract type change by sending future type
+    + Attributes (object)
+        + futureType: 'COMPLETE' (string, required)
+        + address (Address, optional) - an address where to send a payment card
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (RevolvingLoanContract, required)
+
++ Request changes without specifying account type (application/json; charset=utf-8)
+    + Attributes (object)
+    
++ Response 422 (application/json; charset=utf-8)
+    Contract type must be specified.
+    + Attributes (Errors)    
 
 ## Monthly billings [/my/contract/billing]
 Monthly billings of logged-in user.
@@ -2430,6 +2449,16 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
++ fee: `89` (number, required) - fee value for current month
++ feeCreateDate: `2020-03-01` (string, required) - date when fee will be created
++ feeDueDate: `2020-04-20` (string, required) - fee due date
++ revolvingLoanMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period length in months
++ futureContractInfo (RevolvingLoanFutureContractInfo, optional)
+
+## RevolvingLoanFutureContractInfo (object)
++ type (RevolvingLoanContractType, required)
++ fee: `0` (number, required) - future fee value
++ startDate: `2020-03-01` (string, required) - date when new contract type will be activated
 
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
