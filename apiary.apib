@@ -1002,7 +1002,7 @@ Use this request to change current revolving contract type (upgrade/downgrade)
 + Request (application/json; charset=utf-8)
     Creating a new request for revolving contract type change by sending future type
     + Attributes (object)
-        + futureType: 'COMPLETE' (string, required)
+        + type: 'COMPLETE' (string, required)
         + address (Address, optional) - an address where to send a payment card
 
 + Response 200 (application/json; charset=utf-8)
@@ -2449,25 +2449,20 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
-+ currentMonthFee: `49` (number, required) - fee value for current month
-+ currentMonthFeeCreateDate: `2020-03-15` (string, required) - date when fee for current month has been created
-+ currentMonthFeeDueDate: `2020-04-20` (string, required) - current month fee due date
-+ nextMonthFee: `89` (number, required) - fee value for next month
-+ nextMonthFeeCreateDate: `2020-04-01` (string, required) - date when fee for next month will be created
-+ nextMonthFeeDueDate: `2020-05-20` (string, required) - next month fee due date
-+ trialInfo (RevolvingLoanTrialInfo, optional) - info about trial period
-+ downgradeContractInfo (RevolvingLoanDowngradeContractInfo, optional) - info about new downgraded contract
-
-## RevolvingLoanTrialInfo (object)
++ fee: `89` (number, required) - default monthly fee value for this contract type, does not depend on downgrade/upgrade process
++ feeCreatedDate: `2020-03-01` (string, required) - date when monthly fee is created
++ feeDueDate: `2020-04-20` (string, required) - monthly fee due date
 + totalMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period - total length in months
 + remainingMonthsOfFreeTrialPeriod: `2` (number, required) - free trial period - remaining length in months
-+ fee: `89` (number, required) - fee value after trial period
-+ feeCrateDate: `2020-03-01` (string, required) - date when fee will be created 
++ futureContractInfo (RevolvingLoanFutureContractInfo, optional) - info about future contract: is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process
 
-## RevolvingLoanDowngradeContractInfo (object)
+## RevolvingLoanFutureContractInfo (object)
 + type (RevolvingLoanContractType, required)
-+ fee: `0` (number, required) - future fee value
-+ startDate: `2020-03-01` (string, required) - date when new contract type will be activated
++ changeType: `DOWNGRADE` (enum, required)
+    + `DOWNGRADE` - user downgrades contract type
+    + `UPGRADE` - user upgrades contract type
++ fee: `0` (number, required) - monthly fee value in case of downgrade; aliquot value in case of upgrade
++ feeCreatedDate: `2020-03-01` (string, required) - date when new fee will be activated: next month in case of downgrade, current month in case of upgrade
 
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
