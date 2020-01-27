@@ -2449,13 +2449,22 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
-+ fee: `89` (number, required) - fee value for current month
-+ feeCreateDate: `2020-03-01` (string, required) - date when fee will be created
-+ feeDueDate: `2020-04-20` (string, required) - fee due date
-+ revolvingLoanMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period length in months
-+ futureContractInfo (RevolvingLoanFutureContractInfo, optional)
++ currentMonthFee: `49` (number, required) - fee value for current month
++ currentMonthFeeCreateDate: `2020-03-15` (string, required) - date when fee for current month has been created
++ currentMonthFeeDueDate: `2020-04-20` (string, required) - current month fee due date
++ nextMonthFee: `89` (number, required) - fee value for next month
++ nextMonthFeeCreateDate: `2020-04-01` (string, required) - date when fee for next month will be created
++ nextMonthFeeDueDate: `2020-05-20` (string, required) - next month fee due date
++ trialInfo (RevolvingLoanTrialInfo, optional) - info about trial period
++ downgradeContractInfo (RevolvingLoanDowngradeContractInfo, optional) - info about new downgraded contract
 
-## RevolvingLoanFutureContractInfo (object)
+## RevolvingLoanTrialInfo (object)
++ totalMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period - total length in months
++ remainingMonthsOfFreeTrialPeriod: `2` (number, required) - free trial period - remaining length in months
++ fee: `89` (number, required) - fee value after trial period
++ feeCrateDate: `2020-03-01` (string, required) - date when fee will be created 
+
+## RevolvingLoanDowngradeContractInfo (object)
 + type (RevolvingLoanContractType, required)
 + fee: `0` (number, required) - future fee value
 + startDate: `2020-03-01` (string, required) - date when new contract type will be activated
