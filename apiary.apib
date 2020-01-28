@@ -1791,8 +1791,19 @@ Activate the given card. When activating the card for the first time, OTP code i
         + `state`: `ACTIVATED` (enum, required)
         + `otpCode`: `123` (string, required)
 
-+ Response 401 (application/json; charset=utf-8)
++ Response 422 (application/json; charset=utf-8)
     Returned when the `otpCode` authorization does not match.
+    - `NOT_AUTHORIZED` - Last 4 digits of payment card does not match with otpCode.
+    + Attributes (Errors)
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVATED` (enum, required)
+        + `otpCode`: `123` (string, required)
+
++ Response 422 (application/json; charset=utf-8)
+    Returned when card cannot be activated from current state (i.e. BLOCKED_PERMANENTLY).
+    - `NOT_SUPPORTED` - Payment card cannot be activated from current state BLOCKED_PERMANENTLY.
     + Attributes (Errors)
 
 + Request (application/json; charset=utf-8)
