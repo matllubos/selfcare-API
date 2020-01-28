@@ -1002,8 +1002,8 @@ Use this request to change current revolving contract type (upgrade/downgrade)
 + Request (application/json; charset=utf-8)
     Creating a new request for revolving contract type change by sending future type
     + Attributes (object)
-        + type: 'COMPLETE' (string, required)
-        + address (Address, optional) - an address where to send a payment card
+        + type: 'COMPLETE' (RevolvingLoanContractType, required) - use previous contract type in case of downgrading
+        + deliveryAddress (DeliveryAddress, optional) - an address where to send a payment card
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (RevolvingLoanContract, required)
@@ -2307,6 +2307,10 @@ Financial amount with VAT rate.
     + COURIER - address, where courier should arrive to verify the customer
 + country: `CZ` (string, required) - ISO code of country
 
+## DeliveryAddress (Address)
++ `addressType`: `DELIVERY` (enum, optional)
+    + `DELIVERY`
+
 ## IdentityDocument (object)
 + number: `123456748` (string, required) - identity document number
 + issueDate: `2014-02-10` (string, optional) - identity document issue date
@@ -2435,6 +2439,11 @@ Financial amount with VAT rate.
 + PLUS
 + COMPLETE
 
+## RevolvingLoanContractFee (object)
++ value (Amount, required) - fee value
++ createdDate: `2020-03-01` (string, required) - date when fee is created
++ dueDate: `2020-04-20` (string, required) - fee due date
+
 ## RevolvingLoanContract (object)
 + type (RevolvingLoanContractType, required)
 + state: `ACTIVE` (enum, required) - state of loan or application
@@ -2449,20 +2458,20 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
-+ fee: `89` (number, required) - default monthly fee value for this contract type, does not depend on downgrade/upgrade process
-+ feeCreatedDate: `2020-03-01` (string, required) - date when monthly fee is created
-+ feeDueDate: `2020-04-20` (string, required) - monthly fee due date
++ fee (RevolvingLoanContractFee, required) - default monthly fee for this contract type, does not depend on downgrade/upgrade process
++ trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
++ futureContractInfo (RevolvingLoanFutureContractInfo, optional) - info about future contract: is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process
+
+## RevolvingLoanContractTrialInfo (object)
 + totalMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period - total length in months
 + remainingMonthsOfFreeTrialPeriod: `2` (number, required) - free trial period - remaining length in months
-+ futureContractInfo (RevolvingLoanFutureContractInfo, optional) - info about future contract: is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process
 
 ## RevolvingLoanFutureContractInfo (object)
 + type (RevolvingLoanContractType, required)
 + changeType: `DOWNGRADE` (enum, required)
     + `DOWNGRADE` - user downgrades contract type
     + `UPGRADE` - user upgrades contract type
-+ fee: `0` (number, required) - monthly fee value in case of downgrade; aliquot value in case of upgrade
-+ feeCreatedDate: `2020-03-01` (string, required) - date when new fee will be activated: next month in case of downgrade, current month in case of upgrade
++ fee (RevolvingLoanContractFee, required) - value - fee value in case of downgrade and aliquot value in case of upgrade; createdDate - next month in case of downgrade and current month in case of upgrade
 
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
@@ -3502,9 +3511,7 @@ Data required to permanently block a card.
 + `stateReason`: `STOLEN` (enum, required) - reason for blocking the card
     + `LOST` - card was lost
     + `STOLEN` - card was stolen
-+ `deliveryAddress` (Address, nullable) - Address where the new card should be delivered. It is assumed (and checked) that the addressType will be of type `DELIVERY`.
-    + `addressType`: `DELIVERY` (enum, optional)
-        + `DELIVERY`
++ `deliveryAddress` (DeliveryAddress, nullable) - Address where the new card should be delivered. It is assumed (and checked) that the addressType will be of type `DELIVERY`.
 
 ## SupportRequest (object)
 Request support by phone object
