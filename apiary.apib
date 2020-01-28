@@ -634,6 +634,14 @@ The request will modify the most recent application in progress.
     Attribute lengthOfMaternityLeave must be specified with this source of income type.
     + Attributes (Errors)
 
++ Request providing date of birth that shows customer younger than 18 years (application/json; charset=utf-8)
+    + Attributes (AccountUpgradeApplicationRequest)
+        + dateOfBirth: `2020-01-01`
+
++ Response 422 (application/json; charset=utf-8)
+    The return code in such an example would be `UPGRADE_UNAVAILABLE`
+    + Attributes (Errors)
+
 + Request Bank business card indentification method (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + kycIdentificationMethod: `BANK_BUSINESS_CARD`
