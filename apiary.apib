@@ -1007,8 +1007,8 @@ This resource supports filtering.
 
 filter name             | possible operators    | example
 ---                     | ---                   | ---
-isPaid                  | eq                    | `billing?filter=ispaid|eq|True` filters billings, where the balance is equal to zero (eg. open billing with zero balance)
-isPaid                  | eq                    | `billing?filter=ispaid|eq|False` filters billings, which were not paid yet (eg. closed last month and open actual month billing)
+isPaid                  | eq                    | `billing?filter=ispaid|eq|true` filters billings, where the balance is equal to zero (eg. open billing with zero balance)
+isPaid                  | eq                    | `billing?filter=ispaid|eq|false` filters billings, which were not paid yet (eg. closed last month and open actual month billing)
 paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|AVAILABLE` billings, which are ready to be paid (eg. last month billing, whose balance is not equal to zero)
 paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|NOT_AVAILABLE` billings, which cannot be paid (eg. open billing or billing with zero balance)
 
