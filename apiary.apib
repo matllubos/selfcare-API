@@ -996,24 +996,59 @@ Returns data of current revolving loan contract of logged-in user.
     Contract not found.
     + Attributes (Errors)
 
-### Change revolving loan contract type  [PATCH]    
+## Revolving loan contract type change [/my/contract/typeChange]
+List of contract type changes
+
+### Display all contract changes [GET]
+Returns list of contract type changes of logged-in user.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[ContractTypeChange], fixed-type, required) - List of changes
+
+### Change revolving loan contract type  [POST]    
 Use this request to change current revolving contract type (upgrade/downgrade)
 
 + Request (application/json; charset=utf-8)
     Creating a new request for revolving contract type change by sending future type
     + Attributes (object)
-        + type: 'COMPLETE' (RevolvingLoanContractType, required) - use previous contract type in case of downgrading
-        + deliveryAddress (DeliveryAddress, optional) - an address where to send a payment card
+        + to: `COMPLETE` (RevolvingLoanContractType, required) - new contract type (use previous contract type in case of reverting)
+        + cardDeliveryAddress (DeliveryAddress, optional) - an address where to send a payment card
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (RevolvingLoanContract, required)
+    + Attributes (ContractTypeChange, required)
 
-+ Request changes without specifying account type (application/json; charset=utf-8)
++ Request changes without specifying contract type (application/json; charset=utf-8)
     + Attributes (object)
     
 + Response 422 (application/json; charset=utf-8)
-    Contract type must be specified.
-    + Attributes (Errors)    
+    Missing contract type.
+    + Attributes (Errors)
+
+## Revolving loan contract type change [/my/contract/typeChange/last]
+Data about last contract type change
+
+### Get information about last contract type change [GET]
+Return last contract type change
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ContractTypeChange, required)
+
+### Delete last contract type change [DELETE]
+Delete last contract type change (revert last change)
+
++ Request (application/json; charset=utf-8)
+
++ Response 204 (application/json; charset=utf-8)
+    + Attributes (ContractTypeChange, required)
+
++ Response 404 (application/json; charset=utf-8)
+    No changes found for the contract
+    + Attributes (Errors)
 
 ## Monthly billings [/my/contract/billing]
 Monthly billings of logged-in user.
@@ -2460,18 +2495,27 @@ Financial amount with VAT rate.
 + totalLimit (Amount, required) - total limit amount of revolving loan
 + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
 + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
-+ futureContractInfo (RevolvingLoanFutureContractInfo, optional) - info about future contract: is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process
++ currentMonthLastContractTypeChange (ContractTypeChange, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
 
 ## RevolvingLoanContractTrialInfo (object)
 + totalMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period - total length in months
 + remainingMonthsOfFreeTrialPeriod: `2` (number, required) - free trial period - remaining length in months
 
-## RevolvingLoanFutureContractInfo (object)
-+ type (RevolvingLoanContractType, required)
-+ changeType: `DOWNGRADE` (enum, required)
-    + `DOWNGRADE` - user downgrades contract type
-    + `UPGRADE` - user upgrades contract type
-+ fee (RevolvingLoanContractFee, required) - default monthly fee for this contract type, does not depend on downgrade/upgrade process; createdDate - date when full fee will be created (next month)
+## ContractTypeChange (object)
++ status: `DONE` (enum, required) - status of contract change application
+    + `CANCELLED`
+    + `DONE`
+    + `WAITING`
++ direction: `DOWNGRADE` (enum, required)
+    + `DOWNGRADE`
+    + `UPGRADE`  
++ createdDate: `2020-02-15` (string, required) - date the change type application has been created 
++ processedDate: `2020-03-01` (string, required) - date the change type application has been processed ('status = DONE'), 1st of the next month for downgrades, date of creating for upgrades 
++ from: `PLUS` (RevolvingLoanContractType, required) - previous contract type
++ to: `START` (RevolvingLoanContractType, required) - new contract type (current contract type in case of upgrade)
++ fee (RevolvingLoanContractFee, required) - default monthly fee for new contract type
++ aliquot (RevolvingLoanContractFee, optional) - aliquot value in case of upgrade
++ cardDeliveryAddress (DeliveryAddress, optional) - an address where to send a payment card
 
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
