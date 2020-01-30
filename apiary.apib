@@ -1038,6 +1038,10 @@ Return last contract type change
 + Response 200 (application/json; charset=utf-8)
     + Attributes (ContractTypeChange, required)
 
++ Response 404 (application/json; charset=utf-8)
+    No changes found for the contract
+    + Attributes (Errors)    
+
 ### Delete last contract type change [DELETE]
 Delete last contract type change (revert last change)
 
@@ -2510,7 +2514,7 @@ Financial amount with VAT rate.
     + `DOWNGRADE`
     + `UPGRADE`  
 + createdDate: `2020-02-15` (string, required) - date the change type application has been created 
-+ processedDate: `2020-03-01` (string, required) - date the change type application has been processed ('status = DONE'), 1st of the next month for downgrades, date of creating for upgrades 
++ processedDate: `2020-03-01` (string, optional) - date the change type application has been processed ('status = DONE'), 1st of the next month for downgrades, date of creating for upgrades 
 + from: `PLUS` (RevolvingLoanContractType, required) - previous contract type
 + to: `START` (RevolvingLoanContractType, required) - new contract type (current contract type in case of upgrade)
 + fee (RevolvingLoanContractFee, required) - default monthly fee for new contract type
