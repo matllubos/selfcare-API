@@ -3020,7 +3020,10 @@ Purchase transormed into installments
 + `applicationIds` (array[string], fixed-type, optional) - list of applications to be repaid
 
 ## PaymentRequest (object)
-+ `items` (array[PaymentItem], fixed-type, required) - list of payment items to be repaid
++ One Of
+    + `applicationIds` (array[string], optional) - list of applications to be paid
+    + `billingIds` (array[string], optional) - list of billings to be paid
+    + `items` (array[PaymentItem], fixed-type, optional) - list of payment items to be paid - OBSOLETE - will be removed after releasing the new version of mobile app.
 + `value` (Amount, optional) - amount of requested payment
 + `method`: `TRANSFER` (enum, required) - payment method
     + `TRANSFER` - money transfer
