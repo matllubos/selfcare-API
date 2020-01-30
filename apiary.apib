@@ -2458,7 +2458,7 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
-+ fee (RevolvingLoanContractFee, required) - default monthly fee for this contract type, does not depend on downgrade/upgrade process
++ fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
 + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
 + futureContractInfo (RevolvingLoanFutureContractInfo, optional) - info about future contract: is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process
 
@@ -2471,7 +2471,7 @@ Financial amount with VAT rate.
 + changeType: `DOWNGRADE` (enum, required)
     + `DOWNGRADE` - user downgrades contract type
     + `UPGRADE` - user upgrades contract type
-+ fee (RevolvingLoanContractFee, required) - value - fee value in case of downgrade and aliquot value in case of upgrade; createdDate - next month in case of downgrade and current month in case of upgrade
++ fee (RevolvingLoanContractFee, required) - default monthly fee for this contract type, does not depend on downgrade/upgrade process; createdDate - date when full fee will be created (next month)
 
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
