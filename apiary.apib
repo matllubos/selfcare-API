@@ -1006,7 +1006,7 @@ Returns list of contract type changes of logged-in user.
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[ContractTypeChange], fixed-type, required) - List of changes
+        + data (array[ContractTypeChangeResponse], fixed-type, required) - List of changes
 
 ### Change revolving loan contract type  [POST]    
 Use this request to change current revolving contract type (upgrade/downgrade)
@@ -1018,7 +1018,7 @@ Use this request to change current revolving contract type (upgrade/downgrade)
         + cardDeliveryAddress (DeliveryAddress, optional) - an address where to send a payment card
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (ContractTypeChange, required)
+    + Attributes (ContractTypeChangeResponse, required)
 
 + Request changes without specifying contract type (application/json; charset=utf-8)
     + Attributes (object)
@@ -1036,7 +1036,7 @@ Return last contract type change
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (ContractTypeChange, required)
+    + Attributes (ContractTypeChangeResponse, required)
 
 + Response 404 (application/json; charset=utf-8)
     No changes found for the contract
@@ -1048,7 +1048,6 @@ Delete last contract type change (revert last change)
 + Request (application/json; charset=utf-8)
 
 + Response 204 (application/json; charset=utf-8)
-    + Attributes (ContractTypeChange, required)
 
 + Response 404 (application/json; charset=utf-8)
     No changes found for the contract
@@ -2499,13 +2498,13 @@ Financial amount with VAT rate.
 + totalLimit (Amount, required) - total limit amount of revolving loan
 + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
 + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
-+ currentMonthLastContractTypeChange (ContractTypeChange, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
++ currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
 
 ## RevolvingLoanContractTrialInfo (object)
 + totalMonthsOfFreeTrialPeriod: `3` (number, required) - free trial period - total length in months
 + remainingMonthsOfFreeTrialPeriod: `2` (number, required) - free trial period - remaining length in months
 
-## ContractTypeChange (object)
+## ContractTypeChangeResponse (object)
 + status: `DONE` (enum, required) - status of contract change application
     + `CANCELLED`
     + `DONE`
