@@ -567,7 +567,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     Request throttling in effect.
     + Attributes (Errors)
 
-## Request account upgrade [/account/upgrade]
+## Request account upgrade [/my/contract/revolvingApplication]
 Use this resource to manage customer's requests for upgrading his account type.
 
 ### Create account upgrade request [POST]
@@ -1002,6 +1002,63 @@ Returns data of current revolving loan contract of logged-in user.
 
 + Response 404 (application/json; charset=utf-8)
     Contract not found.
+    + Attributes (Errors)
+
+## Revolving loan contract type change [/my/contract/typeChange]
+List of contract type changes
+
+### Display all contract changes [GET]
+Returns list of contract type changes of logged-in user.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[ContractTypeChangeResponse], fixed-type, required) - List of changes
+
+### Change revolving loan contract type  [POST]    
+Use this request to change current revolving contract type (upgrade/downgrade)
+
++ Request (application/json; charset=utf-8)
+    Creating a new request for revolving contract type change by sending future type
+    + Attributes (object)
+        + to: `COMPLETE` (RevolvingLoanContractType, required) - new contract type (use previous contract type in case of reverting)
+        + cardDeliveryAddress (Address, optional) - an address where to send a payment card
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ContractTypeChangeResponse, required)
+
++ Request changes without specifying contract type (application/json; charset=utf-8)
+    + Attributes (object)
+    
++ Response 422 (application/json; charset=utf-8)
+    Missing contract type.
+    + Attributes (Errors)
+
+## Revolving loan contract type change [/my/contract/typeChange/last]
+Data about last contract type change
+
+### Get information about last contract type change [GET]
+Return last contract type change
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ContractTypeChangeResponse, required)
+
++ Response 404 (application/json; charset=utf-8)
+    No changes found for the contract
+    + Attributes (Errors)    
+
+### Delete last contract type change [DELETE]
+Delete last contract type change (revert last change)
+
++ Request (application/json; charset=utf-8)
+
++ Response 204 (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    No changes found for the contract
     + Attributes (Errors)
 
 ## Monthly billings [/my/contract/billing]
@@ -2288,13 +2345,15 @@ Financial amount with VAT rate.
 + streetNumber: `5` (string, required) - street number
 + city: `Prague` (string, required) - city
 + zip: `14000` (string, required) - postal code
++ country: `CZ` (string, required) - ISO code of country
+
+## TypedAddress (Address)
 + addressType: `CONTACT` (enum, required) - type of address
     + CONTACT - contact address
     + BILLING - billing address
     + PERMANENT - permanent (residential) address, according to identity document
     + DELIVERY - delivery address
     + COURIER - address, where courier should arrive to verify the customer
-+ country: `CZ` (string, required) - ISO code of country
 
 ## IdentityDocument (object)
 + number: `123456748` (string, required) - identity document number
@@ -2309,7 +2368,7 @@ Financial amount with VAT rate.
 + type (RevolvingLoanContractType, optional)
 + firstName: `John` (string, optional) - user first (given) name
 + lastName: `Doe` (string, optional) - user family name
-+ addresses (array[Address], fixed-type, optional) - client addresses (permanent and delivery)
++ addresses (array[TypedAddress], fixed-type, optional) - client addresses (permanent and delivery)
 + identityDocument (IdentityDocument, optional) - client identity document
 + personalId: `8808308234` (string, optional) - birth number
 + residencePermit (boolean, optional) - residence permit in case of non-Czech citizens
@@ -2424,6 +2483,11 @@ Financial amount with VAT rate.
 + PLUS
 + COMPLETE
 
+## RevolvingLoanContractFee (object)
++ value (Amount, required) - fee value
++ createdDate: `2020-03-01` (string, required) - date when fee is created
++ dueDate: `2020-04-20` (string, required) - fee due date
+
 ## RevolvingLoanContract (object)
 + type (RevolvingLoanContractType, required)
 + state: `ACTIVE` (enum, required) - state of loan or application
@@ -2438,6 +2502,29 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
++ fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
++ trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
++ currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
+
+## RevolvingLoanContractTrialInfo (object)
++ totalMonths: `3` (number, required) - free trial period - total length in months
++ remainingMonths: `2` (number, required) - free trial period - remaining length in months
+
+## ContractTypeChangeResponse (object)
++ status: `DONE` (enum, required) - status of contract change application
+    + `CANCELLED`
+    + `DONE`
+    + `WAITING`
++ direction: `DOWNGRADE` (enum, required)
+    + `DOWNGRADE`
+    + `UPGRADE`  
++ createdDate: `2020-02-15` (string, required) - date the change type application has been created 
++ processedDate: `2020-03-01` (string, optional) - date the change type application has been processed ('status = DONE'), 1st of the next month for downgrades, date of creating for upgrades 
++ from: `PLUS` (RevolvingLoanContractType, required) - previous contract type
++ to: `START` (RevolvingLoanContractType, required) - new contract type (current contract type in case of upgrade)
++ fee (RevolvingLoanContractFee, required) - default monthly fee for new contract type
++ aliquot (RevolvingLoanContractFee, optional) - aliquot value in case of upgrade
++ cardDeliveryAddress (Address, optional) - an address where to send a payment card
 
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
@@ -2545,7 +2632,7 @@ Financial amount with VAT rate.
     + `MALE`
     + `FEMALE`
 + birthDate: `1978-02-15` (string, required) - date of birth
-+ addresses (array[Address], fixed-type, optional) - client addresses (permanent, delivery, courier)
++ addresses (array[TypedAddress], fixed-type, optional) - client addresses (permanent, delivery, courier)
 + phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
 + emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
 + facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
@@ -3481,8 +3568,6 @@ Data required to permanently block a card.
     + `LOST` - card was lost
     + `STOLEN` - card was stolen
 + `deliveryAddress` (Address, nullable) - Address where the new card should be delivered. It is assumed (and checked) that the addressType will be of type `DELIVERY`.
-    + `addressType`: `DELIVERY` (enum, optional)
-        + `DELIVERY`
 
 ## SupportRequest (object)
 Request support by phone object
