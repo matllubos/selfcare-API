@@ -1407,11 +1407,9 @@ TBD.
 #### Filtering
 This resource supports [filtering](#header-filtering). You can use following filters:
 
-filter name      | possible operators | example
----              | ---                | ---
-state            |eq,in               | `applications?filter=state|in|READY` applications that are ready to be financed
-stateReason      |eq,in               | `applications?filter=stateReason|in|READY_TO_SHIP` applications that are READY_TO_SHIP
-type             |eq,in               | `applications?filter=type|in|INSTALLMENT` applications financed by installment program
+filter name     | possible operators | example
+---             | ---                | ---
+originBillingId |eq                  | `applications?filter=originBillingId|eq|378` applications that was approved at specific billing
 
 + Request Existing contract (application/json; charset=utf-8)
     + Parameters
@@ -2785,15 +2783,13 @@ Basic eshop info
 Financing application.
 
 ### Properties
++ originBillingId: `378` (string, optional) - id of billing where application was approved at
 + createdDate: `2017-06-15` (string, optional) - date the application was created
 + order (Order, required) - Order data.
 + type: `DEFERRED_PAYMENT` (enum, optional) - Financing type
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + contractNumber: `01-6010027378` (string, required) - parent contract for this application
 + gatewayRedirectUrl: `https://mallpay.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
-+ applicationOrigin (object, optional) - if the application was created based on other application
-    + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
-    + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
 + eshopAdditionalInfo (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
 + defpayAdditionalInfo (object, optional, nullable) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
     + `currentDebt` (Amount, required) - Actual debt amount
