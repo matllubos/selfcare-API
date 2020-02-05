@@ -2511,6 +2511,10 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
++ limitState: `AVAILABLE` (enum, required) - state of limit amount 
+    + `BLOCKED_TEMPORARILY`
+    + `BLOCKED_PERMANENTLY`
+    + `REACHED`
 + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
 + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
 + currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
