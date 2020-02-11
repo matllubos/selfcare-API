@@ -2506,15 +2506,17 @@ Financial amount with VAT rate.
     + `SIGNED`
     + `ACTIVE`
     + `RESIGNED`
+    + `BLOCKED`
 + cancellationReason (enum, optional, nullable)
     + `BACKOFFICE`
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
 + limitState: `AVAILABLE` (enum, required) - state of limit amount 
-    + `BLOCKED_TEMPORARILY`
-    + `BLOCKED_PERMANENTLY`
-    + `REACHED`
+    + `AVAILABLE` - availableAmount > 0 - the customer is able to shop
+    + `BLOCKED_TEMPORARILY` - totalLimit = 0 - the limit was blocked (i.e. because of unpaid billings after due date), the customer is not able to shop
+    + `BLOCKED_PERMANENTLY` - totalLimit = 0 - the limit was blocked (i.e. because of unpaid billings after due date), the customer is not able to shop
+    + `REACHED` - availableAmount <= 0 - the limit was reached, the customer is not able to shop
 + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
 + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
 + currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
