@@ -976,6 +976,16 @@ Get reward promo codes customer received for each new customer (referee).
 + Response 200 (application/json; charset=utf-8)
     + Attributes (array[ReferralRewardCodesReceived], required)
 
+## Mobile application rating [/mobileapp/feedback/rating]
+
+### Send mobile application rating [POST]
+Customer sends application rating.
+
++ Request (application/json)
+    + Attributes (MobileApplicationRating)
+
++ Response 204 (application/json; charset=utf-8)
+
 # Group Revolving loan
 Management of cards and listing the transactions from revolving loan.
 
@@ -3248,6 +3258,18 @@ Promocode offer purchased by a customer
 + id: `10` (string, required) - Id of purchased key
 + purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
 + offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
+
+## MobileApplicationRating (object)
+Mobile application rating
+
+### Properties
++ appVersion: `3.29.0` (string, optional) - Release version rating relates to
++ comment: `Aplikace se občas sekne a je třeba restartovat.` (string, optional) - Additional comment to rating
++ deviceInfo (object, optional) - Additional information about customer's device
+    + browser: `Chrome Mobile WebView 79.0.3945` (string, optional) - Browser type and version
+    + device: `Huawei DRA-L21` (string, optional) - Device name
+    + os: `Android 9` (string, optional) - OS type and version
++ rating: 7 (number, required) - Application rating value between 1-10
 
 ## ReferralCodeStats
 Statistics of customer's referral promo code.
