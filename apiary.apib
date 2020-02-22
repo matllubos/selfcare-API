@@ -2512,18 +2512,20 @@ Financial amount with VAT rate.
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
 + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
-+ trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
++ trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period, is null when customer is not in free trial period yet or free trial period expired
 + currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
 
 ## RevolvingLoanContractTrialInfo (object)
 + totalMonths: `3` (number, required) - free trial period - total length in months
 + remainingMonths: `2` (number, required) - free trial period - remaining length in months
++ expiresAt: `2020-02-29` (string, required) - last date of free trial period
 
 ## ContractTypeChangeResponse (object)
 + status: `DONE` (enum, required) - status of contract change application
     + `CANCELLED`
     + `DONE`
     + `WAITING`
+    + `PROCESSING`
 + direction: `DOWNGRADE` (enum, required)
     + `DOWNGRADE`
     + `UPGRADE`  
