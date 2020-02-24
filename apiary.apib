@@ -596,10 +596,16 @@ Use this endpoint to create a new account upgrade request for a logged-in user. 
 
 + Response 409 (application/json; charset=utf-8)
     There could be just one application in progress.
-    + Attributes (AccountUpgradeApplicationResponse)
+    + Attributes (Errors)
+
++ Request Starts new application (application/json; charset=utf-8)
+    + Attributes (AccountUpgradeApplicationRequest)
         + type: `START`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
++ Response 403 (application/json; charset=utf-8)
+    Returned in cases, where the premium account cannot be applied - ie. it has already your account blocked or has unpaid order after due date, for example.
+    + Attributes (Errors)
 
 ### Update application of account upgrade request [PATCH]
 The request will modify the most recent application in progress.
@@ -820,7 +826,6 @@ Get information about current active revolving loan application.
     User not yet created account upgrade request.
 
     + Body
-
             {
                 "errors": [{
                     "message": "Nenalezeno",
@@ -828,6 +833,11 @@ Get information about current active revolving loan application.
                     "code": "OBJECT_NOT_FOUND"
                 }]
             }
+
++ Response 403 (application/json; charset=utf-8)
+    Returned in cases, where the premium account cannot be applied - ie. it has already your account blocked or has unpaid order after due date, for example.
+    + Attributes (Errors)
+
 
 ## Consents [/account/consents]
 All consents user is able to subscribe and unsubscribe.
