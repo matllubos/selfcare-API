@@ -2511,9 +2511,9 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
-+ limitDrawingState: `OVERDUE` (enum, optional) - state of limit drawing, is set once available amount is 0
++ availableAmountState: `BLOCKED_OVERDUE` (enum, optional) - state of available amount, is set once available amount is 0
     + `EXHAUSTED` - the limit was exhausted, the customer has spent the whole available amount 
-    + `OVERDUE` - the limit was blocked because of overdue payments
+    + `BLOCKED_OVERDUE` - the available amount was blocked because of overdue payments
 + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
 + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period
 + currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
