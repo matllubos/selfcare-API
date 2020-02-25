@@ -1874,10 +1874,10 @@ Allows to temporarily block a card, for example when you are not going to use it
     + Attributes (Errors)
 
 ## Showing a card's PIN number [/my/contract/card/{cardId}/pinView]
-Return an image with card's PIN number.
+Return an URL of an image with the card's PIN number.
 
 ### Show card PIN [POST]
-Display pin of the card. The returned image will be object of image data.
+Display pin of the card. Returns URL of the image with PIN. The URL is invalidated (ceases to exist) after first GET request.
 
 + Request (application/json; charset=utf-8)
     + Attributes
@@ -1885,11 +1885,11 @@ Display pin of the card. The returned image will be object of image data.
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes
-        + `pinData` (string, required) - Base64 encoded image of PIN. Returned data type may change.
+        + `url`: `https://www.cardprovider_example.com/pin_image_url/image.svg` (string, required) - URL of the PIN image.
 
 
 + Request (application/json; charset=utf-8)
-    Request with an empty body to send otpCode to a customer. Returns validity of code sent.
+    Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
     + Attributes
         {}
 
