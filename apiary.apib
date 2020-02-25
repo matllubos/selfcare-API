@@ -2511,7 +2511,7 @@ Financial amount with VAT rate.
     + `CUSTOMER`
 + availableAmount (Amount, required) - available amount of revolving loan
 + totalLimit (Amount, required) - total limit amount of revolving loan
-+ availableAmountState: `BLOCKED_OVERDUE` (enum, optional) - state of available amount, is set once available amount is 0
++ availableAmountState: `BLOCKED_OVERDUE` (enum, required) - state of available amount, is set once available amount is 0
     + `AVAILABLE` - the customer has available amount to spend
     + `EXHAUSTED` - the limit was exhausted, the customer has spent the whole available amount 
     + `BLOCKED_OVERDUE` - the available amount was blocked because of overdue payments
