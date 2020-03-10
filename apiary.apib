@@ -1315,6 +1315,27 @@ Get questions (data) for questionnaire construction
 
     + Attributes (Errors)
 
+## Notification settings [/my/profile/settings/notifications/]
+
+### Get notification settings [GET]
+Use this endpoint to inquiry customer's notification settings.
+
++ Response 200
+    + Attributes (object)
+        + cardAuthorization: `true` (boolean) - Flag indicating if customer will receive card authorization notifications.
+
+### Set notification settings [PUT]
+Use this endpoint to change customer's notification settings.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + cardAuthorization: `true` (boolean) - Flag indicating if customer will receive card authorization notifications.
+
++ Response 200
+    Settings were sucessfully saved.
+    + Attributes (object)
+        + cardAuthorization: `true` (boolean)
+
 # Group Notifications
 Resource group for managing customer's notifications.
 
