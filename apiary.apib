@@ -2427,7 +2427,7 @@ Financial amount with VAT rate.
     + `FEMALE`
 + dateOfBirth: `1994-02-10` (string, optional) - date of birth in case of non-Czech citizens
 + placeOfBirth: `CZ` (string, optional) - ISO 3166 alpha 2 country code
-+ consents (array[RevolvingConsent], fixed-type, optional)- List of consents given by customer
++ isConsentTelco: `False` (boolean, optional) - consent with Telco scoring in revolving application process
 + typeOfHousing (enum, optional) - type of accommodation
     + OWN
     + RENT
@@ -3161,11 +3161,6 @@ Consent subscription object
     + `MARKETING_EXTENDED`
 + isSubscribed: `true` (boolean, required) - true if user is subscribed to consents with given slug
 
-## RevolvingConsent (Consent)
-
-### Properties
-+ slug: `REVOLVING_TELCO` (enum, required) - slug of consents user agreed/disagreed with
-    + `REVOLVING_TELCO` - Consent with Telco scoring in revolving application process
 
 ## Broker (object)
 Additional information about broker application
