@@ -2614,6 +2614,7 @@ Financial amount with VAT rate.
 + stateReason: `AMOUNT_TO_PAY_TOO_LOW` (enum, optional) - reasons for UNAVAILABLE state
     + `AMOUNT_TO_PAY_TOO_LOW` - unable to defer because amount to pay is lower than minimal payable amount
     + `BILLING_PAYMENT_OVERDUE` - unable to defer because it is past due date and the billing is still unpaid
+    + `BILLING_NOT_CLOSED` - unable to defer because monthly billing is not yet closed
 
 ## RevolvingTransaction (object)
 + id: `2070` (string, required) - transaction id
@@ -2969,7 +2970,7 @@ Information about possibility to pay application or billing
     + `AVAILABLE`
     + `NOT_AVAILABLE`
 + reasons (array[string], optional) - List of reasons.
-    Possible values in array: `ALREADY_PAID`, `BLOCKED`, `IN_REVOLVING_PAYMENT_PROCESS`.
+    Possible values in array: `ALREADY_PAID`, `BLOCKED`, `IN_REVOLVING_PAYMENT_PROCESS`, `BILLING_NOT_CLOSED`
 
 
 ## ReturnUrls (object)
