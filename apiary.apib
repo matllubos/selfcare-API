@@ -2617,23 +2617,35 @@ Financial amount with VAT rate.
 ## RevolvingTransaction (object)
 + id: `2070` (string, required) - transaction id
 + amount (Amount, required) - transaction amount in the currency of the card account
-+ type: `CARD_TRANSACTION_DOMESTIC` (enum, required) - transaction type
-    + `CARD_TRANSACTION_DOMESTIC` - domestic card transaction
-    + `CARD_TRANSACTION_ABROAD` - card transaction from abroad
-    + `CARD_ATM_WITHDRAWAL_DOMESTIC` - domestic withdrawal from ATM
-    + `CARD_ATM_WITHDRAWAL_ABROAD` - withdrawal from ATM abroad
-    + `CARD_ONLINE_TRANSACTION` - online transaction
-    + `DEFERRED_PAYMENT` - deffered payment
-    + `DEFERRED_BILLING_PAYMENT` - deffered payment for billing
++ type: `CARD_TRANSACTION` (enum, required) - transaction type
+    + `CARD_TRANSACTION` - Card POS
+    + `CARD_ATM_WITHDRAWAL` - ATM withdrawal
+    + `CARD_ONLINE` - Cardholder not present - online, e-commerce
+    + `CARD_OTHER` - Cardholder not present - other
+    + `CARD_REFUND_MERCHANT` - Refund by merchant
+    + `CARD_REFUND_COMPLAINT` - Refund by complaint
+    + `CARD_MONEYBACK_MASTERCARD_SPECIALS` - MoneyBack - "Cashback Mastercard priceless specials"
+    + `CARD_ATM_WITHDRAWAL_FEE` - ATM withdrawal fee
+    + `CARD_REVERSAL` - Transaction storno
+    + `DEFERRED_PAYMENT` - New order (deffered payment)
+    + `DEFERRED_PAYMENT_PROMOCODE` - Applied promocode to order (deffered payment)
+    + `DEFERRED_PAYMENT_RETURN` - Returned order (partly or whole)
+    + `DEFERRED_PAYMENT_FREE_DELIVERY` - Applied free delivery discount  to order (deffered payment)
+    + `DEFERRED_PAYMENT_OTHER` - Any other transaction related to order.
+    + `DEFERRED_BILLING_PAYMENT_TO_NEXT_MONTH` - Deffered payment for billing - transaction that moves debt to next month.
+    + `DEFERRED_BILLING_PAYMENT_FROM_PREVIOUS_MONTH` - Deffered payment for billing - transaction that moves debt to next month.
+    + `DEFERRED_BILLING_PAYMENT_FEE` - Deferred payment for billing - fee
     + `FEE` - fee
+    + `CUSTOMER` - customer repayment
+    + `OTHER` - any other transaction
 + createdDate: `2020-05-20` (string, required) - date, on which transaction was created
 + postingDate: `2020-05-21` (string, optional) - date, on which transaction was posted
 + referenceNumber (string, optional) - transaction reference number
 + billingId: `189` (string, required) - billing id transaction belongs to
 + description (string, optional) - transaction description
 + fees (array[TransactionFee], optional) - array of fees related to the transaction
-+ additionalInfoCard (RevolvingTransactionInfoCard, optional) - card payment additional info (card number, mcc and merchant name)
-+ additionalInfoForeign (RevolvingTransactionInfoForeign, optional) - foreign payment additional info (original amount and exchange rate)
++ additionalInfoCard (RevolvingTransactionInfoCard, optional) - card payment additional info (card number, mcc and merchant name) in case of card payment otherwise is null
++ additionalInfoForeign (RevolvingTransactionInfoForeign, optional) - foreign payment additional info (original amount and exchange rate) if the transaction was paid in foreign currency otherwise is null
 + additionalInfoApplication (RevolvingTransactionInfoApplication, optional) - application additional information for transaction related to deffered payment
 
 ## TransactionFee (object)
