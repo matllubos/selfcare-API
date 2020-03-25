@@ -665,7 +665,7 @@ The request will modify the most recent application in progress.
 
 + Request Invalid proof of income file content (application/json; charset=utf-8)
     + Attributes (object)
-        + bankStatements (array[BankStatementDocument])
+        + bankStatements (array[RevolvingLoanDocument])
 
 + Response 422 (application/json; charset=utf-8)
     File content was evaluated as not supported file type
@@ -686,8 +686,8 @@ The request will modify the most recent application in progress.
     + Attributes (object)
         + sourceOfIcome: `SELF_EMPLOYED`
         + companyRegistrationNumber: `ABCDE12345`
-        + bankStatements (array, BankStatementDocument)
-            + file (BankStatementDocument)
+        + bankStatements (array, RevolvingLoanDocument)
+            + file (RevolvingLoanDocument)
 
     + Body
 
@@ -723,8 +723,8 @@ The request will modify the most recent application in progress.
     + Attributes (object)
         + sourceOfIcome: `EMPLOYMENT`
         + trialPeriod: `False`
-        + bankStatements (array, BankStatementDocument)
-            + file (BankStatementDocument)
+        + bankStatements (array, RevolvingLoanDocument)
+            + file (RevolvingLoanDocument)
 
     + Body
 
@@ -1796,36 +1796,6 @@ Installments of given contract (installment schedule for CEL contract)
         + `previous` - installment preceding current installment (ie. installment with due date in previous month)
         + `current` - current installment (ie. installment with due date in current month)
 
-## Documents for contract [/my/contracts/{contractNumber}/documents]
-Documents issued on given contract.
-
-+ Parameters
-    + contractNumber: `01-3700227718` (string, required) - ID of contract
-
-### Documents for contract [GET]
-Get a list of documents issued on given contract.
-
-feature                       | supported by resource
----                           | ---
-[paging](#header-paging)      | no
-[sorting](#header-sorting)    | no
-[filtering](#header-filtering)| yes
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name      | possible operators | example
----              | ---                | ---
-type             |in,eq               | `documents?filter=type|eq|MONTHLY_STATEMENT` only documents of type "MžsŪŤnŪ vżpis"
-
-+ Request  (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `01-3700227718`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[ContractDocument], fixed-type, required)
-
 ## Support request [/my/contract/supportRequest]
 Request support by phone.
 
@@ -2191,12 +2161,12 @@ This resource supports [filtering](#header-filtering). You can use following fil
 
 filter name      | possible operators | example
 ---              | ---                | ---
-type             |in,eq               | `documents?filter=type|eq|GEN_SMS_SIGN_AGREEMENT` only documents of type "Smlouva o pouěŪvŠnŪ online aplikacŪ"
+type             |in,eq               | `documents?filter=type|eq|CONTRACT` only documents of type "Úvěrová smlouva"
 
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
-        + data (array[ContractDocument], fixed-type, required)
+        + data (array[RevolvingLoanDocument], fixed-type, required)
 
 # Group MALL Coin
 
@@ -2453,7 +2423,7 @@ Financial amount with VAT rate.
 + quarterlyGrossIncome (Amount, optional) - gross income amount per three months (for self-employed income source)
 + monthlyLoanExpenses (Amount, optional) - loan expenses per month
 + monthlyRegularExpenses (Amount, optional) - regular expenses per month (food, accommodation, etc.)
-+ bankStatements (array[BankStatementDocument], optional)
++ bankStatements (array[RevolvingLoanDocument], optional)
 + cardLimitSelected (Amount, optional) - card limit chosen by customer
 + accountingSystem (enum, optional) - required in case of self-employed source of income
     + TAX_RECORD
@@ -2797,6 +2767,7 @@ Attached document
     + `DRIVING_LICENSE_FRONT` - Řidičský průkaz - přední strana
     + `DRIVING_LICENSE_BACK` - Řidičský průkaz - zadní strana
     + `CONTRACT` - Smlouva
+    + `PRECONTRACTUAL_INFORMATION` - Předsmluvní informace
     + `IPID` - IPID
     + `PRESUIT_DEMAND` - Předžalobní výzva
     + `BANK_STATEMENT` - Výpis účtu
@@ -2865,9 +2836,11 @@ Attached document (document only for client, document for specific contract, doc
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
     + `statementYear`: 2017 (number, optional) - Year for document type MONTHLY_STATEMENT
 
-## BankStatementDocument (BaseDocument)
+## RevolvingLoanDocument (BaseDocument)
 + type: `BANK_STATEMENT` (enum, optional) - Type of the document
     + `BANK_STATEMENT` - Výpis účtu
+    + `CONTRACT` - Úvěrová smlouva
+    + `PRECONTRACTUAL_INFORMATION` - Předsmluvní informace
 + file (File, required) - File in pdf format
 
 
