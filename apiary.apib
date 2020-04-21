@@ -1526,6 +1526,9 @@ This resource supports [filtering](#header-filtering). You can use following fil
 filter name     | possible operators | example
 ---             | ---                | ---
 originBillingId |eq                  | `applications?filter=originBillingId|eq|378` applications that was approved at specific billing
+originBillingId |isnull              | `applications?filter=originBillingId|isnull|true` applications that was not approved on revolving
+isClosed        |eq                  | `applications?filter=isClosed|eq|true` applications that is closed and cannot be shown on the main page
+
 
 + Request Existing contract (application/json; charset=utf-8)
     + Parameters
@@ -2947,6 +2950,7 @@ Financing application.
     + `paymentAvailability` (PaymentAvailability, optional, nullable) - information about possibility to pay application (it could be blocked, f.e. "rozklad odkladu")
     + `rewardsInfo` (RewardsInfo, optional) - information in rewards
 + `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
++ `isClosed`: `true` (boolean, required) - application is closed and do not need customer further action
 
 
 ## HistoryApplication (ApplicationBase)
