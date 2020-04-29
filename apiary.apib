@@ -66,6 +66,8 @@ You can specify filtering by passing `filter` attribute. General pattern to spec
 
 Multiple filters can be specified on each request, separated by semi-colon. They are joined by "AND", so each result item must satisfy all conditions.
 
+All resources whose result object contains `id` have filtering by `id` enabled by default.
+
 __Note__: Some resources (stated in documentation) support filtering by specified embedded child object attributes. Suppose you have the following object structure:
 ```
 {
