@@ -3620,9 +3620,10 @@ Contract Payment Card (virtual or physical)
     + `OTHER` - the card is in an unexpected or other state
 + `stateChangedAt`: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of last change of state
 + `stateReason`: `LOST` (enum, optional) - reason of the status, for example reason for blocking the card. Some states (not activated etc.) don't require explicit reason. Permanent blocking always requires the reason.
-    + `LOST` - card was lost
-    + `STOLEN` - card was stolen
-    + `FRAUD` - a fraud was committed using a payment card
+    + `LOST` - card was lost (used for BLOCKED_PERMANENTLY card)
+    + `STOLEN` - card was stolen (used for BLOCKED_PERMANENTLY card)
+    + `FRAUD` - a fraud was committed using a payment card (used for BLOCKED_PERMANENTLY card)
+    + `WRONG_PIN` - customer had 3 wrong PIN tries (used for BLOCKED_TEMPORARILY card)
 + `onlinePaymentsEnabled`: true (boolean, required) - Are online payments enabled? Note that if this is enabled it also implies a fixed preset single transaction amount limit.
 + `atmWithdrawalEnabled`: true (boolean, required) - Are cash withdrawals from ATMs enabled? Note that if this is enabled it also implies a fixed preset maximum withdrawal amount limit.
 
