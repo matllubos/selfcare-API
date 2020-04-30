@@ -2640,6 +2640,7 @@ Financial amount with VAT rate.
 + additionalInfoCard (RevolvingTransactionInfoCard, optional) - card payment additional info (card number, mcc and merchant name) in case of card payment otherwise is null
 + additionalInfoForeign (RevolvingTransactionInfoForeign, optional) - foreign payment additional info (original amount and exchange rate) if the transaction was paid in foreign currency otherwise is null
 + additionalInfoApplication (RevolvingTransactionInfoApplication, optional) - application additional information for transaction related to deffered payment
++ additionalInfoDeferredBilling (RevolvingTransactionInfoDeferredBilling, optional) - deferred billing transaction info if this transaction deferred monthly payment otherwise is null. In case the payment was deferred the payable amount have been transferred to next billing with `id` equal to `billingId`.
 
 ## TransactionFee (object)
 + amount (Amount, required) - fee amount
@@ -2665,6 +2666,9 @@ Financial amount with VAT rate.
 + orderState: `REJECTED` (OrderState, required) - order state
 + partnerName (string, required) - partner name
 + partnerLogo (File, optional) - partner logo
+
+## RevolvingTransactionInfoDeferredBilling (object)
++ id (string, required) - id of billing whose payment have been deferred to the next billing
 
 ## RevolvingTransactionComplaintRequest (object)
 + reason: `Zneužití platební karty` (string, required) - complaint main reason
