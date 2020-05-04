@@ -2644,6 +2644,7 @@ Financial amount with VAT rate.
 + additionalInfoForeign (RevolvingTransactionInfoForeign, optional) - foreign payment additional info (original amount and exchange rate) if the transaction was paid in foreign currency otherwise is null
 + additionalInfoApplication (RevolvingTransactionInfoApplication, optional) - application additional information for transaction related to deffered payment
 + additionalInfoDeferredBilling (RevolvingTransactionInfoDeferredBilling, optional) - deferred billing transaction info if this transaction deferred monthly payment otherwise is null. In case the payment was deferred the payable amount have been transferred to next billing with `id` equal to `billingId`.
++ documents (array[RevolvingTransactionDocument], fixed-type, optional) - Attached documents (fees etc.)
 
 ## TransactionFee (object)
 + amount (Amount, required) - fee amount
@@ -2801,6 +2802,7 @@ Attached document
     + `PRESUIT_DEMAND` - Předžalobní výzva
     + `BANK_STATEMENT` - Výpis účtu
 + description: `This is an document` (string, optional) - File description
++ file (File, required) - Attached file
 
 ## ContractDocument (BaseDocument)
 Attached document (document only for client, document for specific contract, document for specific order ...)
@@ -2812,7 +2814,6 @@ Attached document (document only for client, document for specific contract, doc
     + `CEL` - Close End Loan
     + `REL` - Revolving Loan
     + `DEFPAY` - deferred payment
-+ file (File, required) - Attached file
 + additionalData (object, optional)
     + `signatureDate`: `2017-01-18T10:25:00+01:00` (string, optional) - Date and time of signature
     + `statementMonth`: 5 (number, optional) - Number of a month for document type MONTHLY_STATEMENT
@@ -2870,8 +2871,11 @@ Attached document (document only for client, document for specific contract, doc
     + `BANK_STATEMENT` - Výpis účtu
     + `CONTRACT` - Úvěrová smlouva
     + `PRECONTRACTUAL_INFORMATION` - Předsmluvní informace
-+ file (File, required) - File in pdf format
 
+## RevolvingTransactionDocument (BaseDocument)
++ type: `REVOLVING_LOAN_FEE` (enum, required) - Type of the document
+    + `REVOLVING_LOAN_FEE` - Poplatek za revolvingový úvěr
++ name: `Zjednodušený daňový doklad` (string, required) - Human-readable localized document name
 
 ## DeliveryCarrier (object)
 Delivery carrier
