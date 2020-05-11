@@ -1117,7 +1117,7 @@ Get list of monthly billings for revolving contract of logged-in user
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[BillingResponse], required) - List of monthly billings for contract of logged-in user
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 + Request monthly billings for non-existing contract (application/json; charset=utf-8)
 
@@ -1224,7 +1224,7 @@ Get list of transactions for revolving contract of logged-in user.
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[RevolvingTransaction], fixed-type, required) - List of transactions for contract of logged-in user
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 + Request transactions for non-existing contract (application/json; charset=utf-8)
 
@@ -1388,7 +1388,7 @@ Use this endpoint to get list of notifications. This endpoint supports paginatio
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Notification], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 ### Mark notification as read/triggered [PATCH]
 Use this endpoint to indicate, that user has seen the notification(s) and/or interacted with it/them (e.g. he clicked or tapped it).
@@ -1539,7 +1539,7 @@ isClosed        |eq                  | `applications?filter=isClosed|eq|true` ap
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[Application], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 + Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
@@ -2058,7 +2058,7 @@ type             |eq,in               | `applications?filter=type|in|INSTALLMENT
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[HistoryApplication], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 
 ## Specific application [/historydata/my/applications/{applicationId}]
@@ -2241,7 +2241,7 @@ __Note:__ Filtering by datetime values does not require time to be set, but valu
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[CoinTransaction], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 # Group Rewards
 
@@ -2274,7 +2274,7 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
-        + pagingInfo (PagingInfo, optional)
+        + pagingInfo (PagingInfo, required)
 
 ## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
 
