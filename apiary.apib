@@ -996,16 +996,6 @@ Get reward promo codes customer received for each new customer (referee).
 + Response 200 (application/json; charset=utf-8)
     + Attributes (array[ReferralRewardCodesReceived], required)
 
-## Mobile application rating [/mobileapp/feedback/rating]
-
-### Send mobile application rating [POST]
-Customer sends application rating.
-
-+ Request (application/json)
-    + Attributes (MobileApplicationRating)
-
-+ Response 204 (application/json; charset=utf-8)
-
 # Group Revolving loan
 Management of cards and listing the transactions from revolving loan.
 
@@ -1335,6 +1325,16 @@ Get questions (data) for questionnaire construction
         There was an error processing request
 
     + Attributes (Errors)
+
+## Mobile application rating [/my/profile/feedback/rating]
+
+### Send mobile application rating [POST]
+Customer sends application rating.
+
++ Request (application/json)
+    + Attributes (MobileApplicationRating)
+
++ Response 204 (application/json; charset=utf-8)
 
 ## Notification settings [/my/profile/settings/notifications/]
 
