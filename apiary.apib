@@ -347,6 +347,417 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     Request throttling in effect.
     + Attributes (Errors)
 
+## Consents [/account/consents]
+All consents user is able to subscribe and unsubscribe.
+
+### Available consents [GET]
+Get all aconsents a can be subscribed to. Allowed subscriptions are `MARKETING` and `MARKETING_EXTENDED`.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
+### Change subscription of consents [PUT]
+Subscribe or unsubscribe user to filtered consents. Requires user authorization or providing valid verification token as attribute.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+filter name | possible operators | example
+---         | ---                | ---
+slug        | eq                 | `consents?filter=slug|eq|MARKETING`  consent with slug `MARKETING`
+slug        | in                 | `consents?filter=slug|in|MARKETING,MARKETING_EXTENDED`  consent with slugs `MARKETING` and `MARKETING_EXTENDED`
+
++ Attributes (object)
+    + isSubscribed: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
+    + token: `s5as4d5a6s54d5sa6asd56` (string, optional, nullable) - valid verification token used instead of user authorization
+
++ Request with authorized user (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
++ Request with unauthorized user with valid token (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+        + token: `s5as4d5a6s54d5sa6asd56`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Consent], fixed-type, required)
+
++ Request with unauthorized user and invalid token (application/json)
+    + Attributes (object)
+        + isSubscribed: `true`
+        + token: `invalid_token`
+
++ Response 422 (application/json)
+    Unauthorized user and invalid verification token. Following errors codes are possible:
+    * UNAUTHORIZED_AND_TOKEN_INVALID
+    + Attributes (Errors)
+
++ Request unknown consent in filter (application/json; charset=utf-8)
+    + Parameters
+        + filter: `slug|eq|UNKNOWN_CONSENT`
+
++ Response 400 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
++ Request with bad filter format (application/json; charset=utf-8)
+    + Parameters
+        + filter: `wrong_filter_name|eq|MARKETING_EXTENDED`
+
++ Response 400 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
+## Push notification devices [/account/push-notification-devices]
+Push notification devices for customer.
+
+### Register new device [POST]
+
++ Request (application/json)
+    + Attributes (PushNotificationDeviceToken)
+
++ Response 204 (application/json; charset=utf-8)
+
++ Response 422 (application/json; charset=utf-8)
+    Push notification device already exists. Following codes are possible.
+    * PUSH_NOTIFICATION_DEVICE_EXISTS
+    + Attributes (Errors)
+
+## Push notification devices detail [/account/push-notification-devices/{type}/{token}]
+Customer push notification device detail.
+
++ Parameters
+    + token (string, required) - Actual token of the device
+    + type (enum, required) - Type of the device
+        + `ANDROID`
+        + `IOS`
+
+### Unregister a device [DELETE]
+
++ Request (application/json)
+
++ Response 204 (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    Push notification device does not exist.
+    + Attributes (Errors)
+
++ Response 422 (application/json; charset=utf-8)
+    Supplied type of device is invalid. Following errors codes are possible:
+    * INVALID
+    + Attributes (Errors)
+
+## Referral promo code stats [/account/referral/stats]
+
+### Get referral code stats [GET]
+Get referral code information of the customer.
+
++ Request (application/json; charset=utf-8)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ReferralCodeStats, required)
+
+## Referral promo code stats by key [/account/referral/{key}/stats]
+Referral promo code information found by key of promo code from customer.
+
++ Parameters
+    + key: `JOEDOE123` (string, required) - referral promo code key
+
+### Get referral code stats by key [GET]
+Get referral code information by promo code key provided. No authorization is required.
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + key: `JOEDOE123`
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ReferralCodeStats, required)
+
++ Request (application/json; charset=utf-8)
+    + Parameters
+        + key: `INVALID_KEY`
+
++ Response 404 (application/json; charset=utf-8)
+
+        Promo code with given key not found.
+
+    + Attributes (Errors)
+
+## Referral reward codes [/account/referral/rewards]
+
+### Get referral reward codes received [GET]
+Get reward promo codes customer received for each new customer (referee).
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (array[ReferralRewardCodesReceived], required)
+
+## Mobile application rating [/mobileapp/feedback/rating]
+
+### Send mobile application rating [POST]
+Customer sends application rating.
+
++ Request (application/json)
+    + Attributes (MobileApplicationRating)
+
++ Response 204 (application/json; charset=utf-8)
+
+# Group Product
+Management of applications, services, rewards or billings, transactions and cards from revolving loan.
+
+## Customer account and contract information [/my/contract]
+Data of current account or revolving loan contract depending on customer's account type.
+
+### Display contract data [GET]
+Returns data of current limits and and eventually loan contract of logged-in user.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (Contract, required)
+
+## Applications [/my/contract/application]
+Applications of logged-in user. The resource providing applications is also running at obsolete URL `/my/contracts/{contractNumber}/applications`.
+
+### Applications of logged-in user[GET]
+Get a list of applications of logged-in user.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+TBD.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name     | possible operators | example
+---             | ---                | ---
+originBillingId |eq                  | `applications?filter=originBillingId|eq|378` applications that was approved at specific billing
+originBillingId |isnull              | `applications?filter=originBillingId|isnull|true` applications that was not approved on revolving
+isClosed        |eq                  | `applications?filter=isClosed|eq|true` applications that is closed and cannot be shown on the main page
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Application], fixed-type, required)
+        + pagingInfo (PagingInfo, required)
+
+## Application detail [/my/contract/application/{applicationId}]
+Specific application. The resource providing application data is also running at obsolete URL `/my/contracts/{contractNumber}/applications/{applicationId}`.
+
++ Parameters
+    + applicationId: `a7718` (string, required) - ID of application
+
+### Application detail [GET]
+Get details of one application.
+
++ Request  (application/json; charset= utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 200 (application/json; charset=utf-8)
+    Existing application
+    + Attributes (Application)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
+### Cancel application [DELETE]
+Cancel application processing.
+
++ Request  (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 204 (application/json; charset=utf-8)
+    Application processing was cancelled.
+    + Body
+
++ Request Invalid application state (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 422 (application/json; charset=utf-8)
+    Application cannot be cancelled.
+    + Attributes (Errors)
+
++ Request non existent application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Application cannot be cancelled.
+    + Attributes (Errors)
+
+## Promo codes [/my/contract/application/{applicationId}/applyPromocode]
+Customer can apply for discount price by submitting promo code. The resource is also running at obsolete URL `/my/contracts/{contractNumber}/applications/{applicationId}/applyPromocode`.
+
++ Parameters
+    + applicationId: `a7718` (string, required) - ID of application
+
+### Submit promo code [POST]
+
++ Request  (application/json; charset= utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+    + Attributes (object)
+        + code: `MALL1SAW3S0M3` (string, required) - promo code key
+
++ Response 200 (application/json; charset=utf-8)
+    Existing application and valid applicable promo code
+    + Attributes (Application)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+    + Attributes (object)
+        + code: `MALL1SAW3S0M3` (string, required) - promo code key
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
++ Request Invalid promo code (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+    + Attributes (object)
+        + code: `this_is_invalid_key` (string, required) - promo code key
+
++ Response 422 (application/json; charset=utf-8)
+    Promo code is invalid or expired.
+    + Attributes (Errors)
+
+## Application item services [/my/contract/application/item]
+Services on given application items. The resource providing services is also running at obsolete URL `/my/contracts/{contractNumber}/application/item`.
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | yes
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Paging
+This resource supports [paging](#header-paging). As a value to `before` and `after` parameters, use `Id` attribute.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+data             |in,eq               | `item?filter=data|eq|list_of_item_ids` only items in "list_of_item_ids"
+service_active   |in,eq               | `item?filter=service_active|eq|true` only items with active services
+
+
+### List of application items with services [GET]
+Getting list of application item services
+
++ Response 200 (application/json, charset=utf-8)
+    + Attributes (object)
+        + `data` (array[Item], required) - List of application order items
+
+## Purchasing services for application items [/my/contract/application/item/service/{serviceId}/purchase]
+Purchasing Services on given application items. The resource is also running at obsolete URL `/my/contracts/{contractNumber}/application/item/service/{serviceId}/purchase`.
+
++ Parameters
+    + serviceId: `service-adp` (string, required) - ID of the service
+
+### Purchasing services for application items [POST]
+Allows ordering of the service based on previous offer
+
++ Request (application/json; charset=utf-8)
+    Correct request.
+    + Parameters
+        + serviceId: `service-adp` (string, required) - ID of the service
+
++ Response 204 (application/json; charset=utf-8)
+
++ Request Non-existing service (application/json; charset=utf-8)
+    + Parameters
+        + serviceId: `this_service_does_not_exist` (string, required)
+
++ Response 404 (application/json; charset=utf-8)
+    Service not found.
+    + Attributes (Errors)
+
+## Purchasing rewards for application [/my/contract/application/{applicationId}/reward]
+Purchasing Rewards on given application items. The resource is also running at obsolete URL `/my/contracts/{contractNumber}/application/{applicationId}/rewards`.
+
++ Parameters
+    + applicationId: `application_id` (string, required) - ID of application
+
+### Purchasing rewards for application order items [POST]
+Allows purchasing/ordering of the reward based on info in an application
+
++ Request (application/json; charset=utf-8)
+    Correct request.
+    + Parameters
+        + applicationId: `application_id` (string, required) - ID of service
+    + Attributes
+        + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
+            + FREE_DELIVERY
+            + SERVICE_DISCOUNT
+        + itemId (string, required) - (TODO: business logic is currently not using this ID (will be required for type FREE_DELIVERY in future).)
+        + serviceId (string, optional, nullable) - Id of service to purchase reward for
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (Application)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+    + Attributes (object)
+        + type: `FREE_DELIVERY` (enum, required) - reward type
+        + itemId (string, required)
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
++ Request Invalid reward type (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+    + Attributes (object)
+        + type: `this_is_invalid_reward_type` (enum, required) - invalid enum value
+        + itemId: `item-id` (string, required)
+
++ Response 422 (application/json; charset=utf-8)
+    Reward not found.
+    + Attributes (Errors)
+
++ Request Cannot apply rewards (application/json; charset=utf-8)
+    Request is correct but the reward has already been applied or customer does not have enough coins, etc.
+    + Parameters
+        + applicationId: `service-adp` (string, required) - ID of service
+    + Attributes
+        + type: `FREE_DELIVERY` (enum, required) - type of reward to purchase
+        + itemId: `itemId` (string, required)
+
++ Response 422 (application/json; charset=utf-8)
+    + Attributes (Errors)
+
 ## Request account upgrade [/my/contract/revolvingApplication]
 Use this resource to manage customer's requests for upgrading his account type.
 
@@ -618,183 +1029,7 @@ Get information about current active revolving loan application.
     Returned in cases, where the premium account cannot be applied - ie. it has already your account blocked or has unpaid order after due date, for example.
     + Attributes (Errors)
 
-
-## Consents [/account/consents]
-All consents user is able to subscribe and unsubscribe.
-
-### Available consents [GET]
-Get all aconsents a can be subscribed to. Allowed subscriptions are `MARKETING` and `MARKETING_EXTENDED`.
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[Consent], fixed-type, required)
-
-### Change subscription of consents [PUT]
-Subscribe or unsubscribe user to filtered consents. Requires user authorization or providing valid verification token as attribute.
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | no
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | yes
-
-filter name | possible operators | example
----         | ---                | ---
-slug        | eq                 | `consents?filter=slug|eq|MARKETING`  consent with slug `MARKETING`
-slug        | in                 | `consents?filter=slug|in|MARKETING,MARKETING_EXTENDED`  consent with slugs `MARKETING` and `MARKETING_EXTENDED`
-
-+ Attributes (object)
-    + isSubscribed: `true` (boolean, required) - if is true it will add consents described in filter to the user otherwise it will remove them
-    + token: `s5as4d5a6s54d5sa6asd56` (string, optional, nullable) - valid verification token used instead of user authorization
-
-+ Request with authorized user (application/json)
-    + Attributes (object)
-        + isSubscribed: `true`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[Consent], fixed-type, required)
-
-+ Request with unauthorized user with valid token (application/json)
-    + Attributes (object)
-        + isSubscribed: `true`
-        + token: `s5as4d5a6s54d5sa6asd56`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[Consent], fixed-type, required)
-
-+ Request with unauthorized user and invalid token (application/json)
-    + Attributes (object)
-        + isSubscribed: `true`
-        + token: `invalid_token`
-
-+ Response 422 (application/json)
-    Unauthorized user and invalid verification token. Following errors codes are possible:
-    * UNAUTHORIZED_AND_TOKEN_INVALID
-    + Attributes (Errors)
-
-+ Request unknown consent in filter (application/json; charset=utf-8)
-    + Parameters
-        + filter: `slug|eq|UNKNOWN_CONSENT`
-
-+ Response 400 (application/json; charset=utf-8)
-    + Attributes (Errors)
-
-+ Request with bad filter format (application/json; charset=utf-8)
-    + Parameters
-        + filter: `wrong_filter_name|eq|MARKETING_EXTENDED`
-
-+ Response 400 (application/json; charset=utf-8)
-    + Attributes (Errors)
-
-## Push notification devices [/account/push-notification-devices]
-Push notification devices for customer.
-
-### Register new device [POST]
-
-+ Request (application/json)
-    + Attributes (PushNotificationDeviceToken)
-
-+ Response 204 (application/json; charset=utf-8)
-
-+ Response 422 (application/json; charset=utf-8)
-    Push notification device already exists. Following codes are possible.
-    * PUSH_NOTIFICATION_DEVICE_EXISTS
-    + Attributes (Errors)
-
-## Push notification devices detail [/account/push-notification-devices/{type}/{token}]
-Customer push notification device detail.
-
-+ Parameters
-    + token (string, required) - Actual token of the device
-    + type (enum, required) - Type of the device
-        + `ANDROID`
-        + `IOS`
-
-### Unregister a device [DELETE]
-
-+ Request (application/json)
-
-+ Response 204 (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    Push notification device does not exist.
-    + Attributes (Errors)
-
-+ Response 422 (application/json; charset=utf-8)
-    Supplied type of device is invalid. Following errors codes are possible:
-    * INVALID
-    + Attributes (Errors)
-
-## Referral promo code stats [/account/referral/stats]
-
-### Get referral code stats [GET]
-Get referral code information of the customer.
-
-+ Request (application/json; charset=utf-8)
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (ReferralCodeStats, required)
-
-## Referral promo code stats by key [/account/referral/{key}/stats]
-Referral promo code information found by key of promo code from customer.
-
-+ Parameters
-    + key: `JOEDOE123` (string, required) - referral promo code key
-
-### Get referral code stats by key [GET]
-Get referral code information by promo code key provided. No authorization is required.
-
-+ Request (application/json; charset=utf-8)
-    + Parameters
-        + key: `JOEDOE123`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (ReferralCodeStats, required)
-
-+ Request (application/json; charset=utf-8)
-    + Parameters
-        + key: `INVALID_KEY`
-
-+ Response 404 (application/json; charset=utf-8)
-
-        Promo code with given key not found.
-
-    + Attributes (Errors)
-
-## Referral reward codes [/account/referral/rewards]
-
-### Get referral reward codes received [GET]
-Get reward promo codes customer received for each new customer (referee).
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (array[ReferralRewardCodesReceived], required)
-
-# Group Revolving loan
-Management of cards and listing the transactions from revolving loan.
-
-## Revolving loan contract [/my/contract]
-Data of current active revolving loan contract.
-
-### Display revolving loan contract data [GET]
-Returns data of current revolving loan contract of logged-in user.
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (RevolvingLoanContract, required)
-
-+ Request of not-existing contract (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    Contract not found.
-    + Attributes (Errors)
-
-## Revolving loan contract type change [/my/contract/typeChange]
+## Revolving loan contract type changes [/my/contract/typeChange]
 List of contract type changes
 
 ### Display all contract changes [GET]
@@ -825,7 +1060,7 @@ Use this request to change current revolving contract type (upgrade/downgrade)
     Missing contract type.
     + Attributes (Errors)
 
-## Revolving loan contract type change [/my/contract/typeChange/last]
+## Last revolving loan contract type change [/my/contract/typeChange/last]
 Data about last contract type change
 
 ### Get information about last contract type change [GET]
@@ -1236,7 +1471,457 @@ Use this enpoint to confirm personal request operation
     GDPR request successfull, there is no space for error
     + Body
 
-# Group My contracts
+# Group Payment cards for contract
+
+## Payment Cards for contract [/my/contract/card]
+List of payment cards for the given customer contract.
+
+__NOTE:__ The cards are ordered by datetime of their creation, newest first.
+
+### Cards for contract [GET]
+Get a list of payment cards associated with the given contract.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PaymentCard], fixed-type, required)
+
+## Detail and modification of payment card for contract [/my/contract/card/{cardId}]
+Detail of given payment card
+
+### Card for contract [GET]
+Get detail of given payment card
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+### Activate card [PATCH]
+Activate the given card. When activating the card for the first time, OTP code is required. Can also be used to activate the card after it has been temporarily blocked.
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVATED` (enum, required)
+        + `otpCode`: `123` (string, optional) - Please note that `otpCode` is required when activating the card for the first time. It is not required when the card is activated from `BLOCKED_TEMPORARILY` state.
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVATED` (enum, required)
+        + `otpCode`: `123` (string, required)
+
++ Response 422 (application/json; charset=utf-8)
+    Returned when the `otpCode` authorization does not match.
+    - `NOT_AUTHORIZED` - Last 4 digits of payment card does not match with otpCode.
+    + Attributes (Errors)
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVATED` (enum, required)
+        + `otpCode`: `123` (string, required)
+
++ Response 422 (application/json; charset=utf-8)
+    Returned when card cannot be activated from current state (i.e. BLOCKED_PERMANENTLY).
+    - `NOT_SUPPORTED` - Payment card cannot be activated from current state BLOCKED_PERMANENTLY.
+    + Attributes (Errors)
+
++ Request (application/json; charset=utf-8)
+
++ Response 403 (application/json; charset=utf-8)
+    Returned in cases, where the card cannot be activated - ie. it has already been activated and now it is permanently blocked, for example.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `state`: `ACTIVATED` (enum, required)
+        + `otpCode`: `1234` (string, required)
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
+### Changing card limits [PATCH]
+Change (enable/disable) limits on the card
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `onlinePaymentEnabled`: true (boolean, optional, nullable) - Enable/disable online payment with the card. Null value does not change setting and keeps value previously set.
+        + `atmWithdrawalEnabled`: true (boolean, optional, nullable) - Enable/disable cash withdrawal from ATMs. Null value does not change setting and keeps value previously set.
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+
+## Card blocking [/my/contract/card/{cardId}/blocking]
+Block a card. Two versions are available - permanent and temporary.
+
+### Permanently block a card [POST]
+Permanently blocks the card.
+
+__NOTE__: This step cannot be undone.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (PaymentCardPermanentBlocking)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+### Temporarily block a card [POST]
+Allows to temporarily block a card, for example when you are not going to use it for a long time or you cannot find it but are not yet sure if it really is lost or stolen (ie when searching for it). Unblocking the card is done by the same method used for activation.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (PaymentCardTemporaryBlocking)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PaymentCard)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+## Showing a card's PIN number [/my/contract/card/{cardId}/pinView]
+Return an URL of an image with the card's PIN number.
+
+### Show card PIN [POST]
+Display pin of the card. Returns URL of the image with PIN. The URL is invalidated (ceases to exist) after first GET request.
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `otpCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes
+        + `url`: `https://www.cardprovider_example.com/pin_image_url/image.svg` (string, required) - URL of the PIN image.
+
+
++ Request (application/json; charset=utf-8)
+    Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
+    + Attributes
+        {}
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
+
++ Request (application/json; charset=utf-8)
+    + Attributes
+        + `otpCode`: `123` (string, required, nullable)
+
++ Response 422 (application/json; charset=utf-8)
+    Returned when the `otpCode` authorization does not match.
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    The card with `cardId` was not found etc.
+    + Attributes (Errors)
+
+
+# Group My history data contracts
+Set of resources to access and modify client's contracts.
+
+## Applications [/historydata/my/applications]
+Applications of given contract.
+
+### Applications on contract [GET]
+Get a list of applications on given contract.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+TBD.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+state            |eq,in               | `applications?filter=state|in|READY` applications that are ready to be financed
+stateReason      |eq,in               | `applications?filter=stateReason|in|READY_TO_SHIP` applications that are READY_TO_SHIP
+type             |eq,in               | `applications?filter=type|in|INSTALLMENT` applications financed by installment program
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[HistoryApplication], fixed-type, required)
+        + pagingInfo (PagingInfo, required)
+
+
+## Specific application [/historydata/my/applications/{applicationId}]
+Specific application.
+
++ Parameters
+    + applicationId: `a7718` (string, required) - ID of application
+
+### Application detail [GET]
+Get details of one application.
+
++ Request (application/json; charset= utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 200 (application/json; charset=utf-8)
+    Existing application
+    + Attributes (HistoryApplication)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
+
+# Group My Payments
+
+## Payments [/my/payments]
+Payments operations.
+
+### Request new payment [POST]
+Prepare payment order data for specified repayments. TODO: add payment method.
+
++ Request TRANSFER/SAZKA (application/json; charset=utf-8)
+    + Attributes (PaymentRequest)
+
++ Response 200(application/json; charset=utf-8)
+
+        Payment order method TRANSFER/SAZKA was prepared and can be paid.
+
+    + Attributes (DomesticPaymentOrder)
+
++ Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json; charset=utf-8)
+    + Attributes (PaymentRequest)
+
++ Response 200(application/json; charset=utf-8)
+
+        Payment order method CARD/PLATBA24/MOJE_PLATBA/EKONTO was prepared and can be paid.
+
+    + Attributes (OnlinePaymentOrder)
+
+
++ Response 400(application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+
+
+## Payment options [/my/payments/options{?amount}]
+Get all possible repayment options
+
++ Parameters
+  + amount: 11000 (number, optional) - Amount to pay specified by client, in minor units and default currency (e.g. 11000 means 110 CZK). If set, repayment options will be modified accordingly. NOT SUPPORTED YET.
+
+### Repayment options [GET]
+Get prioritized list of possible installments that are available for repayment. If no amount is specified, upper bound of repayment is calculated according to business rules (e.g. including all possible installments).
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PaymentItem], fixed-type, required)
+
++ Response 400 (application/json; charset=utf-8)
+
+        There was an error processing request
+
+    + Attributes (Errors)
+
+
+# Group My Settings
+
+## My settings [/my/settings]
+Information about settings
+
+### List of settings [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PromoBanner)
+
+# Group My Documents
+
+## Documents for client [/my/documents]
+All documents for client and for all his contracts.
+
+### List of documents [GET]
+Get a list of documents.
+
+feature                       | supported by resource
+---                           | ---
+[paging](#header-paging)      | no
+[sorting](#header-sorting)    | no
+[filtering](#header-filtering)| yes
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name      | possible operators | example
+---              | ---                | ---
+type             |in,eq               | `documents?filter=type|eq|CONTRACT` only documents of type "Úvěrová smlouva"
+
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[RevolvingLoanDocument], fixed-type, required)
+
+# Group MALL Coin
+
+## Client's MALL Coin overview [/coins/overview]
+Overview of client's coin account. Currently only account coin balance.
+
+### MALL Coin account overview [GET]
+Get coin account overview
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (CoinBalance)
+
+## Client's MALL Coin transactions [/coins/transactions]
+Overview of client's MALL Coin transactions.
+
+### MALL Coin transactions list [GET]
+Get customer coin transactions list
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+TBD.
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `created_at descending`.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name        | possible operators | example
+---                | ---                | ---
+id                 |eq,in               | `transactions?filter=id|in|1,3` transactions that have id 1 or 3
+value.amount       |eq,gt,lt            | `transactions?filter=value.amount|gt|0` transactions that have amount higher than 0
+transactionReason  |eq                  | `transactions?filter=transactionReason|eq|PAID_ORDER` transactions that were created as a result of order paid
+direction          |eq                  | `transactions?filter=direction|eq|CREDIT` transactions by type, credit or debit
+isExpired          |eq                  | `transactions?filter=isExpired|eq|0` transactions that are not expired
+createdAt          |eq,gt,lt            | `transactions?filter=createdAt|lt|2019-04-10T19:42` transactions by datetime of creation
+
+__Note:__ Filtering by datetime values does not require time to be set, but values of datetime that will not be filled in will be considered to have value of 0. Suppose we have 1 transaction that was created on May 5th, 1976, 04:35 o'clock. Filtering using `createdAt|eq|1976-05-05` term will yield no result, since the transaction was created after `1976-05-05T00:00`. Filtering using `createdAt|gt|1976-05-05` will return the transaction, as will filtering for `createdAt|lt|1976-05-05T04:36`.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[CoinTransaction], fixed-type, required)
+        + pagingInfo (PagingInfo, required)
+
+# Group Rewards
+
+## Partner promocode offers [/rewards/partnerPromocodes/offers]
+Partner promocode offers available to customers
+
+### Partner promocode offers [GET]
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `priority descending, createdAt descending`.
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name        | possible operators | example
+---                | ---                | ---
+id                 |eq,in               | `offers?filter=id|in|1,3` transactions that have id 1 or 3
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
+        + pagingInfo (PagingInfo, required)
+
+## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
+
+### Customer partner promocode purchase [POST]
+
++ Request (application/json; charset=utf-8)
+    + Attributes (object)
+        + `promocodeId`: `10` (string, fixed-type, required) - pk of the offer the customer wishes to buy
+
++ Response 201 (application/json; charset=utf-8)
+    + Attributes (PurchasedPartnerPromocodeOffer, required)
+
++ Response 422 (application/json; charset=utf-8)
+Purchasing the key was not succesful
+    + Attributes (Errors)
+
+
+### Customer purchased partner promocodes list [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PurchasedPartnerPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
+
+# Group My contracts - obsolete
 Set of resources to access and modify client's contracts.
 
 ## Customer contracts [/my/contracts]
@@ -1483,34 +2168,28 @@ Services on given application items
     Contract not found.
     + Attributes (Errors)
 
-## Purchasing services for application items [/my/contracts/{contractNumber}/application/{applicationId}/services]
+## Purchase services for application item [/my/contracts/{contractNumber}/application/item/service/{serviceId}/purchase]
 Purchasing Services on given application items
 
 + Parameters
     + contractNumber: `01-3700227718` (string, required) - ID of contract
-    + applicationId: `application_id` (string, required) - ID of application
-+ Attributes
     + serviceId: `service-adp` (string, required) - ID of the service
 
-### Purchasing services for application items [POST]
+### Purchase services for application items [POST]
 Allows ordering of the service based on previous offer
 
 + Request (application/json; charset=utf-8)
     Correct request.
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
-        + applicationId: `application_id` (string, required) - ID of application
-    + Attributes
-        + serviceId: `service-adp`
+        + serviceId: `service-adp` (string, required) - ID of the service
 
 + Response 204 (application/json; charset=utf-8)
 
 + Request Non-existing contract (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `this_is_no_contract` (string, required) - ID of contract
-        + applicationId: `application_id` (string, required) - ID of application
-    + Attributes
-        + serviceId: `service-adp`
+        + serviceId: `service-adp` (string, required) - ID of the service
 
 + Response 404 (application/json; charset=utf-8)
     Contract not found.
@@ -1519,8 +2198,6 @@ Allows ordering of the service based on previous offer
 + Request Non-existing service (application/json; charset=utf-8)
     + Parameters
         + contractNumber: `01-3700227718` (string, required) - ID of contract
-        + applicationId: `application_id` (string, required) - ID of application
-    + Attributes
         + serviceId: `this_service_does_not_exist`
 
 + Response 404 (application/json; charset=utf-8)
@@ -1614,469 +2291,6 @@ Request Account Upgrade request support by phone.
     + Attributes (SupportRequest)
 
 + Response 401 (application/json; charset=utf-8)
-
-# Group Payment cards for contract
-
-## Payment Cards for contract [/my/contract/card]
-List of payment cards for the given customer contract.
-
-__NOTE:__ The cards are ordered by datetime of their creation, newest first.
-
-### Cards for contract [GET]
-Get a list of payment cards associated with the given contract.
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[PaymentCard], fixed-type, required)
-
-## Detail and modification of payment card for contract [/my/contract/card/{cardId}]
-Detail of given payment card
-
-### Card for contract [GET]
-Get detail of given payment card
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (PaymentCard)
-
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    The card with `cardId` was not found etc.
-    + Attributes (Errors)
-
-### Activate card [PATCH]
-Activate the given card. When activating the card for the first time, OTP code is required. Can also be used to activate the card after it has been temporarily blocked.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `123` (string, optional) - Please note that `otpCode` is required when activating the card for the first time. It is not required when the card is activated from `BLOCKED_TEMPORARILY` state.
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (PaymentCard)
-
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `123` (string, required)
-
-+ Response 422 (application/json; charset=utf-8)
-    Returned when the `otpCode` authorization does not match.
-    - `NOT_AUTHORIZED` - Last 4 digits of payment card does not match with otpCode.
-    + Attributes (Errors)
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `123` (string, required)
-
-+ Response 422 (application/json; charset=utf-8)
-    Returned when card cannot be activated from current state (i.e. BLOCKED_PERMANENTLY).
-    - `NOT_SUPPORTED` - Payment card cannot be activated from current state BLOCKED_PERMANENTLY.
-    + Attributes (Errors)
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 403 (application/json; charset=utf-8)
-    Returned in cases, where the card cannot be activated - ie. it has already been activated and now it is permanently blocked, for example.
-    + Attributes (Errors)
-
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    The card with `cardId` was not found etc.
-    + Attributes (Errors)
-
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `1234` (string, required)
-
-+ Response 480 (application/json; charset=utf-8)
-    + Attributes (OTPErrors)
-
-### Changing card limits [PATCH]
-Change (enable/disable) limits on the card
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `onlinePaymentEnabled`: true (boolean, optional, nullable) - Enable/disable online payment with the card. Null value does not change setting and keeps value previously set.
-        + `atmWithdrawalEnabled`: true (boolean, optional, nullable) - Enable/disable cash withdrawal from ATMs. Null value does not change setting and keeps value previously set.
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (PaymentCard)
-
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    The card with `cardId` was not found etc.
-    + Attributes (Errors)
-
-
-## Card blocking [/my/contract/card/{cardId}/blocking]
-Block a card. Two versions are available - permanent and temporary.
-
-### Permanently block a card [POST]
-Permanently blocks the card.
-
-__NOTE__: This step cannot be undone.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (PaymentCardPermanentBlocking)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (PaymentCard)
-
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    The card with `cardId` was not found etc.
-    + Attributes (Errors)
-
-### Temporarily block a card [POST]
-Allows to temporarily block a card, for example when you are not going to use it for a long time or you cannot find it but are not yet sure if it really is lost or stolen (ie when searching for it). Unblocking the card is done by the same method used for activation.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (PaymentCardTemporaryBlocking)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (PaymentCard)
-
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    The card with `cardId` was not found etc.
-    + Attributes (Errors)
-
-## Showing a card's PIN number [/my/contract/card/{cardId}/pinView]
-Return an URL of an image with the card's PIN number.
-
-### Show card PIN [POST]
-Display pin of the card. Returns URL of the image with PIN. The URL is invalidated (ceases to exist) after first GET request.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `otpCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes
-        + `url`: `https://www.cardprovider_example.com/pin_image_url/image.svg` (string, required) - URL of the PIN image.
-
-
-+ Request (application/json; charset=utf-8)
-    Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
-    + Attributes
-        {}
-
-+ Response 480 (application/json; charset=utf-8)
-    + Attributes (OTPErrors)
-
-
-+ Request (application/json; charset=utf-8)
-    + Attributes
-        + `otpCode`: `123` (string, required, nullable)
-
-+ Response 422 (application/json; charset=utf-8)
-    Returned when the `otpCode` authorization does not match.
-    + Attributes (Errors)
-
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 404 (application/json; charset=utf-8)
-    The card with `cardId` was not found etc.
-    + Attributes (Errors)
-
-
-# Group My history data contracts
-Set of resources to access and modify client's contracts.
-
-## Applications [/historydata/my/applications]
-Applications of given contract.
-
-### Applications on contract [GET]
-Get a list of applications on given contract.
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | yes
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | yes
-
-#### Paging
-This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
-
-#### Sorting
-TBD.
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name      | possible operators | example
----              | ---                | ---
-state            |eq,in               | `applications?filter=state|in|READY` applications that are ready to be financed
-stateReason      |eq,in               | `applications?filter=stateReason|in|READY_TO_SHIP` applications that are READY_TO_SHIP
-type             |eq,in               | `applications?filter=type|in|INSTALLMENT` applications financed by installment program
-
-+ Request Existing contract (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `54307275`
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[HistoryApplication], fixed-type, required)
-        + pagingInfo (PagingInfo, required)
-
-
-## Specific application [/historydata/my/applications/{applicationId}]
-Specific application.
-
-+ Parameters
-    + applicationId: `a7718` (string, required) - ID of application
-
-### Application detail [GET]
-Get details of one application.
-
-+ Request  (application/json; charset= utf-8)
-    + Parameters
-        + contractNumber: `01-3700227718` (string, required) - ID of contract
-        + applicationId: `a7718` (string, required) - ID of application
-
-+ Response 200 (application/json; charset=utf-8)
-    Existing application
-    + Attributes (HistoryApplication)
-
-+ Request Non-existing contract (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `this_is_no_contract` (string, required) - ID of contract
-        + applicationId: `a7718` (string, required) - ID of application
-
-+ Response 404 (application/json; charset=utf-8)
-    Contract not found.
-    + Attributes (Errors)
-
-+ Request Non-existing application (application/json; charset=utf-8)
-    + Parameters
-        + contractNumber: `6605812455` (string, required) - ID of contract
-        + applicationId: `this_is_no_application` (string, required) - ID of application
-
-+ Response 404 (application/json; charset=utf-8)
-    Application not found.
-    + Attributes (Errors)
-
-
-# Group My Payments
-
-## Payments [/my/payments]
-Payments operations.
-
-### Request new payment [POST]
-Prepare payment order data for specified repayments. TODO: add payment method.
-
-+ Request TRANSFER/SAZKA (application/json; charset=utf-8)
-    + Attributes (PaymentRequest)
-
-+ Response 200(application/json; charset=utf-8)
-
-        Payment order method TRANSFER/SAZKA was prepared and can be paid.
-
-    + Attributes (DomesticPaymentOrder)
-
-+ Request CARD/PLATBA24/MOJE_PLATBA/EKONTO (application/json; charset=utf-8)
-    + Attributes (PaymentRequest)
-
-+ Response 200(application/json; charset=utf-8)
-
-        Payment order method CARD/PLATBA24/MOJE_PLATBA/EKONTO was prepared and can be paid.
-
-    + Attributes (OnlinePaymentOrder)
-
-
-+ Response 400(application/json; charset=utf-8)
-
-        There was an error processing request
-
-    + Attributes (Errors)
-
-
-## Payment options [/my/payments/options{?amount}]
-Get all possible repayment options
-
-+ Parameters
-  + amount: 11000 (number, optional) - Amount to pay specified by client, in minor units and default currency (e.g. 11000 means 110 CZK). If set, repayment options will be modified accordingly. NOT SUPPORTED YET.
-
-### Repayment options [GET]
-Get prioritized list of possible installments that are available for repayment. If no amount is specified, upper bound of repayment is calculated according to business rules (e.g. including all possible installments).
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[PaymentItem], fixed-type, required)
-
-+ Response 400 (application/json; charset=utf-8)
-
-        There was an error processing request
-
-    + Attributes (Errors)
-
-
-# Group My Settings
-
-## My settings [/my/settings]
-Information about settings
-
-### List of settings [GET]
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (PromoBanner)
-
-# Group My Documents
-
-## Documents for client [/my/documents]
-All documents for client and for all his contracts.
-
-### List of documents [GET]
-Get a list of documents.
-
-feature                       | supported by resource
----                           | ---
-[paging](#header-paging)      | no
-[sorting](#header-sorting)    | no
-[filtering](#header-filtering)| yes
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name      | possible operators | example
----              | ---                | ---
-type             |in,eq               | `documents?filter=type|eq|CONTRACT` only documents of type "Úvěrová smlouva"
-
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[RevolvingLoanDocument], fixed-type, required)
-
-# Group MALL Coin
-
-## Client's MALL Coin overview [/coins/overview]
-Overview of client's coin account. Currently only account coin balance.
-
-### MALL Coin account overview [GET]
-Get coin account overview
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (CoinBalance)
-
-## Client's MALL Coin transactions [/coins/transactions]
-Overview of client's MALL Coin transactions.
-
-### MALL Coin transactions list [GET]
-Get customer coin transactions list
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | yes
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | yes
-
-#### Paging
-TBD.
-This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
-
-#### Sorting
-Resource does not support manual sorting, default sorting is by `created_at descending`.
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name        | possible operators | example
----                | ---                | ---
-id                 |eq,in               | `transactions?filter=id|in|1,3` transactions that have id 1 or 3
-value.amount       |eq,gt,lt            | `transactions?filter=value.amount|gt|0` transactions that have amount higher than 0
-transactionReason  |eq                  | `transactions?filter=transactionReason|eq|PAID_ORDER` transactions that were created as a result of order paid
-direction          |eq                  | `transactions?filter=direction|eq|CREDIT` transactions by type, credit or debit
-isExpired          |eq                  | `transactions?filter=isExpired|eq|0` transactions that are not expired
-createdAt          |eq,gt,lt            | `transactions?filter=createdAt|lt|2019-04-10T19:42` transactions by datetime of creation
-
-__Note:__ Filtering by datetime values does not require time to be set, but values of datetime that will not be filled in will be considered to have value of 0. Suppose we have 1 transaction that was created on May 5th, 1976, 04:35 o'clock. Filtering using `createdAt|eq|1976-05-05` term will yield no result, since the transaction was created after `1976-05-05T00:00`. Filtering using `createdAt|gt|1976-05-05` will return the transaction, as will filtering for `createdAt|lt|1976-05-05T04:36`.
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[CoinTransaction], fixed-type, required)
-        + pagingInfo (PagingInfo, required)
-
-# Group Rewards
-
-## Partner promocode offers [/rewards/partnerPromocodes/offers]
-Partner promocode offers available to customers
-
-### Partner promocode offers [GET]
-
-feature                         | supported by resource
----                             | ---
-[paging](#header-paging)        | yes
-[sorting](#header-sorting)      | no
-[filtering](#header-filtering)  | yes
-
-#### Paging
-This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
-
-#### Sorting
-Resource does not support manual sorting, default sorting is by `priority descending, createdAt descending`.
-
-#### Filtering
-This resource supports [filtering](#header-filtering). You can use following filters:
-
-filter name        | possible operators | example
----                | ---                | ---
-id                 |eq,in               | `offers?filter=id|in|1,3` transactions that have id 1 or 3
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
-        + pagingInfo (PagingInfo, required)
-
-## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
-
-### Customer partner promocode purchase [POST]
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (object)
-        + `promocodeId`: `10` (string, fixed-type, required) - pk of the offer the customer wishes to buy
-
-+ Response 201 (application/json; charset=utf-8)
-    + Attributes (PurchasedPartnerPromocodeOffer, required)
-
-+ Response 422 (application/json; charset=utf-8)
-Purchasing the key was not succesful
-    + Attributes (Errors)
-
-
-### Customer purchased partner promocodes list [GET]
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/json; charset=utf-8)
-    + Attributes (object)
-        + data (array[PurchasedPartnerPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
 
 # Data Structures
 
@@ -2310,28 +2524,6 @@ Financial amount with VAT rate.
 + createdDate: `2020-03-01` (string, required) - date when fee is created
 + dueDate: `2020-04-20` (string, required) - fee due date
 
-## RevolvingLoanContract (object)
-+ type (RevolvingLoanContractType, required)
-+ state: `ACTIVE` (enum, required) - state of loan or application
-    + `PROCESSING`
-    + `WAITING_FOR_SIGNATURE`
-    + `CANCELLED_BEFORE_SIGNING`
-    + `SIGNED`
-    + `ACTIVE`
-    + `RESIGNED`
-+ cancellationReason (enum, optional, nullable)
-    + `BACKOFFICE`
-    + `CUSTOMER`
-+ availableAmount (Amount, required) - available amount of revolving loan
-+ totalLimit (Amount, required) - total limit amount of revolving loan
-+ availableAmountState: `BLOCKED_OVERDUE` (enum, required) - state of available amount, is set once available amount is 0
-    + `AVAILABLE` - the customer has available amount to spend
-    + `EXHAUSTED` - the limit was exhausted, the customer has spent the whole available amount 
-    + `BLOCKED_OVERDUE` - the available amount was blocked because of overdue payments
-+ fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
-+ trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period, is null when customer is not in free trial period yet or free trial period expired
-+ currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
-
 ## RevolvingLoanContractTrialInfo (object)
 + totalMonths: `3` (number, required) - free trial period - total length in months
 + remainingMonths: `2` (number, required) - free trial period - remaining length in months
@@ -2463,6 +2655,12 @@ Financial amount with VAT rate.
 + transactionId:`2020` (string, required) - id of related transaction
 + createdDate: `2020-05-20` (string, required) - date, on which complaint was created
 
+## AccountType (enum)
++ TRY_IT - basic account with maximum limit of 5000 CZK
++ START - revolving loan account (no card is provided) with limit up to 50 000 CZK
++ PLUS - basic revolving loan with card and limit up to 50 000 CZK
++ COMPLETE - revolving loan account with card, limit up to 50 000 CZK and bonuses eg. free delivery,...
+
 ## Client (object)
 + id: `12345` (number, required) - internal customer ID
 + name (object, required)
@@ -2483,36 +2681,31 @@ Financial amount with VAT rate.
 + facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
-+ accountType (enum, required) - client's account type
-    + TRY_IT - basic account with maximum limit of 5000 CZK
-    + START - revolving loan account (no card is provided) with limit up to 50 000 CZK
-    + PLUS - basic revolving loan with card and limit up to 50 000 CZK
-    + COMPLETE - revolving loan account with card, limit up to 50 000 CZK and bonuses eg. free delivery,...
++ accountType (AccountType, required) - client's account type
 
 
 ## Contract (object)
-+ contractNumber: `12345678` (string, required) - ID of a contract
-+ applicationCreatedAt: `2016-01-01` (string, required) - date when application was created
-+ name: `Tesco karta` (string, required) - human-readable contract (product) name
-+ contractType: `CEL` (enum, required) - contract type
-   + `CEL` - Close End Loan
-   + `REL` - Revolving Loan
-   + `DEFPAY` - deferred payment
-+ status: `ACTIVE` (enum, required) - status of contract
-    + `PROCESSING` - contract is approved
-    + `ACTIVE` - contract is active (DEFPAY user is not banned and active)
-    + `FINISHED` - contract has been closed (DEFPAY user is banned or inactive)
-    + `CANCELLED` - contract has been cancelled
-+ currentDebt (Amount, required) - sum of overdue installments to date (DEFPAY sum of application debts in closest due date)
-+ overdueInstallmentsCount: 2 (number, required) - number of overdue installments to date
-+ currentInstallment (Amount, optional) - current installment amount  (DEFPAY sum of application claims in closest due date)
-+ currentInstallmentDueDate: `2017-10-13` (string, optional) - current installment due date (DEFPAY closest application due date)
-+ currentDPD: 8 (number, optional) - current days past due of contract (DEFPAY closest application DPD)
-+ One Of
-   + DEFPAYAdditionalInfo (object, required)
-        + availableCreditBalance (Amount, required) - available credit balance of an account
-        + creditLimit (Amount, fixed-type, required) - credit limit amount of an account
-
++ type (AccountType, required) - account type
++ availableAmount (Amount, required) - available amount of an account
++ totalLimit (Amount, required) - total limit of an account
++ availableAmountState: `AVAILABLE` (enum, required) - state of available amount
+    + `AVAILABLE` - the customer has available amount to spend
+    + `EXHAUSTED` - the limit was exhausted, the customer has spent the whole available amount
+    + `BLOCKED` - the available amount was blocked because customer is blocked
++ revolvingLoanContractAdditionalInfo (object, required, nullable) - additional information for client with revolving loan
+    + state: `ACTIVE` (enum, required) - state of loan or application
+        + `PROCESSING`
+        + `WAITING_FOR_SIGNATURE`
+        + `CANCELLED_BEFORE_SIGNING`
+        + `SIGNED`
+        + `ACTIVE`
+        + `RESIGNED`
+    + cancellationReason (enum, optional, nullable)
+        + `BACKOFFICE`
+        + `CUSTOMER`
+    + fee (RevolvingLoanContractFee, required) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created
+    + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period, is null when customer is not in free trial period yet or free trial period expired
+    + currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
 
 ## HistoryContract (object)
 + contractNumber: `12345678` (string, required) - ID of a contract
