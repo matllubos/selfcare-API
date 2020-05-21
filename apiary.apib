@@ -2906,7 +2906,7 @@ Basic eshop info
 
 ### Properties
 + name: `Mall.cz`(string, optional) - marketing name of eshop used in connection with application
-+ logoUrl: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - URL na logo eshopu
++ logoUrl: `https://www.uloziste_obrazku_z_eshop.cz/763a8b72-a081-4baa-9f71-7b41153d5fed` (string, optional) - eshop logo URL if exists otherwise is `null`
 
 
 ## Application (ApplicationBase)
@@ -2920,7 +2920,7 @@ Financing application.
     + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
 + contractNumber: `01-6010027378` (string, required) - parent contract for this application
 + gatewayRedirectUrl: `https://mallpay.cz?applicationId=0a04ead9-f54b-4cb0-98f4-3baacae9460b` (string, optional) - Gateway redirect URL. Redirect user to this URL to complete this application if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
-+ eshopAdditionalInfo (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
++ eshopAdditionalInfo (EshopAdditionalInfo, required) - other information for particular salesroom connected to this application
 + defpayAdditionalInfo (object, optional, nullable) - additional application information for DEFERRED_PAYMENT and TRY_AND_PAY application type
     + `currentDebt` (Amount, required) - Actual debt amount
     + `dueDate`: `2016-11-15` (string, optional, nullable) - date due for DEFERRED_PAYMENT and TRY_AND_PAY
@@ -2945,7 +2945,7 @@ Financing application.
 + applicationOrigin (object, optional) - if the application was created based on other application
     + `applicationIds`: `54546` (array[string], required) - application which led to creation of this application
     + `contractNumber`: `1` (string, required) - contract for the application which led to creation of this application
-+ eshopAdditionalInfo (EshopAdditionalInfo, optional) - other information for particular salesroom connected to this application
++ eshopAdditionalInfo (EshopAdditionalInfo, required) - other information for particular salesroom connected to this application
 
 ## PaymentAvailability (object)
 Information about possibility to pay application or billing
