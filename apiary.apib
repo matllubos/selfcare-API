@@ -3584,7 +3584,7 @@ Contract Payment Card (virtual or physical)
 
 ### Properties
 + `id`: `10` (string, required) - unique id of the card in the system
-+ `maskedPan`: `123456******1234` (string, optional) - masked PAN of the card. Will be set to `null` if we don't know the card's number.
++ `maskedPan`: `123456******1234` (string, optional) - masked PAN of the card. Will be set to `null` if we don't know the card's number or card is in state `ASSIGNED` (due to security reasons).
 + `firstName`: `Franta` (string, required) - first name of the cardholder
 + `lastName`: `Tester` (string, required) - last name of the cardholder
 + `validThru`: `05/36` (string, optional) - card expiration in standard card format (dd/yy).
