@@ -3538,13 +3538,14 @@ Detail of customer's Mall Coin transaction
 ### Properties
 + value (CoinAmount, required) - amount of coins moved in the transaction
 + transactionReason (enum, required) - reason for creating the transaction
-    + `OTHER` - Coins were received for other reason
-    + `ORDER_PAID` - Coins were received for order payment
-    + `SERVICES_DISCOUNT` - Coins were spent on services discount
-    + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
-    + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
-    + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
     + `APP_DOWNLOAD_BONUS` - Coins were received as a bonus for app download
+    + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
+    + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
+    + `MONTHLY_BILLING_PAID` - Coins were received for payment of monthly billing
+    + `ORDER_PAID` - Coins were received for order payment
+    + `OTHER` - Coins were received for other reason
+    + `SERVICES_DISCOUNT` - Coins were spent on services discount
+    + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
 + `relatedData` (RelatedDataObject, optional, nullable) - data and objects related to the MALL Coin transaction
 
 ## PromoBanner (object)
