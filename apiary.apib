@@ -2673,7 +2673,8 @@ Financial amount with VAT rate.
 + username: `memyself@mine.com` (string, required) - client's self care zone username
 + hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
 + accountType (AccountType, required) - client's account type
-
++ options (object, required) - client's options
+    + canApplyForRevolvingContract (boolean, required) - indicates whether the client can apply for revolving loan contract or not
 
 ## Contract (object)
 + type (AccountType, required) - account type
