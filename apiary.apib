@@ -602,6 +602,56 @@ Cancel application processing.
     Application cannot be cancelled.
     + Attributes (Errors)
 
+## Application transactions [/my/contract/applications/{applicationId}/transactions]
+Specific application.
+
++ Parameters
+    + applicationId: `a7718` (string, required) - ID of application
+
+### Transactions of application [GET]
+Get financing transactions of one application.
+
++ Request  (application/json; charset= utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[ApplicationTransaction], fixed-type, required) - List of transactions for application of logged-in user
+        + pagingInfo (PagingInfo, required)
+
++ Request Non-existing application (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `this_is_no_application` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Application not found.
+    + Attributes (Errors)
+
+## Application transaction detail [/my/contract/applications/{applicationId}/transactions/{transactionId}]
+Detail of transaction for application of logged-in user.
+
++ Parameters
+    + applicationId: `a7718` (string, required) - ID of application
+    + transactionId: `5425` (string, required) - ID of application transaction
+
+### Transaction detail of application [GET]
+Get detail of application transaction
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ApplicationTransaction)
+
++ Request Non-existing transaction (application/json; charset=utf-8)
+    + Parameters
+        + applicationId: `a7718` (string, required) - ID of application
+        + transactionId: `this_is_no_transaction` (string, required) - ID of application
+
++ Response 404 (application/json; charset=utf-8)
+    Transaction not found.
+    + Attributes (Errors)
+
 ## Promo codes [/my/contract/application/{applicationId}/applyPromocode]
 Customer can apply for discount price by submitting promo code. The resource is also running at obsolete URL `/my/contracts/{contractNumber}/applications/{applicationId}/applyPromocode`.
 
@@ -2929,6 +2979,28 @@ Financing application.
 + `paymentDate`: `2017-01-12` (string, optional, nullable) - Date when was order paid
 + `isClosed`: `true` (boolean, required) - application is closed and do not need customer further action
 
+## ApplicationTransaction (object)
++ id: `2070` (string, required) - transaction id
++ amount (Amount, required) - transaction amount customer owes (-) / or receives as a discount (+)
++ type: `DEFERRED_PAYMENT` (enum, required) - finance transaction type related to order
+    + `CLAIM_DEFERRED_PAYMENT` - Order
+    + `CLAIM_SERVICES` - Service
+    + `CLAIM_SANCTION` - Sanction
+    + `CUSTOMER_DEFERRED_PAYMENT` - Payment of the order
+    + `CUSTOMER_SERVICES` - Service payment
+    + `CUSTOMER_SANCTION` - Paid sanction
+    + `CUSTOMER_REVOLVING` - Payment of the billing
+    + `CUSTOMER_CREDIT_NOTE_DEFERRED_PAYMENT` - Refund of order overpayment to the customer
+    + `CUSTOMER_CREDIT_NOTE_SERVICES` - Refund of service overpayment to the customer
+    + `CUSTOMER_CREDIT_NOTE_SANCTION` - Refund of sanction overpayment to the customer
+    + `CUSTOMER_CREDIT_NOTE_REVOLVING` - Refund of billing overpayment to the customer
+    + `REVOLVING_DEBIT_REFINANCING` - Refinancing
+    + `DISCOUNT_PROMOCODE` - Promo Code
+    + `DISCOUNT_MALLCOIN_SERVICE` - MALL Coin service discount
+    + `DISCOUNT_MALLCOIN_FREE_DELIVERY` - MALL Coin free delivery
+    + `DISCOUNT_FREE_DELIVERY` - Free Delivery
+    + `REVOLVING_CUSTOMER_SANCTION` - Sanction refinance from revolving loan
++ createdDate: `2020-05-20` (string, required) - date, on which transaction was created
 
 ## HistoryApplication (ApplicationBase)
 Financing application.
