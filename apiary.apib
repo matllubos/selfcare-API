@@ -1197,6 +1197,7 @@ billingId       | eq, in                | `transaction?filter=billingId|in|1,2` 
 type            | eq, in                | `transaction?filter=type|in|CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD` transactions, whose type is from the list CARD_TRANSACTION_DOMESTIC, CARD_TRANSACTION_ABROAD
 date            | lteq, gteq            | `transaction?filter=date|gteq|2020-05-18;date|lteq|2020-05-20` all transactions created or posted between 18th and 20th May 2020
 amount          | lteq, gteq            | `transaction?filter=amount|gteq|150000;amount|lteq|200000` transactions, which have amount greater or equal to 1500,- CZK and less or equal to 2000,- CZK
+amount          | abslteq, absgteq      | `transaction?filter=amount|absgteq|150000;amount|abslteq|200000` transactions, which have amount greater or equal to 1500,- CZK and less or equal to 2000,- CZK independently on amount sign (positive or negative), resp. transaction direction(incoming, outgoing)
 referenceNumber | eq                    | `transaction?filter=referenceNumber|eq|123456789` transactions, which have reference number equal to 123456789
 
 

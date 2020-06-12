@@ -112,6 +112,8 @@ GET /general/transactions?filter=value.amount|gt|100
 | isnull    | true          | value is null                                            |
 | lt        | 2             | less than 2                                              |
 | lteq      | 3             | less than or equals 3                                    |
+| abslteq   | 10            | values from -10 to 10                                    |
+| absgteq   | 10            | values less than -10 and greater than 10                 |
 
 ## API calls limits
 
