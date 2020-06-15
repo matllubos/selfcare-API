@@ -821,21 +821,13 @@ Use this endpoint to create a new account upgrade request for a logged-in user. 
     Contract type must be specified.
     + Attributes (Errors)
 
-+ Request Start another new application while another one already exists (application/json; charset=utf-8)
-    + Attributes (AccountUpgradeApplicationRequest)
-        + type: `START`
-
-+ Response 409 (application/json; charset=utf-8)
-    There could be just one application in progress.
-    + Attributes (Errors)
-
 + Request Starts new application (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + type: `START`
         + slug: `CUSTOMER_INFORMATION_CONTACT`
 
 + Response 403 (application/json; charset=utf-8)
-    Returned in cases, where the premium account cannot be applied - ie. it has already your account blocked or has unpaid order after due date, for example.
+    Returned in cases, where the premium account cannot be applied - i.e. another application in progress, account blocked or has unpaid order after due date, for example.
     + Attributes (Errors)
 
 ### Update application of account upgrade request [PATCH]
