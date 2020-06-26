@@ -1902,26 +1902,41 @@ __Note:__ Filtering by datetime values does not require time to be set, but valu
 ## Partner promocode offers [/rewards/partnerPromocodes/offers]
 Partner promocode offers available to customers
 
-### Partner promocode offers [GET]
-
 feature                         | supported by resource
 ---                             | ---
 [paging](#header-paging)        | yes
-[sorting](#header-sorting)      | no
+[sorting](#header-sorting)      | yes
 [filtering](#header-filtering)  | yes
 
 #### Paging
-This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after`
+ parameter.
 
 #### Sorting
-Resource does not support manual sorting, default sorting is by `priority descending, createdAt descending`.
+Resource supports sorting according `coinsRequired`. Default sorting is by `priority descending, createdAt descending`.
+Example: `offers?sort=-coinsRequired`
 
 #### Filtering
 This resource supports [filtering](#header-filtering). You can use following filters:
 
 filter name        | possible operators | example
 ---                | ---                | ---
-id                 |eq,in               | `offers?filter=id|in|1,3` transactions that have id 1 or 3
+id                 |eq,in               | `offers?filter=id|in|1,3` promocode offers that have id 1 or 3
+categoryId         |eq,in               | `offers?filter=categoryId|in|5,9` promocode offers, whose category has id 5 or 9
+partnerId          |eq,in               | `offers?filter=partnerId|in|1,2,5` promocode offers, which are active and whose partner has id 1 or 2 or 5
+isPopular          |eq                  | `offers?filter=isPopular|eq|true` active promocode offers, which are currently best-selling
+isNew              |eq                  | `offers?filter=isNew|eq|true` active promocode offers, which are new
+
+
+Fulltext search can be used in this resource. The system will search for `query_string` in the field `eshopAdditionalInfo.name`.
+The search is case insensitive and does not reflect the accents.
+
+fulltext search  | query string     | example
+---              | ---              | ---
+fulltext         | `mall`           | `offers?filter=fulltext|icontains|mall` promocode offers, which contain string `mall` in the name of eshopAdditionalInfo
+
+### Partner promocode offers [GET]
+Get list of promocode offers
 
 + Request (application/json; charset=utf-8)
 
@@ -1930,9 +1945,35 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
         + data (array[BasicPartnerPromocodeOffer], fixed-type, required) - array of available promocode offers
         + pagingInfo (PagingInfo, required)
 
+## Detail of Partner promocode offer [/rewards/partnerPromocodes/offers/{promocodeOfferId}]
+Detail of promocode offer
+
+### Partner promocode offer detail [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (BasicPartnerPromocodeOffer)
+
++ Response 404 (application/json; charset=utf-8)
+    Non-existing  promocode offer
+    + Attributes (Errors)
+
+
 ## Partner promocode purchases [/rewards/partnerPromocodes/purchases/]
+Resource to purchase promocode offer or to list already purchased promocodes.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | no
+
+#### Sorting
+This resource does not support sorting. Default sorting is according date of purchase in descending order.
 
 ### Customer partner promocode purchase [POST]
+Purchase partner promocode offer
 
 + Request (application/json; charset=utf-8)
     + Attributes (object)
@@ -1945,14 +1986,79 @@ id                 |eq,in               | `offers?filter=id|in|1,3` transactions
 Purchasing the key was not succesful
     + Attributes (Errors)
 
-
 ### Customer purchased partner promocodes list [GET]
+List of purchases partner promocodes
 
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (object)
         + data (array[PurchasedPartnerPromocodeOffer], fixed-type, required) - array of promocodes and keys purchased by the customer
+
+## Detail of customer purchased partner promocode [/rewards/partnerPromocodes/purchases/{purchasedPartnerPromocodeOfferId}]
+Detail of purchased partner promocode
+
+###  Customer purchased partner promocode detail [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (PurchasedPartnerPromocodeOffer)
+
+## Partner promocode categories  [/rewards/partnerPromocodes/categories]
+Partner promocode offer categories
+
+### Partner promocode categories [GET]
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | no
+
+#### Paging
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `name ascending`.
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PartnerPromocodeCategory], fixed-type, required) - array of available promocode offers
+        + pagingInfo (PagingInfo, required)
+
+
+# Group General
+General resources
+
+## Partner [/partners]
+Resource for getting partner data. No authorization is required.
+
+### Partner [GET]
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Filtering
+This resource supports [filtering](#header-filtering). You can use following filters:
+
+filter name                 | possible operators | example
+---                         | ---                | ---
+isOfferingDeferredPayment   | eq                 | `partners?filter=isOfferingDefferedPayment|eq|true` partner data for partner, which offers deferred payment
+isOfferingServices          | eq                 | `partners?filter=isOfferingServices|eq|true` partner data for partner, which offers services
+promocodeOfferState         | eq                 | `partners?filter=promocodeOfferState|eq|IN_OFFER` partner data for partner, which has at the moment active partner promocode offer
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[Partner], fixed-type, required) - array of available promocode offers
+        + pagingInfo (PagingInfo, required)
 
 # Group My contracts - obsolete
 Set of resources to access and modify client's contracts.
@@ -2626,10 +2732,10 @@ Financial amount with VAT rate.
     + `CARD_MONEYBACK_MASTERCARD_SPECIALS` - MoneyBack - "Cashback Mastercard priceless specials"
     + `CARD_ATM_WITHDRAWAL_FEE` - ATM withdrawal fee
     + `CARD_REVERSAL` - Transaction storno
-    + `DEFERRED_PAYMENT` - New order (deffered payment)
-    + `DEFERRED_PAYMENT_PROMOCODE` - Applied promocode to order (deffered payment)
+    + `DEFERRED_PAYMENT` - New order (deferred payment)
+    + `DEFERRED_PAYMENT_PROMOCODE` - Applied promocode to order (deferred payment)
     + `DEFERRED_PAYMENT_RETURN` - Returned order (partly or whole)
-    + `DEFERRED_PAYMENT_FREE_DELIVERY` - Applied free delivery discount  to order (deffered payment)
+    + `DEFERRED_PAYMENT_FREE_DELIVERY` - Applied free delivery discount  to order (deferred payment)
     + `DEFERRED_PAYMENT_OTHER` - Any other transaction related to order.
     + `DEFERRED_BILLING_PAYMENT_TO_NEXT_MONTH` - Deffered payment for billing - transaction that moves debt to next month.
     + `DEFERRED_BILLING_PAYMENT_FROM_PREVIOUS_MONTH` - Deffered payment for billing - transaction that moves debt to next month.
@@ -2645,7 +2751,7 @@ Financial amount with VAT rate.
 + fees (array[TransactionFee], optional) - array of fees related to the transaction
 + additionalInfoCard (RevolvingTransactionInfoCard, optional) - card payment additional info (card number, mcc and merchant name) in case of card payment otherwise is null
 + additionalInfoForeign (RevolvingTransactionInfoForeign, optional) - foreign payment additional info (original amount and exchange rate) if the transaction was paid in foreign currency otherwise is null
-+ additionalInfoApplication (RevolvingTransactionInfoApplication, optional) - application additional information for transaction related to deffered payment
++ additionalInfoApplication (RevolvingTransactionInfoApplication, optional) - application additional information for transaction related to deferred payment
 + additionalInfoDeferredBilling (RevolvingTransactionInfoDeferredBilling, optional) - deferred billing transaction info if this transaction deferred monthly payment otherwise is null. In case the payment was deferred the payable amount have been transferred to next billing with `id` equal to `billingId`.
 + documents (array[RevolvingTransactionDocument], fixed-type, optional) - Attached documents (fees etc.)
 
@@ -3524,19 +3630,24 @@ Promocode offer - voucher offered to customer
 + description (string, required) - Offer description
 + coinsRequired (CoinAmount, required) - Price of offer in MALL Coins
 + validFrom: `2019-01-18T10:34:44+01:00` (string, required) - The offer is valid from this datetime
-+ validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetimr
++ validTo: `2010-01-18T10:34:44+01:00` (string, required) - The offer is valid until this datetime
 + priority: 100 (number, required) - Priority of offer in a list of offers
 + createdAt: `2017-01-18T10:34:44+01:00` (string, required) - When was the offer created
 + productImages (array[File], required) - Images for the offer
 + productPriceNonDiscounted (Amount, optional, nullable) - Display original non-discounted price
 + productPriceDiscounted (Amount, optional, nullable) - Display discounted price
++ hyperlink (Hyperlink, required) - URL of offer page description or similar information
 + productUrl: `https://www.example.com/product_offer/10` (string, optional, nullable) - URL of offer page description or similar information
 + voucherValidFrom: `2019-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - starting datetime
 + voucherValidUntil: `2020-01-18T10:34:44+01:00` (string, optional, nullable) - Display info about voucher validity - ending info
 + descriptionShort: `Sleva 55%` (string, optional, nullable) - Display short info about a value of the voucher
-+ eshopAddtionalInfo (EshopAdditionalInfo, required) - Display info about partner
-    + `name`: `Mall.cz` (string, required) - marketing name of eshop used in connection with application
++ isLogoDisplayed (boolean, required) - `true` if partner logo should be displayed
++ eshopAdditionalInfo (BasePartner, required) - Display info about partner
 + usageDescription: `Code can be used by following the steps below: - step 1 - step 2` (string, required) - Display info about how to use the external promocode
++ termOfUse: `The code is valid for all purchases above 500,- CZK.` (string, required) - Terms, which must be fullfilled, to be able to use the promocode
++ categories (array[PartnerPromocodeCategory], required) - information about categories, which a promocode offer belongs to
++ isPopular (boolean, required) - represents first best selling active promocode offers (offers, which has the higher number of purchased promocode keys)
++ isNew (boolean, required) - indicates, whether the offer should be labelled as "new"
 
 
 ## PurchasedPartnerPromocodeOffer (object)
@@ -3546,6 +3657,33 @@ Promocode offer purchased by a customer
 + id: `10` (string, required) - Id of purchased key
 + purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
 + offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
+
+## BasePartner (object)
+Basic partner data.
+
+### Properties
++ id: `10` (string, required) - Id of partner data
++ name: `Mall.cz` (string, required) - partner marketing name
++ logo: (File, required) - partner logo
+
+## Partner (BasePartner)
+General partner data, where partner can be internal partner offering deferred payment, partner offering services as well as external partner offering promocode.
+
+### Properties
++ promotionImage (File, optional) - partner logo for display on background
++ isOfferingDeferredPayment (boolean, required) - `true` if partner offers deferred payment
++ isOfferingServices (boolean, required) - `true` if partner offers services
++ promocodeOfferState (enum, required)
+    + `IN_OFFER` - partner offers at the moment at least one active promocode offer
+    + `WAS_OFFERED`- partner does not offer at the moment any promocode offer, but had at least one promocode offer in the past
+    + `NEVER_OFFERED` - partner does not provide promocode offers at all
+
+
+## PartnerPromocodeCategory (object)
+
+### Properties
++ id: `10` (string, required) - Id of partner promocode category
++ name: `Elektronika` (string, required) - partner promocode category name
 
 ## MobileApplicationRating (object)
 Mobile application rating
@@ -3695,3 +3833,10 @@ Request support by phone object
 + phoneNumber: `604 644 989` (string, required) - phone number we should call with the support
 + type: `REVOLVING_LOAN` (enum, required) - type of support required
     + REVOLVING_LOAN
+
+## Hyperlink (object)
+URL link with displayed text
+
+### Properties
+  + url (string, required) - URL link
+  + text (string, optional) - display text for URL link
