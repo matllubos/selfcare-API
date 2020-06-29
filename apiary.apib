@@ -3840,3 +3840,20 @@ URL link with displayed text
 ### Properties
   + url (string, required) - URL link
   + text (string, optional) - display text for URL link
+
+# Exchange Rates
+
+## Exchange Rates [/exchangeRates/{date}]
+Exchange Rates from CSOB, the {date} attribute is passed through to https://www.csob.cz/portal/lide/kurzovni-listek/-/date/{date}/kurzovni-listek.xml and the resulting xml is returned.
+
+
+### Exchange Rates for a date [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/xml)
+    Exchange Rates XML. See https://www.csob.cz/portal/lide/kurzovni-listek/-/date/2020-01-01/kurzovni-listek.xml for shape of response
+
++ Response 404 (application/json; charset=utf-8)
+    Resource not found.
+    + Attributes (Errors)
