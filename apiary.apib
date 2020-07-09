@@ -1443,6 +1443,8 @@ Use this endpoint to indicate, that user has seen the notification(s) and/or int
 
 Use filter (by ID) to limit set of affected notifications.
 
+Use filter by `isTriggered|eq|false` to mark all notifications as read and triggered (acts as "read all" feature). 
+
 + Request  (application/json; charset=utf-8)
     + Attributes (object)
         + isRead: `true` (boolean) - Mark notification as read (i.e. user has seen the notification)
