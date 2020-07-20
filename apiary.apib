@@ -1677,11 +1677,21 @@ Display pin of the card. Returns URL of the image with PIN. The URL is invalidat
 
 
 + Request (application/json; charset=utf-8)
+    Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
+    + Attributes
+        {}
+
++ Response 422 (application/json; charset=utf-8)
+    Returned when card state does not allow PIN retrieval
+    + Attributes (Errors)
+
+
++ Request (application/json; charset=utf-8)
     + Attributes
         + `otpCode`: `123` (string, required, nullable)
 
 + Response 422 (application/json; charset=utf-8)
-    Returned when the `otpCode` authorization does not match.
+    Returned when the `otpCode` authorization does not match or card PIN cannot be retrieved due to card state.
     + Attributes (Errors)
 
 
@@ -3812,6 +3822,7 @@ Contract Payment Card (virtual or physical)
     + `WRONG_PIN` - customer had 3 wrong PIN tries (used for BLOCKED_TEMPORARILY card)
 + `onlinePaymentsEnabled`: true (boolean, required) - Are online payments enabled? Note that if this is enabled it also implies a fixed preset single transaction amount limit.
 + `atmWithdrawalEnabled`: true (boolean, required) - Are cash withdrawals from ATMs enabled? Note that if this is enabled it also implies a fixed preset maximum withdrawal amount limit.
++ `canShowPin`: true (boolean, optional) - Is card in a state that allows retrieval of customer PIN?
 
 ## PaymentCardTemporaryBlocking (object)
 Data required to temporary block a card.
