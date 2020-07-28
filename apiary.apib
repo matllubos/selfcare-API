@@ -1717,13 +1717,34 @@ Display pin of the card. Returns URL of the image with PIN. The URL is invalidat
 
 
 + Request (application/json; charset=utf-8)
-    Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
+    Request with an empty body to send otpCode to a customer. Returns validity of the code sent. When the request is
+    repeated and the token from previous request is still valid, the confirmation code is not sent to the customer,
+    even though the endpoint responds as usual, with validity of the first confirmation code.
     + Attributes
         {}
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
 
++ Request (application/json; charset=utf-8)
+    Request with a parameter `otpResend` forces the endpoint to send the customer new confirmation code, subject to
+    rules regarding the frequenecy of calls to the endpoint and number of calls. If these rules are broken, then returns `HTTP 429 (Too Many Requests)`.
+    Currently the rules allow the call to be made once in 25s, seven times. After that, it is necessary to wait for time based expiration
+    of the first confirmation code sent (time of oldest code sent + 5 minutes).
+    + Attributes
+        + `otpResend`: `true` (boolean) - forces resend of confirmation code to the customer 
+
++ Response 480 (application/json; charset=utf-8)
+    + Attributes (OTPErrors)
+
++ Request (application/json; charset=utf-8)
+    If resend frequency rules are broken, HTTP 429 will be returned
+    + Attributes
+        + `otpResend`: `true` (boolean) - forces resend of confirmation code to the customer 
+
++ Response 429 (application/json; charset=utf-8)
+    Returned if endpoint call frequency rules are broken.
+    + Attributes (Errors)
 
 + Request (application/json; charset=utf-8)
     Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
@@ -2609,7 +2630,7 @@ Financial amount with VAT rate.
     + `FEMALE`
 + dateOfBirth: `1994-02-10` (string, optional) - date of birth in case of non-Czech citizens
 + placeOfBirth: `CZ` (string, optional) - ISO 3166 alpha 2 country code
-+ isConsentTelco: `False` (boolean, optional) - consent with Telco scoring in revolving application process
++ isConsentTelco: `false` (boolean, optional) - consent with Telco scoring in revolving application process
 + typeOfHousing (enum, optional) - type of accommodation
     + OWN
     + RENT
