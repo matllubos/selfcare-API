@@ -983,9 +983,8 @@ The request will modify the most recent application in progress.
 
 + Request Signing contract - request to send OTP (application/json; charset=utf-8)
     The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
+    + Attributes (OTPRequest)
 
-    + Attributes
-        {}
 
 + Response 480 (application/json; charset=utf-8)
     OTP has been sent
@@ -995,12 +994,7 @@ The request will modify the most recent application in progress.
 
 + Request Signing contract (application/json; charset=utf-8)
     Request to resend OTP. The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
-
-    + Body
-
-            {
-                "otpResend": true
-            }
+    + Attributes (OTPResendRequest)
 
 + Response 480 (application/json; charset=utf-8)
     OTP has been sent
@@ -1010,12 +1004,7 @@ The request will modify the most recent application in progress.
 
 + Request Signing contract send OTP (application/json; charset=utf-8)
     The attribute `slug` must be set to `CONFIRMATION_AGREEMENT_SMS`
-
-    + Body
-
-            {
-                "otpCode": "abc123"
-            }
+    + Attributes (OTPCodeRequest)
 
 + Response 200
     OTP code is valid
@@ -1595,18 +1584,17 @@ Get detail of given payment card
 Activate the given card. When activating the card for the first time, OTP code is required. Can also be used to activate the card after it has been temporarily blocked.
 
 + Request (application/json; charset=utf-8)
-    + Attributes
+Please note that `otpCode` is required when activating the card for the first time. It is not required when the card is activated from `BLOCKED_TEMPORARILY` state.
+    + Attributes (OTPCodeRequest)
         + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `123` (string, optional) - Please note that `otpCode` is required when activating the card for the first time. It is not required when the card is activated from `BLOCKED_TEMPORARILY` state.
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes (PaymentCard)
 
 
 + Request (application/json; charset=utf-8)
-    + Attributes
+    + Attributes (OTPCodeRequest)
         + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `123` (string, required)
 
 + Response 422 (application/json; charset=utf-8)
     Returned when the `otpCode` authorization does not match.
@@ -1614,9 +1602,8 @@ Activate the given card. When activating the card for the first time, OTP code i
     + Attributes (Errors)
 
 + Request (application/json; charset=utf-8)
-    + Attributes
+    + Attributes (OTPCodeRequest)
         + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `123` (string, required)
 
 + Response 422 (application/json; charset=utf-8)
     Returned when card cannot be activated from current state (i.e. BLOCKED_PERMANENTLY).
@@ -1638,9 +1625,8 @@ Activate the given card. When activating the card for the first time, OTP code i
 
 
 + Request (application/json; charset=utf-8)
-    + Attributes
+    + Attributes  (OTPCodeRequest)
         + `state`: `ACTIVATED` (enum, required)
-        + `otpCode`: `1234` (string, required)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
@@ -1708,8 +1694,8 @@ Return an URL of an image with the card's PIN number.
 Display pin of the card. Returns URL of the image with PIN. The URL is invalidated (ceases to exist) after first GET request.
 
 + Request (application/json; charset=utf-8)
-    + Attributes
-        + `otpCode`: `123` (string, required, nullable) - request confirmation code - second level of authorization
+request confirmation code - second level of authorization
+    + Attributes (OTPCodeRequest)
 
 + Response 200 (application/json; charset=utf-8)
     + Attributes
@@ -1720,8 +1706,7 @@ Display pin of the card. Returns URL of the image with PIN. The URL is invalidat
     Request with an empty body to send otpCode to a customer. Returns validity of the code sent. When the request is
     repeated and the token from previous request is still valid, the confirmation code is not sent to the customer,
     even though the endpoint responds as usual, with validity of the first confirmation code.
-    + Attributes
-        {}
+    + Attributes (OTPRequest)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
@@ -1731,16 +1716,14 @@ Display pin of the card. Returns URL of the image with PIN. The URL is invalidat
     rules regarding the frequenecy of calls to the endpoint and number of calls. If these rules are broken, then returns `HTTP 429 (Too Many Requests)`.
     Currently the rules allow the call to be made once in 25s, seven times. After that, it is necessary to wait for time based expiration
     of the first confirmation code sent (time of oldest code sent + 5 minutes).
-    + Attributes
-        + `otpResend`: `true` (boolean) - forces resend of confirmation code to the customer 
+    + Attributes (OTPResendRequest)
 
 + Response 480 (application/json; charset=utf-8)
     + Attributes (OTPErrors)
 
 + Request (application/json; charset=utf-8)
     If resend frequency rules are broken, HTTP 429 will be returned
-    + Attributes
-        + `otpResend`: `true` (boolean) - forces resend of confirmation code to the customer 
+    + Attributes (OTPResendRequest)
 
 + Response 429 (application/json; charset=utf-8)
     Returned if endpoint call frequency rules are broken.
@@ -1748,8 +1731,7 @@ Display pin of the card. Returns URL of the image with PIN. The URL is invalidat
 
 + Request (application/json; charset=utf-8)
     Request with an empty body to send otpCode to a customer. Returns validity of the code sent.
-    + Attributes
-        {}
+    + Attributes (OTPRequest)
 
 + Response 422 (application/json; charset=utf-8)
     Returned when card state does not allow PIN retrieval
@@ -1757,8 +1739,7 @@ Display pin of the card. Returns URL of the image with PIN. The URL is invalidat
 
 
 + Request (application/json; charset=utf-8)
-    + Attributes
-        + `otpCode`: `123` (string, required, nullable)
+    + Attributes (OTPCodeRequest)
 
 + Response 422 (application/json; charset=utf-8)
     Returned when the `otpCode` authorization does not match or card PIN cannot be retrieved due to card state.
@@ -2139,6 +2120,23 @@ promocodeOfferState         | eq                 | `partners?filter=promocodeOff
     + Attributes (object)
         + data (array[Partner], fixed-type, required) - array of available promocode offers
         + pagingInfo (PagingInfo, required)
+
+# Group Exchange Rates
+
+## Exchange Rates [/exchangeRates/{date}]
+Exchange Rates from CSOB, the {date} attribute is passed through to https://www.csob.cz/portal/lide/kurzovni-listek/-/date/{date}/kurzovni-listek.xml and the resulting xml is returned.
+
+
+### Exchange Rates for a date [GET]
+
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/xml)
+    Exchange Rates XML. See https://www.csob.cz/portal/lide/kurzovni-listek/-/date/2020-01-01/kurzovni-listek.xml for shape of response
+
++ Response 404 (application/json; charset=utf-8)
+    Resource not found.
+    + Attributes (Errors)
 
 # Group My contracts - obsolete
 Set of resources to access and modify client's contracts.
@@ -2528,6 +2526,23 @@ Request Account Upgrade request support by phone.
 
 ## OTPErrors (Errors)
 + otpValidTo: `2017-01-18T10:34:44+01:00` (string, required) - datetime of token validity
+
+## OTPRequest (object)
+Request to send customer OTP via SMS.
+
+### Properties
+
+## OTPCodeRequest (object)
+Request to send OTP code - customer confirming the action required
+
+### Properties
++ `otpCode`: `abc234` (string) - confirmation code the customer received (usually) by SMS
+
+## OTPResendRequest (object)
+Request to re-send customer OTP via SMS
+
+### Properties
++ `otpResend`: `true` (boolean) - forces the resend of the OTP SMS to customer
 
 ## PagingInfo (object)
 + itemsPerPage: 10 (number, required) - number of items per page
@@ -3935,20 +3950,3 @@ URL link with displayed text
 ### Properties
   + url (string, required) - URL link
   + text (string, optional) - display text for URL link
-
-# Exchange Rates
-
-## Exchange Rates [/exchangeRates/{date}]
-Exchange Rates from CSOB, the {date} attribute is passed through to https://www.csob.cz/portal/lide/kurzovni-listek/-/date/{date}/kurzovni-listek.xml and the resulting xml is returned.
-
-
-### Exchange Rates for a date [GET]
-
-+ Request (application/json; charset=utf-8)
-
-+ Response 200 (application/xml)
-    Exchange Rates XML. See https://www.csob.cz/portal/lide/kurzovni-listek/-/date/2020-01-01/kurzovni-listek.xml for shape of response
-
-+ Response 404 (application/json; charset=utf-8)
-    Resource not found.
-    + Attributes (Errors)
