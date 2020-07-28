@@ -953,7 +953,7 @@ The request will modify the most recent application in progress.
 
             {
                 "sourceOfIncome": "EMPLOYMENT",
-                "trialPeriod": "False,
+                "trialPeriod": false,
                 "bankStatements": [{
                     "file": {
                         "filename": "doklad1.pdf",
@@ -1267,6 +1267,55 @@ Get list of transactions for revolving contract of logged-in user.
 + Response 404 (application/json; charset=utf-8)
     Contract not found.
     + Attributes (Errors)
+
+## Exported transactions [/my/contract/transaction/export]
+Exported transactions for revolving contract of logged-in user to a file.
+
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | yes
+
+#### Filtering
+Filtering is the same as in `/my/contract/transaction` endpoint.
+
+### Run transaction export to a file [POST]
+Endpoint will generate transaction file in given `format`. The file in given format will be generated in the background. It may not be available for download immediately (when object still has a `state: PROCESSING`).
+
++ Request Generate xls transaction file (application/json; charset=utf-8)
+    + Attributes (object)
+        + format: `XLSX` (enum, required) - output file will have given extension
+            + `XLSX` - spreadsheet with .xlsx extension(`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`)
+
+
++ Response 201 (application/json; charset=utf-8)
+    + Attributes (ExportedFile)
+
++ Request Generate transaction file in unrecognized format (application/json; charset=utf-8)
+    + Attributes (object)
+        + format: `unsupported-format`
+
++ Response 422 (application/json; charset=utf-8)
+    File format not supported
+    + Attributes (Errors)
+
+## Exported transactions detail [/my/contract/transaction/export/{fileUUID}]
+
+### Get exported transaction file [GET]
+Get exported generated transaction file
+
++ Request Get transaction file (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (ExportedFile)
+
++ Request Get transaction file already expired or with wrong UUID (application/json; charset=utf-8)
+
++ Response 404 (application/json; charset=utf-8)
+    File not found.
+    + Attributes (Errors)
+
 
 ## Transaction detail [/my/contract/transaction/{transactionId}]
 Detail of transaction for revolving contract of logged-in user.
@@ -2999,6 +3048,16 @@ Attached document (document only for client, document for specific contract, doc
 + type: `REVOLVING_LOAN_FEE` (enum, required) - Type of the document
     + `REVOLVING_LOAN_FEE` - Poplatek za revolvingový úvěr
 + name: `Zjednodušený daňový doklad` (string, required) - Human-readable localized document name
+
+## ExportedFile (BaseDocument)
++ id: `00001ca5-db91-4040-b454-fb5b81c0abb4` (string, required) - UUID of temporary file
++ type: `TRANSACTIONS` (enum, required) - Type of the file
+    + `TRANSACTIONS` - Transaction export file
++ expiresAt `2020-01-18T10:34:44+01:00` (string, optional) - Date and time of file availability
++ state: `PROCESSING` (enum, required) - State of file
+    + `PROCESSING` - File is being generated
+    + `READY` - File is ready to download
++ file (File, optional) - File in predefined format
 
 ## DeliveryCarrier (object)
 Delivery carrier
