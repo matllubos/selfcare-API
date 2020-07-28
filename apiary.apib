@@ -1139,8 +1139,8 @@ This resource supports filtering.
 
 filter name             | possible operators    | example
 ---                     | ---                   | ---
-isPaid                  | eq                    | `billing?filter=isPaid|eq|true` filters billings, where the balance is equal to zero (eg. open billing with zero balance)
-isPaid                  | eq                    | `billing?filter=isPaid|eq|false` filters billings, which were not paid yet (eg. closed last month and open actual month billing)
+hasDebt                 | eq                    | `billing?filter=hasDebt|eq|true` filters billings, where has debt greater than zero (balance > 0)
+hasDebt                 | eq                    | `billing?filter=hasDebt|eq|false` filters billings, where has debt less than or equal to zero (balance <= 0)
 paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|AVAILABLE` billings, which are ready to be paid (eg. last month billing, whose balance is not equal to zero)
 paymentAvailability     | eq                    | `billing?filter=paymentavailability|eq|NOT_AVAILABLE` billings, which cannot be paid (eg. open billing or billing with zero balance)
 
@@ -2705,7 +2705,8 @@ Financial amount with VAT rate.
 + coinReward (CoinAmount, required) - Amount of coins, which customer get for paying the billing
 + dueDate: `2020-05-20` (string, required) - billing due date
 + id: `378` (string, required) - billing id
-+ isPaid (boolean, required) - information, whether the billing was paid or not
++ hasDebt (boolean, required) - billing has debt
++ isPaid (boolean, required) - information, whether the billing balance less than or equal to zero and was paid by customer transaction
 + month: `4` (number, required) - month of the billing, 0 represents January, 1 - February
 + paymentAvailability (PaymentAvailability, required) - information about possibility to pay for the billing
 + year: `2020` (number, required) - year of the billing
