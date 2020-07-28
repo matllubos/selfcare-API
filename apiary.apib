@@ -1941,14 +1941,6 @@ partnerId          |eq,in               | `offers?filter=partnerId|in|1,2,5` pro
 isPopular          |eq                  | `offers?filter=isPopular|eq|true` active promocode offers, which are currently best-selling
 isNew              |eq                  | `offers?filter=isNew|eq|true` active promocode offers, which are new
 
-
-Fulltext search can be used in this resource. The system will search for `query_string` in the field `eshopAdditionalInfo.name`.
-The search is case insensitive and does not reflect the accents.
-
-fulltext search  | query string     | example
----              | ---              | ---
-fulltext         | `mall`           | `offers?filter=fulltext|icontains|mall` promocode offers, which contain string `mall` in the name of eshopAdditionalInfo
-
 ### Partner promocode offers [GET]
 Get list of promocode offers
 
