@@ -1979,12 +1979,16 @@ Resource to purchase promocode offer or to list already purchased promocodes.
 
 feature                         | supported by resource
 ---                             | ---
-[paging](#header-paging)        | no
-[sorting](#header-sorting)      | no
+[paging](#header-paging)        | yes
+[sorting](#header-sorting)      | yes
 [filtering](#header-filtering)  | no
 
+#### Paging
+This resource supports [paging](#header-paging). The attribute `id` will be used as the value for `before` or `after` parameter.
+
 #### Sorting
-This resource does not support sorting. Default sorting is according date of purchase in descending order.
+This resource supports sorting according `purchasedAt`. Default sorting is according `id` in descending order.
+Example: `rewards/partnerPromocodes/purchases?sort=-purchasedAt`
 
 ### Customer partner promocode purchase [POST]
 Purchase partner promocode offer
@@ -3670,6 +3674,7 @@ Promocode offer purchased by a customer
 
 ### Properties
 + id: `10` (string, required) - Id of purchased key
++ purchasedAt: `2020-05-18T10:34:44+01:00` (string, required) - Date of purchase
 + purchasedKey: `ABCD-offer-987654` (string, required) - Customer purchase usable key of the offer (what thecustomer uses to get a discount)
 + offer (BasicPartnerPromocodeOffer, required) - Offer the key is based on
 
