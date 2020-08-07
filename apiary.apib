@@ -854,15 +854,6 @@ The request will modify the most recent application in progress.
         + firstName: `John`
         + lastName: `Doe`
 
-+ Request Not providing all required attributes of the bound fields (application/json; charset=utf-8)
-    lengthOfMaternityLeave value is missing in request
-    + Attributes (AccountUpgradeApplicationRequest)
-        + sourceOfIncome: `MATERNITY_LEAVE`
-
-+ Response 422 (application/json; charset=utf-8)
-    Attribute lengthOfMaternityLeave must be specified with this source of income type.
-    + Attributes (Errors)
-
 + Request with customer younger than 18 years old (application/json; charset=utf-8)
     + Attributes (AccountUpgradeApplicationRequest)
         + dateOfBirth: `2020-01-01`
@@ -2693,11 +2684,6 @@ Financial amount with VAT rate.
     + ACCOUNTING
     + OTHERS
 + startOfBusiness: `1994-02-10` (string, optional) - since when is the business running, required in case of self-employed source of income
-+ lengthOfMaternityLeave (enum, optional) - required in case of maternity leave source of income
-    + LESS_THAN_ONE_YEAR
-    + ONE_TO_TWO_YEARS
-    + TWO_TO_THREE_YEARS
-    + THREE_AND_MORE_YEARS
 + otpCode (string, optional) - SMS code to sign the contract
 + kycIdentificationMethod (enum, optional) - how the client's identity will be verified
     + BANK_BUSINESS_CARD
