@@ -2101,9 +2101,17 @@ This resource supports [filtering](#header-filtering). You can use following fil
 
 filter name                 | possible operators | example
 ---                         | ---                | ---
+categoryId                  | eq,in              | `partners?filter=categoryId|in|5,9` partners, whose category has id 5 or 9
 isOfferingDeferredPayment   | eq                 | `partners?filter=isOfferingDefferedPayment|eq|true` partner data for partner, which offers deferred payment
 isOfferingServices          | eq                 | `partners?filter=isOfferingServices|eq|true` partner data for partner, which offers services
 promocodeOfferState         | eq                 | `partners?filter=promocodeOfferState|eq|IN_OFFER` partner data for partner, which has at the moment active partner promocode offer
+
+Fulltext search can be used in this resource. The system will search for `query_string` in the field `name`.
+The search is case insensitive and does not reflect the accents.
+
+fulltext search  | query string     | example
+---              | ---              | ---
+fulltext         | `mall`           | `partners?filter=fulltext|icontains|mall` partners, which contain string `mall` in the name
 
 + Request (application/json; charset=utf-8)
 
@@ -2111,6 +2119,27 @@ promocodeOfferState         | eq                 | `partners?filter=promocodeOff
     + Attributes (object)
         + data (array[Partner], fixed-type, required) - array of available promocode offers
         + pagingInfo (PagingInfo, required)
+
+## Partner categories  [/partners/categories]
+Partner categories
+
+### Partner categories [GET]
+feature                         | supported by resource
+---                             | ---
+[paging](#header-paging)        | no
+[sorting](#header-sorting)      | no
+[filtering](#header-filtering)  | no
+
+#### Paging
+This resource does not support paging.
+
+#### Sorting
+Resource does not support manual sorting, default sorting is by `name ascending`.
+
++ Request (application/json; charset=utf-8)
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (object)
+        + data (array[PartnerCategory], fixed-type, required) - array of available categories
 
 # Group Exchange Rates
 
@@ -3763,6 +3792,7 @@ Basic partner data.
 General partner data, where partner can be internal partner offering deferred payment, partner offering services as well as external partner offering promocode.
 
 ### Properties
++ categories (array[PartnerCategory], required)  - list of partners categories
 + promotionImage (File, optional) - partner logo for display on background
 + isOfferingDeferredPayment (boolean, required) - `true` if partner offers deferred payment
 + isOfferingServices (boolean, required) - `true` if partner offers services
@@ -3771,6 +3801,12 @@ General partner data, where partner can be internal partner offering deferred pa
     + `WAS_OFFERED`- partner does not offer at the moment any promocode offer, but had at least one promocode offer in the past
     + `NEVER_OFFERED` - partner does not provide promocode offers at all
 
+
+## PartnerCategory (object)
+
+### Properties
++ id: `5` (string, required) - Id of partner category
++ name: `Móda` (string, required) - partner category name
 
 ## PartnerPromocodeCategory (object)
 
