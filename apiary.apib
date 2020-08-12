@@ -2942,6 +2942,8 @@ Financial amount with VAT rate.
 + type (AccountType, required) - account type
 + availableAmount (Amount, required) - available amount of an account
 + totalLimit (Amount, required) - total limit of an account
++ availableAnnualAmount (Amount, optional) - available annual amount of an account (only for non premium account)
++ totalAnnualLimit (Amount, optional) - total annual limit of an account (only for non premium account)
 + availableAmountState: `AVAILABLE` (enum, required) - state of available amount
     + `AVAILABLE` - the customer has available amount to spend
     + `EXHAUSTED` - the limit was exhausted, the customer has spent the whole available amount
