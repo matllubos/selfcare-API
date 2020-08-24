@@ -1903,7 +1903,7 @@ type             |in,eq               | `documents?filter=type|eq|CONTRACT` only
 # Group MALL Coin
 
 ## Client's MALL Coin overview [/coins/overview]
-Overview of client's coin account. Currently only account coin balance.
+Overview of client's coin account.
 
 ### MALL Coin account overview [GET]
 Get coin account overview
@@ -1911,7 +1911,10 @@ Get coin account overview
 + Request (application/json; charset=utf-8)
 
 + Response 200 (application/json; charset=utf-8)
-    + Attributes (CoinBalance)
+    + Attributes (object)
+        + coinBalance: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
+        + earliestExpiration (EarliestCoinsExpiration, required)
+
 
 ## Client's MALL Coin transactions [/coins/transactions]
 Overview of client's MALL Coin transactions.
@@ -3830,11 +3833,6 @@ Rewards the customer received from all the referees (new customers referred).
 + receivedDate: `2014-02-10` (string, required) - the date when referee paid the order and the reward was received
 + expirationDate: `2014-04-10` (string, required) - to which date is the referral key applicable on order
 
-## CoinBalance (object)
-Customer's coin account overview. Is based on CoinAmount object.
-### Properties
-+ coinBalance: 12500 (CoinAmount, required) - Amount in minor units (12500 represents 125 coins/units)
-
 ## RelatedDataObject (object)
 ### Properties
 + application (Application, optional, nullable) - Related Application
@@ -3857,6 +3855,16 @@ Detail of customer's Mall Coin transaction
     + `SERVICES_DISCOUNT` - Coins were spent on services discount
     + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
 + `relatedData` (RelatedDataObject, optional, nullable) - data and objects related to the MALL Coin transaction
++ remainingValue (CoinAmount, optional) - amount of remaining (unused) coins; the value is always `null` for debit transactions
++ expirationDate: `2020-06-30` (string, optional) - expiration date; the value is always `null` for debit transactions
+
+
+## EarliestCoinsExpiration (object)
+
+### Properties
++ date: `2020-06-30` (string, optional) - nearest expiration date of coins
++ sum: 9000 (CoinAmount, optional) - nearest expiration sum of coins
+
 
 ## PromoBanner (object)
 Promo banner description
