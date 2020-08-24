@@ -3603,36 +3603,6 @@ Collection of URLs used for redirection of a customer back to a partner website 
     + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
 
 
-## MoneyTransferAvailability (object)
-+ One Of
-    + `moneyTransferParameters`
-        + `limitFrom` (Amount, required) - Minimal available money transfer amount (possible overpayment taken into account)
-        + `limitTo` (Amount, required) - Maximal available money transfer amount (zero when money transfer unavailable)
-        + `overpayment` (Amount, optional) - Overpayment amount
-    + `unavailabilityReason`
-        + `reason`: `IN_RECOVERY` (enum, optional) - reason of possible unavailability of money transfer operation
-            + `IN_RECOVERY` - Customer in collection
-            + `NOT_SUFFICIENT_BALANCE` - Customer doesn't have sufficient balance
-            + `NO_VERIFIED_MOBILE` - Customer doesn't have verified mobile (PRIMARY mobile)
-            + `OTHER` - Unspecified reason (internal failure etc.)
-
-
-## MoneyTransfer (object)
-+ `moneyTransfer` (object, required)
-    + `account` (AccountNumber, required) - Customer's account number
-    + `amount` (Amount, required) - Money transfer amount
-    + `variableSymbol`: 123456789 (number, optional) - Variable symbol of payment
-    + `specificSymbol`: 123456789 (number, optional) - Specific symbol of payment
-    + `constantSymbol`: 123456789 (number, optional) - Constant symbol of payment
-
-
-## MoneyTransferResponse (object)
-+ One Of
-    + `otp` (object, required)
-        + `id`: 1323589 (number, required) - Authorization ID
-        + `key`: `fc1ec9ae87da7f97fdbbe7cc45f5e9cee0372fcd37bc25c94c0ed62ce27a436b` (string, required) - Authorization key
-    + `accountMoveId`: 1122334455 (number, required) - Money transfer relevant account move ID
-
 ## Authorization (object)
 + blockedUntil: `2017-01-18T10:34:44+01:00` (string, optional) - requested operation is blocked until specified time
 
@@ -3722,7 +3692,7 @@ Collection of URLs used for redirection of a customer back to a partner website 
 
 
 ## Notification (object)
-+ `id`: 45688987 (number) - Notification ID
++ `id`: `45688987` (string, required) - Notification ID
 + `createdDate` : `2017-01-18T10:34:44+01:00` (string) - Date and time of notification creation
 + `title`: `Order has been cancelled` (string) - Title of the notification
 + `text`: `Your order no.4566221 has been cancelled` (string, optional) - Text of the notification
