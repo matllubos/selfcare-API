@@ -3304,9 +3304,9 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
 + documents (array[ContractDocument], fixed-type, optional) - Attached documents (invoices etc.)
 + state: `PROCESSING` (OrderState, required) - Order state.
 + deliveryCarrier (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ deliveryDate: `2017-01-18T10:34:44+01:00` (string, optional) - Date and time of delivery
++ deliveryDate: `2017-01-18` (string, optional) - Date of delivery
 + deliveryTrackingNumber: `EX12221` (string, optional) - Delivery tracking number
-+ sentDate: `2017-01-12T10:34:44+01:00` (string, optional) - Date and time of order shipping
++ sentDate: `2017-01-12` (string, optional) - Date of order shipping
 
 
 ## HistoryOrder (HistoryFinancedSubject)
@@ -3331,9 +3331,9 @@ Detailed information about order (type `GOODS` and `GOODS_BROKER`)
     + `RETURNED`
     + `DELIVERED`
 + deliveryCarrier (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ deliveryDate: `2017-01-18T10:34:44+01:00` (string, optional, nullable) - Date and time of delivery
++ deliveryDate: `2017-01-18` (string, optional, nullable) - Date of delivery
 + deliveryTrackingNumber: `EX12221` (string, optional, nullable) - Delivery tracking number
-+ sentDate: `2017-01-12T10:34:44+01:00` (string, optional, nullable) - Date and time of order shipping
++ sentDate: `2017-01-12` (string, optional, nullable) - Date of order shipping
 
 
 ## Item (object)
@@ -3370,8 +3370,8 @@ Order item information, needed to create an application.
     + `DELIVERED` - Order item was delivered to customer
     + `RETURNED` - Order item was returned to merchant
     + `CANCELLED` - Order item was cancelled
-+ `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional) - Date and time when item was sent. Only when the whole order was NOT sent at once.
-+ `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
++ `sentDate`: `2017-01-12` (string, optional) - Date when item was sent. Only when the whole order was NOT sent at once.
++ `deliveryDate`: `2017-01-12` (string, optional) - Date when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
 + `services` (array[Service]) - insurance services objects for item
 + `rewards` (array[Reward], fixed-type, optional, nullable) - rewards purchasable for order item
@@ -3410,8 +3410,8 @@ Order item information, needed to create an application.
     + `DELIVERED` - Order item was delivered to customer
     + `RETURNED` - Order item was returned to merchant
     + `CANCELLED` - Order item was cancelled
-+ `sentDate`: `2017-01-10T10:34:44+01:00` (string, optional, nullable) - Date and time when item was sent. Only when the whole order was NOT sent at once.
-+ `deliveryDate`: `2017-01-12T12:34:56+01:00` (string, optional, nullable) - Date and time when item was delivered. Only when the whole order was NOT sent at once.
++ `sentDate`: `2017-01-12` (string, optional, nullable) - Date when item was sent. Only when the whole order was NOT sent at once.
++ `deliveryDate`: `2017-01-12` (string, optional, nullable) - Date when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional, nullable) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
 
