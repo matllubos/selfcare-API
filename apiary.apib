@@ -2815,7 +2815,7 @@ Financial amount with VAT rate.
 ## RevolvingLoanContractFee (object)
 + value (Amount, required) - fee value
 + createdDate: `2020-03-01` (string, required) - date when fee is created
-+ dueDate: `2020-04-20` (string, required) - fee due date
++ dueDate: `2020-04-20` (string, required) - fee due date, usualy due date of a monthly billing the fee falls into
 
 ## RevolvingLoanContractTrialInfo (object)
 + totalMonths: `3` (number, required) - free trial period - total length in months
@@ -3003,7 +3003,7 @@ Financial amount with VAT rate.
     + cancellationReason (enum, optional, nullable)
         + `BACKOFFICE`
         + `CUSTOMER`
-    + fee (RevolvingLoanContractFee, optional) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created; in case that contract is not active, the fee can be omitted;
+    + fee (RevolvingLoanContractFee, optional) - value - fee value for current month, aliquot value in case of upgrade; createdDate - date when fee was created; dueDate - fee due date (monthly billing due date) in case that contract is not active, the fee can be omitted;
     + trialInfo (RevolvingLoanContractTrialInfo, optional) - info about trial period, is null when customer is not in free trial period yet or free trial period expired
     + currentMonthLastContractTypeChange (ContractTypeChangeResponse, optional) - info about last change done in current month (is defined only when user is in downgrade/upgrade process, is undefined the month after downgrade/upgrade process)
 
