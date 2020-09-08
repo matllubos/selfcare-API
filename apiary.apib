@@ -2589,7 +2589,7 @@ Request Account Upgrade request support by phone.
 
 ## OTPErrors (Errors)
 + otpValidTo: `2017-01-18T10:34:44+01:00` (string, required) - datetime of token validity
-+ obfuscatedPhone: `+420 737 *** *56` (string, required) - obfuscated customer's phone where OTP code was sent
++ phone: `+420 737 *** *56` (string, required) - Customer's phone where OTP code was sent. The number is obfuscated if customer's request is not authorized.
 
 ## OTPRequest (object)
 Request to send customer OTP via SMS.
