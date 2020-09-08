@@ -2993,13 +2993,19 @@ Financial amount with VAT rate.
     + `EXHAUSTED` - the limit was exhausted, the customer has spent the whole available amount
     + `BLOCKED` - the available amount was blocked because customer is blocked
 + revolvingLoanContractAdditionalInfo (object, required, nullable) - additional information for client with revolving loan
-    + state: `ACTIVE` (enum, required) - state of loan or application
+    + state: `ACTIVE` (enum, required) - state of loan contract
         + `PROCESSING`
         + `WAITING_FOR_SIGNATURE`
         + `CANCELLED_BEFORE_SIGNING`
         + `SIGNED`
         + `ACTIVE`
         + `RESIGNED`
+    + applicationState: `PROCESSING` (enum, required) - state of loan application
+        + `PROCESSING`
+        + `FINISHED`
+        + `CANCELLED`
+        + `REJECTED`
+        + `ERROR`
     + cancellationReason (enum, optional, nullable)
         + `BACKOFFICE`
         + `CUSTOMER`
