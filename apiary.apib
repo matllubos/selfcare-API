@@ -3892,15 +3892,14 @@ Detail of customer's Mall Coin transaction
 + value (CoinAmount, required) - amount of coins moved in the transaction
 + transactionReason (enum, required) - reason for creating the transaction
     + `APP_DOWNLOAD_BONUS` - Coins were received as a bonus for app download
-    + `CUSTOMER_COMPENSATION` - Coins were received as customer compensation
     + `DELIVERY_DISCOUNT` - Coins were spent on delivery discount
     + `EXPIRATION` - Coins were expired
     + `MONTHLY_BILLING_PAID` - Coins were received for payment of monthly billing
     + `ORDER_PAID` - Coins were received for order payment
-    + `OTHER` - Coins were received for other reason
     + `PAID_ITEM_RETURNED` - Coins removal for returned order item
     + `SERVICES_DISCOUNT` - Coins were spent on services discount
     + `VOUCHER_ACQUISITION` - Coins were spent on voucher acquisition
+    + `MANUAL` - Coins were added/removed to customer by administrator
 + `relatedData` (RelatedDataObject, optional, nullable) - data and objects related to the MALL Coin transaction
 + remainingValue (CoinAmount, optional) - amount of remaining (unused) coins; the value is always `null` for debit transactions
 + expirationDate: `2020-06-30` (string, optional) - expiration date; the value is always `null` for debit transactions
