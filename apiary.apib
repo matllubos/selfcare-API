@@ -19,9 +19,6 @@ Use this endpoint to obtain the access token. There are two possible ways to log
 #### Classic login
 Provide `username` and `password`. `otpCode` may be required for some security reasons.
 
-+ Parameters
-    + exponeaCookie: `12345678-1234-1234-1234-123456789abc` (string, optional) - UUID from Exponea SDK cookie.
-
 + Request customer without revolving account login (application/json; charset=utf-8)
     + `username`: `joe.doe@example.com` (string, required)
     + `password`: `1234567` (string, required)
@@ -326,11 +323,12 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
     + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
     + phone: `+420777777777` (string) - Customer's phone in international format.
     + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
-    + consents  (array, required) - List of consents given by customer
+    + consents (array, required) - List of consents given by customer
         + `REGISTRATION` - Consent with service terms and conditions (required)
         + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
     + promoSource: `referral:JNOVAK586` (string) - Contains either promo source URL part or referral code of referrer (should start with `referral:` prefix)
     + cjToken: `1234abcd` (string, optional) - CJEVENT affiliate token. It's obtained from URL parameters - ie. https://mallpay.cz/?cjevent=some-cute-code
+    + extras (AccountLoginExtraAttributes, optional)
 
 + Request classic registration with referral code (application/json; charset=utf-8)
     + Attributes (object)
@@ -3764,6 +3762,15 @@ Customer's device for receiving push notifications.
     + `ANDROID`
     + `IOS`
 + `token` (string, required) - Actual token of the device
+
+## AccountLoginExtraAttributes (object)
+Extra attributes sent when customer logs in.
+
+### Properties
++ exponeaCookie: `12345678-1234-1234-1234-123456789abc` (string, optional) - UUID from Exponea SDK cookie.
++ cjSID: `ShoPPerid8675309` (string, optional) - Publisher-defined ShopperID CJ assigns, optional for publishers. If present but you MUST accept and store it.
++ cjAID: `98766543` (string, optional) - The unique Link/Ad ID CJ assigns when you create a new link. The passed value maps to the Ad ID the customer clicked on.
++ cjPID: `1122567` (string, optional) - The website ID CJ assigns that a publisher refers traffic from.
 
 ## CoinAmount (Amount)
 ### Properties
