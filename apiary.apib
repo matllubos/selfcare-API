@@ -2698,7 +2698,7 @@ Financial amount with VAT rate.
     + `PASSPORT`
 + countryIssuedId: `CZ` (string, required) - country that issued the document, ISO 3166 alpha 2 country code
 
-## AccountUpgradeApplicationRequest (object)
+## AccountUpgradeApplication (object)
 + type (RevolvingLoanContractType, optional)
 + firstName: `John` (string, optional) - user first (given) name
 + lastName: `Doe` (string, optional) - user family name
@@ -2767,6 +2767,21 @@ Financial amount with VAT rate.
 + courierArrivalDate: `2019-01-01` (string, optional) - date when courier should arrive to verify the customer
 + bankBusinessCardReturnUrl: `https://www.mallpay.cz/application` (string, optional) - Callback URL after redirection from Bank Business Card.
 
+## BudgetBakersAuthorizationRequest (object)
++ returnUrl (string, required) - URL used for redirection of a customer back to a Self care
++ bankCode (string, required) - bank code defined in BudgetBakers API
+
+## BudgetBakersRequest (object)
++ authorization (BudgetBakersAuthorizationRequest, optional) - BudgetBakers authorization send only for its initialization
++ bankAccountID (string, optional) - BudgetBakers bank account ID obtained from list of bank accounts in account upgrade application response
++ state `COMPLETED` (enum, optional) - is required to send COMPLETED on end of the BudgetBakers process (in BUDGET_BAKERS_COMPLETE view slug) to continue to the next step
+    + COMPLETED
+
+## AccountUpgradeApplicationRequest (AccountUpgradeApplication)
++ consents (array, optional) - list of consents given by customer
+    + `BANK_TRANSACTIONS` - consent retain bank transaction data from BudgetBakers due to income confirmation
++ budgetBakers (BudgetBakersRequest, optional) - BudgetBakers data for initialize authorization or select bank account to download transactions
+
 ## AccountUpgradeApplicationSlug (enum)
 + CUSTOMER_INFORMATION_CONTACT
 + CUSTOMER_INFORMATION_ADDRESS
@@ -2777,7 +2792,7 @@ Financial amount with VAT rate.
 + INCOME_AND_EXPENSES_INCOME_CONFIRMATION
 + SCORING_LOADING
 + CONFIRMATION_LIMIT
-+ CONFIRMATION_INCOME_STATEMENT_UPLOAD
++ CONFIRMATION_INCOME_STATEMENT
 + CONFIRMATION_IDENTIFICATION
 + BANK_BUSINESS_CARD_VERIFICATION_FAILED
 + CONFIRMATION_AGREEMENT_SMS
@@ -2786,6 +2801,12 @@ Financial amount with VAT rate.
 + DECLINED_GENERAL
 + DECLINED_SCORING_REGISTERS
 + TECHNICAL_ERROR
++ UNKNOWN_INVALID
++ BUDGET_BAKERS_REDIRECT
++ BUDGET_BAKERS_LOADING
++ BUDGET_BAKERS_SELECT_BANK_ACCOUNT
++ BUDGET_BAKERS_COMPLETE
++ BUDGET_BAKERS_ERROR
 
 ## BankBusinessCardRedirectionLogin (object)
 + bic (enum, required) - BIC of bank
@@ -2798,7 +2819,29 @@ Financial amount with VAT rate.
     + KOMBCZPP - Komerční banka
 + url (string, required) - URL where is the user redirected to log-in and authenticate to the bank
 
-## AccountUpgradeApplicationResponse (AccountUpgradeApplicationRequest)
+## BudgetBakersBankAccountResponse (object)
++ id (string, required)
++ name (string, required)
+
+## BudgetBakersAuthorizationResponse (object)
++ bankCode (string, required) - bank code selected for BudgetBakers authorization process
++ redirectUrl (string, optional) - URL of bank service for bank transactions download authorization
+
+## BudgetBakersResponse (object)
++ authorization (BudgetBakersAuthorizationResponse, required) - BudgetBakers authorization data
++ bankAccounts (array[BudgetBakersBankAccountResponse], optional) - list of customer bank accounts
++ state `INIT_AUTHORIZATION` (enum, optional) - state of the BudgetBakers proof of income process
+    + INIT_AUTHORIZATION
+    + AUTHORIZED
+    + PROCESSING_BANK_ACCOUNTS_DOWNLOAD
+    + BANK_ACCOUNTS_DOWNLOADED
+    + SELECT_BANK_ACCOUNT
+    + PROCESSING_TRANSACTIONS_DOWNLOAD
+    + TRANSACTIONS_DOWNLOADED
+    + COMPLETED
+    + ERROR
+
+## AccountUpgradeApplicationResponse (AccountUpgradeApplication)
 + email (string, optional) - client e-mail address
 + phoneNumber (string, optional) - client phone number
 + bankStatementMonth: `4` (number, optional) - number between 0 and 11 (0 - January, 11 - December), represents the month for which non self-employed customer must provide bank statement
@@ -2808,6 +2851,7 @@ Financial amount with VAT rate.
 + slug (AccountUpgradeApplicationSlug, optional) - current view with form which should be displayed
 + isCourierFinished (boolean, optional) - information, whether the identification by courier is already finished. In combination with type this field determines, which screen should be displayed in case COMPLETED slug is returned.
 + unsignedContractHtml (string, optional) - unsigned contract in escaped HTML
++ budgetBakers (BudgetBakersResponse, optional) - data required for complete BudgetBakers proof of income process
 
 ## RevolvingLoanContractType (enum)
 + START
