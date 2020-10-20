@@ -2885,6 +2885,9 @@ Financial amount with VAT rate.
 + aliquot (RevolvingLoanContractFee, optional) - aliquot value in case of upgrade
 + cardDeliveryAddress (Address, optional) - an address where to send a payment card
 
+## BillingCampaignResponse (object)
++ slug: `CHRISTMAS` (string, required) - campaign unique slug identifier
+
 ## BillingResponse (object)
 + additionalInfoDeferment (BillingDefermentInfoResponse, required) - information about possibilities for defer the billing payment
 + balance (Amount, required) - billing balance
@@ -2896,6 +2899,7 @@ Financial amount with VAT rate.
 + month: `4` (number, required) - month of the billing, 0 represents January, 1 - February
 + paymentAvailability (PaymentAvailability, required) - information about possibility to pay for the billing
 + year: `2020` (number, required) - year of the billing
++ campaigns: (array[BillingCampaignResponse], required) - list of active campaigns for the billing
 
 ## BillingDefermentResponse (object)
 + billingBalance (Amount, required) - Amount user want to pay in current billing
