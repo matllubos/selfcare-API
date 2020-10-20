@@ -81,6 +81,22 @@ Provide `mobileToken`.
     - `INVALID_MOBILE_LOGIN` - Mobile login token is invalid.
     + Attributes (Errors)
 
+#### Simple customer identification token login
+
++ Request (application/json; charset=utf-8)
+    + Attributes (CustomerLogin)
+        + simpleCustomerIdentificationToken: `abcd1234`
+
++ Response 200 (application/json; charset=utf-8)
+    Access token issued.
+    + Attributes (CustomerLoginResult)
+
++ Response 422 (application/json; charset=utf-8)
+    Provided token is invalid.
+    + Attributes (array)
+        + Attributes (Error)
+            + code: `INVALID_SIMPLE_CUSTOMER_IDENTIFICATION_TOKEN`
+
 ## Customer logout [/account/logout]
 Use this resource to invalidate existing token, which in effect logs out the customer.
 
@@ -918,6 +934,24 @@ The request will modify the most recent application in progress.
             + (object)
                 + bic: `AIRACZPP`
                 + url: `http://example.com/redirect/connect?redirectId=f277a779-58cf-446c-a163-3ba1c77134ef&bic=airaczpp`
+
++ Request Simple customer identification KYC method (application/json; charset=utf-8)
+    Use this request to set simple customer identification as KYC method and get limited validity URL for uploading documents (photos).
+    In case of expired URL, call this request again to generate a new URL.
+    + Attributes (AccountUpgradeApplication)
+        + kycIdentificationMethod: `SIMPLE_CUSTOMER_IDENTIFICATION`
+        + simpleCustomerIdentification
+            + sendSms: True
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (AccountUpgradeApplicationResponse)
+        + simpleCustomerIdentification
+            + url: `https://mallpay.cz/overeni-mobilem/abcd1234`
+            + urlValidTo: `2012-04-23T18:25:43.511Z`
+
++ Response 429 (application/json; charset=utf-8)
+    Request throttling in effect.
+    + Attributes (Errors)
 
 + Request Invalid proof of income file content (application/json; charset=utf-8)
     + Attributes (object)
@@ -2574,6 +2608,37 @@ Request Account Upgrade request support by phone.
 
 + Response 401 (application/json; charset=utf-8)
 
+# Group Simple customer identification
+A set of resources related to simple customer identification.
+
+## Simple customer identification - documents upload [/simple-id]
+Use this resource to upload documents (photos) needed for simple customer identification or get state of the simple customer identification process.
+
+### Get state of simple customer identification process [GET]
++ Request (application/json; charset=utf-8)
+
++ Response 200 (application/json; charset=utf-8)
+    + Attributes (SimpleCustomerIdentificationResponse)
+
++ Response 404 (application/json; charset=utf-8)
+    No revolving loan application eligible for simple customer identification found.
+    + Attributes (Errors)
+
+### Upload a document [PATCH]
++ Request (application/json; charset=utf-8)
+    Upload a document. Only types ID_CARD_FRONT, ID_CARD_BACK and ID_CARD_SELFIE are allowed. If already uploaded document with the same type exists, it will be overwritten.
+    + Attributes (object)
+        + documents (array[BaseDocument], required) - documents to be uploaded
+
++ Response 201 (application/json; charset=utf-8)
+    Documents were successfully uploaded.
+    + Attributes (SimpleCustomerIdentificationResponse)
+
++ Response 422 (application/json; charset=utf-8)
+    Unsupported document format.
+    + Attributes (array)
+        + Attributes (Error)
+
 # Data Structures
 
 ## Error (object)
@@ -2764,8 +2829,11 @@ Financial amount with VAT rate.
     + BANK_BUSINESS_CARD
     + COURIER
     + OFFICE
+    + SIMPLE_CUSTOMER_IDENTIFICATION
 + courierArrivalDate: `2019-01-01` (string, optional) - date when courier should arrive to verify the customer
 + bankBusinessCardReturnUrl: `https://www.mallpay.cz/application` (string, optional) - Callback URL after redirection from Bank Business Card.
++ simpleCustomerIdentification (object, optional) - data related to simple customer identification
+    sendSms: (boolean, required) - (re)send SMS with simple customer identification URL
 
 ## BudgetBakersAuthorizationRequest (object)
 + returnUrl (string, required) - URL used for redirection of a customer back to a Self care
@@ -2807,6 +2875,8 @@ Financial amount with VAT rate.
 + BUDGET_BAKERS_SELECT_BANK_ACCOUNT
 + BUDGET_BAKERS_COMPLETE
 + BUDGET_BAKERS_ERROR
++ SIMPLE_CUSTOMER_IDENTIFICATION_INITIALIZED
++ SIMPLE_CUSTOMER_IDENTIFICATION_IN_PROGRESS
 
 ## BankBusinessCardRedirectionLogin (object)
 + bic (enum, required) - BIC of bank
@@ -2852,6 +2922,9 @@ Financial amount with VAT rate.
 + isCourierFinished (boolean, optional) - information, whether the identification by courier is already finished. In combination with type this field determines, which screen should be displayed in case COMPLETED slug is returned.
 + unsignedContractHtml (string, optional) - unsigned contract in escaped HTML
 + budgetBakers (BudgetBakersResponse, optional) - data required for complete BudgetBakers proof of income process
++ simpleCustomerIdentification(object, optional) - data related to simple customer identification (not provided if differend KYC method is selected)
+    + url (string, required) - simple customer identification URL (not provided if current URL is invalid), the URL carries limited validity login token (see login resource)
+    + urlValidTo (string, required) - date and time until which URL is valid (not provided if current URL is invalid)
 
 ## RevolvingLoanContractType (enum)
 + START
@@ -3764,6 +3837,7 @@ Collection of URLs used for redirection of a customer back to a partner website 
     + Properties
         + `deviceUuid`: `deviceuuid123456789` (string, required) - Device UUID
         + `mobileToken`: `secretToken123456` (string, required) - Mobile login token
+    + simpleCustomerIdentificationToken: `abcd1234` (string, required) - Simple customer identification login token
 
 
 ## CustomerLoginResult (object)
@@ -4065,3 +4139,15 @@ URL link with displayed text
 ### Properties
   + url (string, required) - URL link
   + text (string, optional) - display text for URL link
+
+## SimpleCustomerIdentificationDocumentType (enum)
++ ID_CARD_FRONT
++ ID_CARD_BACK
++ ID_CARD_SELFIE
+
+## SimpleCustomerIdentificationResponse (object)
++ state (enum, required):
+    + `INITIALIZED` - simple customer identification process is initialized, token not used yet
+    + `IN_PROGRESS` - token used to get simple customer identification process state or upload (some) documents
+    + `COMPLETED` - all required document types were uploaded
++ documents (array[BaseDocument], required) - already uploaded documents
