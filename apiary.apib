@@ -1207,7 +1207,7 @@ Apply for billing deferment
     Creating new deferment by sending amount to pay in current billing
     + Attributes (Amount)
 
-+ Response 200
++ Response 201
     New billing deferment successfully created
     + Attributes (BillingDefermentResponse)
 
@@ -1376,6 +1376,32 @@ Use this resource to generate new complaint for a transaction
 + Response 422 (application/json; charset=utf-8)
     Complaint for this transaction has been already created    
     + Attributes (Errors)       
+
+## Support request [/my/contract/supportRequest]
+Request support by phone.
+
+### Support request [POST]
+Request Account Upgrade request support by phone.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (SupportRequest)
+
++ Response 201 (application/json; charset=utf-8)
+    + Attributes (SupportRequest)
+
++ Request (application/json; charset=utf-8)
+    Request when customer is not logged in
+    + Attributes (SupportRequest)
+
++ Response 401 (application/json; charset=utf-8)
+
++ Request (application/json; charset=utf-8)
+    Request when customer does not have revolving loan application in PROCESSING state
+    + Attributes (SupportRequest)
+
++ Response 404 (application/json; charset=utf-8)
+    Loan application in state PROCESSING not found.
+    + Attributes (Errors)
 
 # Group My profile
 Resources for accessing and modifying user personal data.
@@ -2556,23 +2582,6 @@ Installments of given contract (installment schedule for CEL contract)
         + `previous` - installment preceding current installment (ie. installment with due date in previous month)
         + `current` - current installment (ie. installment with due date in current month)
 
-## Support request [/my/contract/supportRequest]
-Request support by phone.
-
-### Support request [POST]
-Request Account Upgrade request support by phone.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (SupportRequest)
-
-+ Response 201 (application/json; charset=utf-8)
-
-
-+ Request (application/json; charset=utf-8)
-    Request when customer is not logged in
-    + Attributes (SupportRequest)
-
-+ Response 401 (application/json; charset=utf-8)
 
 # Data Structures
 
