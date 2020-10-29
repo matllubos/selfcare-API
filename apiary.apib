@@ -343,6 +343,7 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
 + Response 200 (application/json; charset=utf-8)
     Customer has been registered.
     + Attributes (object)
+        + customerId: `101` (string, required) - ID of newly registered customer.
         + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
