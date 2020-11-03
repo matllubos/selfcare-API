@@ -1,3 +1,7 @@
+# Deprecated
+
+This repository is deprecated in favor of https://bitbucket.org/mallpay/api-spec-self-care/src/master/
+
 # Selfcare API
 
 This is specification of private API used between MALL Pay servers and MALL Pay clients.
