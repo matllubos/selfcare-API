@@ -60,9 +60,6 @@ Provide `username` and `password`. `otpCode` may be required for some security r
     Returned when the `otpCode` authorization does not match.
     + Attributes (Errors)
 
-#### Facebook login
-Provide `facebookAccessToken`.
-
 #### Mobile app token login
 Provide `mobileToken`.
 
@@ -75,8 +72,6 @@ Provide `mobileToken`.
 
 + Response 422(application/json; charset=utf-8)
     Unable to authenticate the customer. List of error codes special for this endpoint:
-    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    - `INVALID_FACEBOOK_LOGIN` - The Facebook account is not linked to any MALL Pay account. Immediate registration is possible.
     - `INVALID_LOGIN` - Username or password is wrong.
     - `INVALID_MOBILE_LOGIN` - Mobile login token is invalid.
     + Attributes (Errors)
@@ -332,14 +327,10 @@ Use this resource to register a new customer. There are two ways of registration
 #### Classic registration
 Provide `name`, `email` and `phone`.
 
-#### Facebook registration
-Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook. The endpoint will indicate which fields are missing if you call it with `facebookAccessToken` only.
-
 + Attributes (object)
     + name: `John Doe` (string) - Customer's full name (first and last name).
     + email: `john.doe@yahoo.com` (string) - Customer's e-mail address.
     + phone: `+420777777777` (string) - Customer's phone in international format.
-    + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string) - Facebook user access token.
     + consents (array, required) - List of consents given by customer
         + `REGISTRATION` - Consent with service terms and conditions (required)
         + `MARKETING_EXTENDED` - Consent with extended marketing e-mails
@@ -363,19 +354,11 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
         + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
-+ Request Facebook registration with promo source URL (application/json; charset=utf-8)
-    + Attributes (object)
-        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
-        + phone: `+420777777777`
-        + consents
-            + `REGISTRATION`
-        + promoSource: `advertisementYY` (string) - the tag of campaign which redirected the user here
-
 + Response 200 (application/json; charset=utf-8)
     Customer has been registered.
     + Attributes (object)
         + result: `REGISTRATION_FINISHED` (enum, required) - Registration status.
-            + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible. Returned in case of Facebook registration only.
+            + `REGISTRATION_FINISHED` - Registration is finished, immediate login is possible.
             + `REGISTRATION_FINISH_REQUIRED` - Customer must finish registration by clicking on a link that has been sent to his e-mail address. Might be returned for both types of registration.
 
 + Request classic registration with user already registered before (application/json; charset=utf-8)
@@ -388,19 +371,8 @@ Provide `facebookAccessToken` and fields that cannot be retrieved from Facebook.
 
 + Response 422 (application/json; charset=utf-8)
     Customer has not been registered. List of error codes special for this endpoint:
-    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
-    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
     - `ALREADY_EXISTS` - MALL Pay account with this email/phone already exists.
-    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    - `EMAILS_DIFFER` - Facebook e-mail address differs from matched MALL Pay account e-mail address.
     + Attributes (Errors)
-
-+ Request Facebook registration with many consequent calls (application/json; charset=utf-8)
-    + Attributes (object)
-        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD`
-        + phone: `+420777777777`
-        + consents
-            + `REGISTRATION`
 
 + Response 429 (application/json; charset=utf-8)
     Request throttling in effect.
@@ -1440,38 +1412,6 @@ Request Account Upgrade request support by phone.
 
 # Group My profile
 Resources for accessing and modifying user personal data.
-
-## Facebook connection [/account/facebook]
-
-### Connect facebook account to a customer [POST]
-Use this resource to connect facebook account to a customer.
-
-+ Request (application/json)
-    + Attributes (object)
-        + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
-
-+ Response 204
-    Facebook account was connected
-    + Body
-
-+ Response 422 (application/json)
-    Facebook account was not connected. List of error codes special for this endpoint:
-    - `ALREADY_CONNECTED_NOT_FINISHED` - The Facebook account is already connected to an existing MALL Pay account, but customer must finish registration.
-    - `ALREADY_CONNECTED` - The Facebook account is already connected to an existing MALL Pay account. Immediate login is possible.
-    - `CONNECTION_ERROR` - Unable to connect to Facebook or invalid Facebook access token.
-    + Attributes (Errors)
-
-### Disconnect facebook account from a customer [DELETE]
-Use this resource to disconnect facebook account from a customer.
-
-+ Response 204
-    Facebook account was disconnected
-    + Body
-
-+ Response 422 (application/json)
-    Facebook account was not connected. List of error codes special for this endpoint:
-    - `NOT_CONNECTED` - The Facebook account isn't connected to an the account
-    + Attributes (Errors)
 
 ## Customer information [/my/profile]
 Customer profile information
@@ -3108,9 +3048,8 @@ Financial amount with VAT rate.
 + addresses (array[TypedAddress], fixed-type, optional) - client addresses (permanent, delivery, courier)
 + phoneNumbers (array[PhoneNumber], fixed-type, required) - client phone numbers
 + emails (array[Email], fixed-type, required) - client e-mail addresses. Can be empty array. There can be only one email of given type.
-+ facebookUserId: `1837454442945293` (string, optional) - client's facebook user id
 + username: `memyself@mine.com` (string, required) - client's self care zone username
-+ hasSetPassword (boolean, required) - indicates whether the client has set password or not. Ie. user registered via Facebook has `hasSetPassword` as `false`.
++ hasSetPassword (boolean, required) - indicates whether the client has set password or not.
 + accountType (AccountType, required) - client's account type
 + options (object, required) - client's options
     + canApplyForRevolvingContract (boolean, required) - indicates whether the client can apply for revolving loan contract or not
@@ -3843,7 +3782,6 @@ Collection of URLs used for redirection of a customer back to a partner website 
     + Properties
         + `username`: `john.doe@yahoo.com` (string, required) - Customer's e-mail address
         + `password`: `secretpassword1234` (string, required) - Customer's password
-    + facebookAccessToken: `EAADcxbT9khgBAHkik7JGjl9ZCDsiV1TyWpVg4hpV6pUokIxYNPfxksp8S0lxAQz22hqehZBxKDxbZARvsfO9foUxj7uq5gGP3j7aLDCu9ZA9VjSobUU4UdadQUMHtxE2wv1uXxnSnST1SPjDi848VWrXQPkBolceCK5IWUvetVRttwdPrua4N1kVtB6V5uIZD` (string, required) - Facebook user access token.
     + Properties
         + `deviceUuid`: `deviceuuid123456789` (string, required) - Device UUID
         + `mobileToken`: `secretToken123456` (string, required) - Mobile login token
